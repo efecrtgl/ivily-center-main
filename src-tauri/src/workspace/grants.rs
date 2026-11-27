@@ -15,6 +15,8 @@ pub enum GrantKind {
     Discovered,
     /// A workspace-file target the user picked that already exists (overwrite needs confirmation).
     SaveTarget,
+    /// A file outside the workspace that the user opened in the editor via a dialog.
+    ExternalDoc,
 }
 
 const MAX_GRANTS: usize = 1000;

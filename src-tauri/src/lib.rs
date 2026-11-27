@@ -7,6 +7,7 @@ pub mod app_state;
 pub mod commands;
 pub mod core;
 pub mod db;
+pub mod editor_io;
 pub mod error;
 pub mod fs;
 pub mod output;
@@ -79,6 +80,14 @@ pub fn run() {
             commands::workspace::session_load,
             commands::workspace::session_save,
             commands::workspace::session_ready,
+            commands::editor::doc_read,
+            commands::editor::doc_write,
+            commands::editor::doc_open_dialog,
+            commands::editor::doc_save_as_dialog,
+            commands::editor::doc_save_as_confirm,
+            commands::editor::draft_save,
+            commands::editor::draft_list,
+            commands::editor::draft_delete,
             commands::fs::fs_list,
             commands::fs::fs_create_file,
             commands::fs::fs_create_dir,
