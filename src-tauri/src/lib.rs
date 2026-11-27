@@ -134,6 +134,8 @@ pub fn run() {
             commands::git::git_init,
             commands::git::git_ignore,
             commands::git::git_clone,
+            commands::export::save_text_dialog,
+            commands::export::save_text_confirm,
             commands::tasks::tasks_list,
             commands::tasks::task_run,
             commands::tasks::tasks_revoke_approvals,

@@ -3,6 +3,7 @@
 
 pub mod app;
 pub mod editor;
+pub mod export;
 pub mod fs;
 pub mod git;
 pub mod lsp;
