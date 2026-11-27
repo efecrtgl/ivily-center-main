@@ -74,6 +74,12 @@ const OPEN_ERRORS = {
 
 function reportOpenError(e, title = 'Could not open workspace') {
   const code = errorCode(e);
+  if (code === 'workspace_open_elsewhere') {
+    // Already open in another window: bring that window forward instead.
+    ipc.windowFocus(errorMessage(e)).catch(() => {});
+    notify({ title: 'The workspace is open in another window', message: 'That window was brought to the front.', source: 'workspace' });
+    return;
+  }
   notify({ severity: 'error', title, message: OPEN_ERRORS[code] ? `${OPEN_ERRORS[code]}\n${errorMessage(e)}` : errorMessage(e), source: 'workspace' });
 }
 
@@ -163,6 +169,15 @@ export const openFolder = () => transition(async () => orUndefined(await ipc.wor
 export const openWorkspaceFile = () => transition(async () => orUndefined(await ipc.workspaceOpenDialog('file')));
 /** @param {string} id */
 export const openRecent = (id) => transition(() => ipc.workspaceOpenRecent(id));
+
+/** Open a new window, optionally with a workspace from the recent list. */
+export async function openInNewWindow(id) {
+  try {
+    await ipc.windowNew(id);
+  } catch (e) {
+    notify({ severity: 'error', title: 'Could not open a new window', message: errorMessage(e), source: 'workspace' });
+  }
+}
 /** @param {string} token */
 export const openDiscovered = (token) => transition(() => ipc.workspaceOpenDiscovered(token));
 export const closeWorkspace = () =>

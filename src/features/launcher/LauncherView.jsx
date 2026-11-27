@@ -7,7 +7,7 @@ import { errorMessage } from '../../core/errors.js';
 import { setSetting, useSetting } from '../../core/settings.js';
 import { keybindingFor } from '../../core/keybindings.js';
 import * as ipc from '../../platform/ipc.js';
-import { openDiscovered, openFolder, openRecent, openWorkspaceFile, recentsVersion, updateCurrent, workspaceStore } from '../../workspace/store.js';
+import { openDiscovered, openFolder, openInNewWindow, openRecent, openWorkspaceFile, recentsVersion, updateCurrent, workspaceStore } from '../../workspace/store.js';
 
 /** @typedef {import('../../platform/ipc.js').WorkspaceRecord} WorkspaceRecord */
 
@@ -123,6 +123,9 @@ function RecordRow({ record, status, isOpen, onChanged }) {
         )}
         <button type="button" className="btn btn--ghost btn--icon" aria-pressed={record.favorite} aria-label={record.favorite ? 'Remove from favorites' : 'Add to favorites'} title={record.favorite ? 'Remove from favorites' : 'Add to favorites'} onClick={toggleFavorite}>
           <Icon name="star" size={14} className={record.favorite ? 'icon--filled' : ''} />
+        </button>
+        <button type="button" className="btn btn--ghost btn--icon" aria-label="Open in new window" title="Open in new window" onClick={() => openInNewWindow(record.id)} disabled={isOpen || unavailable}>
+          <Icon name="split" size={14} />
         </button>
         <button type="button" className="btn btn--ghost btn--icon" aria-label="Rename or group" title="Rename or group" onClick={() => setEditing(true)}>
           <Icon name="pencil" size={14} />

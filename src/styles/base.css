@@ -137,3 +137,13 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: var(--font-weight-st
 :root[data-motion='reduced'] *, :root[data-motion='reduced'] *::before, :root[data-motion='reduced'] *::after {
   animation-duration: 0s !important; animation-iteration-count: 1 !important; transition-duration: 0s !important;
 }
+
+/* Windows high-contrast (forced colors): keep focus, selection and state visible with system colors. */
+@media (forced-colors: active) {
+  :focus-visible { outline: 2px solid Highlight; }
+  .btn, .input, .select, .badge, .search-toggle, .module-card, .quick-pick, .popover { border: 1px solid ButtonText; }
+  .search-toggle--on, .scm-tab--active, .debug-frame--active, .quick-pick__item--active, [aria-selected='true'], [aria-pressed='true'] { forced-color-adjust: none; background: Highlight; color: HighlightText; }
+  .cm-breakpoint { forced-color-adjust: none; background: Highlight; }
+  .cm-debug-stopped, .cm-searchMatch { forced-color-adjust: none; outline: 1px solid Highlight; }
+  .search-preview mark, .quick-pick mark { forced-color-adjust: none; background: Highlight; color: HighlightText; }
+}

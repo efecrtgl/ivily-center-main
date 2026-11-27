@@ -13,7 +13,7 @@ import { closeWindow, minimizeWindow, toggleMaximizeWindow } from '../platform/w
 import { setStatusPopover, statusUi } from '../shell/statusUi.js';
 import { selectTheme } from '../shell/ThemePicker.jsx';
 import {
-  closeWorkspace, openFolder, openWorkspaceFile, reloadWorkspaceFile, saveWorkspaceAs, showPage, toggleCurrentFavorite, workspaceStore,
+  closeWorkspace, openFolder, openInNewWindow, openWorkspaceFile, reloadWorkspaceFile, saveWorkspaceAs, showPage, toggleCurrentFavorite, workspaceStore,
 } from '../workspace/store.js';
 import { ExplorerView } from '../features/explorer/ExplorerView.jsx';
 import { baseName, collapseAll, explorerStore, keyOf, parentKeyOf, parseKey, refreshAll, startCreate } from '../features/explorer/model.js';
@@ -249,6 +249,7 @@ export function registerWorkbenchContributions() {
     { id: 'app.showUpdates', title: 'About Ivily Center', category: 'Help', icon: 'info', run: () => showPage('updates') },
     { id: 'backup.show', title: 'Show Backups', category: 'Backup', icon: 'shield', run: () => showPage('backups') },
     { id: 'backup.create', title: 'Back Up Ivily Center Data Now', category: 'Backup', run: () => createBackup('manual') },
+    { id: 'window.new', title: 'New Window', category: 'Window', run: () => openInNewWindow() },
     { id: 'git.showView', title: 'Show Source Control', category: 'Git', icon: 'git', run: () => updateLayout({ sidebarVisible: true, sidebarView: 'scm' }) },
     { id: 'git.refresh', title: 'Refresh', category: 'Git', icon: 'refresh', when: 'workspaceOpen', run: () => loadRepos() },
     { id: 'git.checkout', title: 'Checkout to…', category: 'Git', when: 'gitRepository', run: () => { const r = activeRepo(); return r && gitCheckout(r.root); } },
@@ -305,6 +306,7 @@ export function registerWorkbenchContributions() {
     { key: 'Ctrl+`', command: 'terminal.toggle' },
     { key: 'Ctrl+Shift+G', command: 'git.showView' },
     { key: 'Ctrl+P', command: 'workbench.quickOpen' },
+    { key: 'Ctrl+Shift+N', command: 'window.new' },
     { key: 'Ctrl+Shift+X', command: 'extensions.show' },
     { key: 'F5', command: 'debug.start' },
     { key: 'F5', command: 'debug.continue', when: "debugState == 'stopped'" },

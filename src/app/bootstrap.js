@@ -25,7 +25,7 @@ import { startOutput, uiLog } from '../core/output.js';
 import * as ipc from '../platform/ipc.js';
 import { beforeWindowClose } from '../platform/window.js';
 import { appStore } from './appStore.js';
-import { applyStartup, showPage } from '../workspace/store.js';
+import { applyStartup, openRecent, showPage, workspaceStore } from '../workspace/store.js';
 import { flushSession } from '../workspace/session.js';
 import { onFsChanged, registerExplorerSession, setFileOpener } from '../features/explorer/model.js';
 import { applyOptionsToAll, onFsChangedEditor, openDocument, registerEditorSession } from '../features/editor/model.js';
@@ -167,6 +167,9 @@ export async function bootstrap() {
   if (ipc.isTauri()) {
     try {
       await applyStartup(await ipc.workspaceStartup());
+      // A window opened for a specific workspace ("Open in new window").
+      const wanted = new URLSearchParams(window.location.search).get('workspace');
+      if (wanted && /^ws_[0-9a-f]{16}$/.test(wanted) && !workspaceStore.get().current) await openRecent(wanted);
     } catch (e) {
       showPage('launcher');
       notify({ severity: 'error', title: 'Could not restore the workspace', message: errorMessage(e), source: 'workspace' });

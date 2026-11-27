@@ -79,6 +79,8 @@ All notable changes to this project are documented here. The format follows
 ### Changed
 - Phase 21: security and performance review; xterm.js and secondary pages load on demand (main
   bundle 1.5 MB → 1.08 MB); `zip` upgraded to 9.x (advisories in 2.x).
+- Phase 22: multiple windows (New Window, open recent in new window, one window per workspace,
+  per-window cleanup), accessible-name audit for all views and pages, Windows high-contrast styles.
 
 ### Fixed
 - Validation errors now include their message when shown in logs, histories and statuses.

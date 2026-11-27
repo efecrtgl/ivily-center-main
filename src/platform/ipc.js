@@ -261,6 +261,11 @@ export const backupExportConfirm = (name, token) => call('backup_export_confirm'
 export const backupImport = () => call('backup_import');
 export const appRestart = () => call('app_restart');
 
+// ── Windows ──────────────────────────────────────────────────────────────────
+/** Open another workbench window (optionally with a workspace); resolves to its label. */
+export const windowNew = (workspaceId) => call('window_new', { workspaceId: workspaceId ?? null });
+export const windowFocus = (label) => call('window_focus', { label });
+
 // ── Tasks (running requires the taskExecution trust capability + approval) ──
 export const tasksList = () => call('tasks_list');
 /** Starts one task in a terminal session; `approve` records the user's approval of its command. */

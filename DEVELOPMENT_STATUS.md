@@ -7,7 +7,7 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 
 ## Current phase
 
-**Phase 21 — Security, performance, stability:** done. **Next: Phase 22 — Multi-window and accessibility.**
+**Phase 22 — Multi-window and accessibility:** done. **Next: Phase 23 — Comprehensive testing.**
 
 ## Phases
 
@@ -35,7 +35,8 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 | 19 | Update manager | done | [docs/UPDATES.md](docs/UPDATES.md); end-to-end install untested until a signed release exists |
 | 20 | Backup and restore | done | [docs/BACKUP.md](docs/BACKUP.md) |
 | 21 | Security, performance, stability | done | [docs/SECURITY-REVIEW.md](docs/SECURITY-REVIEW.md) |
-| 22–25 | See plan | planned | |
+| 22 | Multi-window, accessibility | done | [docs/WINDOWS-AND-ACCESSIBILITY.md](docs/WINDOWS-AND-ACCESSIBILITY.md) |
+| 23–25 | See plan | planned | |
 
 ## Phase 3 deliverables
 
@@ -61,7 +62,8 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 ## Known issues / limitations
 
 * Windows 11 Snap Layouts flyout is not shown when hovering the custom maximize button.
-* A command-line path given to a second launch starts a second instance (no single-instance forwarding yet).
+* A command-line path given to a second launch starts a second instance (no single-instance forwarding yet; use New Window inside the app).
+* No manual screen-reader pass (Narrator/NVDA) has been done; accessibility is verified by automated checks.
 * Trust is bound to a path: if a trusted folder is deleted and another folder is created at the same path, it is trusted too.
 * A workspace file's folder list cannot be edited in the UI yet (edit the file and use Reload Workspace File).
 * `appearance.reduceMotion = system` is not re-read when the Windows animation setting changes while running.
