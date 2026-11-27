@@ -67,6 +67,7 @@ impl AppState {
         let output = Arc::new(OutputHub::new());
         output.register("workspace", "Workspace").expect("valid channel id");
         output.register("lsp", "Language Servers").expect("valid channel id");
+        output.register("git", "Git").expect("valid channel id");
         output.info("app", format!("{} {} starting", crate::APP_NAME, crate::APP_VERSION));
 
         let opened = db::open_app_db(dir);

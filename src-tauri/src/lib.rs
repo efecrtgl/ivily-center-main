@@ -10,6 +10,7 @@ pub mod db;
 pub mod editor_io;
 pub mod error;
 pub mod fs;
+pub mod git;
 pub mod lsp;
 pub mod output;
 pub mod settings;
@@ -107,6 +108,30 @@ pub fn run() {
             commands::toolchains::toolchains_detect,
             commands::toolchains::toolchains_open_homepage,
             commands::toolchains::open_external_url,
+            commands::git::git_repos,
+            commands::git::git_status,
+            commands::git::git_stage,
+            commands::git::git_unstage,
+            commands::git::git_discard,
+            commands::git::git_commit,
+            commands::git::git_branches,
+            commands::git::git_branch_create,
+            commands::git::git_switch,
+            commands::git::git_branch_delete,
+            commands::git::git_log,
+            commands::git::git_commit_files,
+            commands::git::git_show,
+            commands::git::git_sync,
+            commands::git::git_stashes,
+            commands::git::git_stash,
+            commands::git::git_remotes,
+            commands::git::git_remote,
+            commands::git::git_tags,
+            commands::git::git_tag,
+            commands::git::git_operation,
+            commands::git::git_init,
+            commands::git::git_ignore,
+            commands::git::git_clone,
             commands::fs::fs_list,
             commands::fs::fs_create_file,
             commands::fs::fs_create_dir,

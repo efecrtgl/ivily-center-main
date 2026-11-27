@@ -4,6 +4,7 @@
 pub mod app;
 pub mod editor;
 pub mod fs;
+pub mod git;
 pub mod lsp;
 pub mod output;
 pub mod settings;
