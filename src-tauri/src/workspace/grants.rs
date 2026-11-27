@@ -17,6 +17,8 @@ pub enum GrantKind {
     SaveTarget,
     /// A file outside the workspace that the user opened in the editor via a dialog.
     ExternalDoc,
+    /// An extension folder the user picked for installation (preview before confirmation).
+    ExtensionSource,
 }
 
 const MAX_GRANTS: usize = 1000;

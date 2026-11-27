@@ -10,6 +10,7 @@ pub mod dap;
 pub mod db;
 pub mod editor_io;
 pub mod error;
+pub mod extensions;
 pub mod fs;
 pub mod git;
 pub mod lsp;
@@ -146,6 +147,11 @@ pub fn run() {
             commands::dap::dap_send,
             commands::dap::dap_stop,
             commands::dap::dap_revoke_approvals,
+            commands::extensions::extensions_list,
+            commands::extensions::extensions_install_dialog,
+            commands::extensions::extensions_install_confirm,
+            commands::extensions::extensions_set_enabled,
+            commands::extensions::extensions_uninstall,
             commands::tasks::tasks_list,
             commands::tasks::task_run,
             commands::tasks::tasks_revoke_approvals,

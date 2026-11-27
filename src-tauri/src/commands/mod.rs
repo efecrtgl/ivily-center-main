@@ -5,6 +5,7 @@ pub mod app;
 pub mod dap;
 pub mod editor;
 pub mod export;
+pub mod extensions;
 pub mod fs;
 pub mod git;
 pub mod lsp;
