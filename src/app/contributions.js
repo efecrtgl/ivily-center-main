@@ -26,6 +26,9 @@ import { pickEncoding, pickEol, pickLanguage } from '../features/editor/EditorSt
 import { findReferences, formatDocument, jumpToDefinition, jumpToImplementation, jumpToTypeDefinition, renameSymbol } from '@codemirror/lsp-client';
 import { restartServers } from '../features/lsp/manager.js';
 import { TerminalView } from '../features/terminal/TerminalView.jsx';
+import { ScmView } from '../features/git/ScmView.jsx';
+import { activeRepo, checkout as gitCheckout, cloneRepository, createBranch as gitCreateBranch, loadRepos, stashPush, sync as gitSync } from '../features/git/model.js';
+import { outputUi as outputPanelUi } from '../features/output/OutputView.jsx';
 import { activeTerminalId, clearTerminal, createTerminal, killTerminal, newTerminalWithProfile, splitTerminal, terminalStore } from '../features/terminal/model.js';
 
 function cycleTab(delta) {
@@ -70,6 +73,7 @@ export function registerWorkbenchContributions() {
 
   // ── Views ──────────────────────────────────────────────────────────────────
   registerView({ id: 'explorer', title: 'Explorer', icon: 'files', location: 'sidebar', component: ExplorerView, order: 10, command: 'workbench.showExplorer' });
+  registerView({ id: 'scm', title: 'Source Control', icon: 'git', location: 'sidebar', component: ScmView, order: 20, command: 'git.showView' });
   registerView({ id: 'settings', title: 'Settings', icon: 'settings', location: 'sidebar', component: SettingsView, order: 100, group: 'bottom', command: 'preferences.openSettings' });
   registerView({ id: 'terminal', title: 'Terminal', icon: 'terminal', location: 'panel', component: TerminalView, order: 10, command: 'terminal.toggle' });
   registerView({ id: 'output', title: 'Output', icon: 'output', location: 'panel', component: OutputView, order: 20, command: 'workbench.showOutput' });
@@ -156,6 +160,17 @@ export function registerWorkbenchContributions() {
     { id: 'terminal.split', title: 'Split Terminal', category: 'Terminal', run: () => splitTerminal() },
     { id: 'terminal.kill', title: 'Kill Active Terminal', category: 'Terminal', run: () => { const id = activeTerminalId(); if (id != null) killTerminal(id); } },
     { id: 'terminal.clear', title: 'Clear Terminal', category: 'Terminal', run: () => clearTerminal() },
+    { id: 'git.showView', title: 'Show Source Control', category: 'Git', icon: 'git', run: () => updateLayout({ sidebarVisible: true, sidebarView: 'scm' }) },
+    { id: 'git.refresh', title: 'Refresh', category: 'Git', icon: 'refresh', when: 'workspaceOpen', run: () => loadRepos() },
+    { id: 'git.checkout', title: 'Checkout to…', category: 'Git', when: 'gitRepository', run: () => { const r = activeRepo(); return r && gitCheckout(r.root); } },
+    { id: 'git.createBranch', title: 'Create Branch…', category: 'Git', when: 'gitRepository', run: () => { const r = activeRepo(); return r && gitCreateBranch(r.root); } },
+    { id: 'git.fetch', title: 'Fetch', category: 'Git', when: 'gitRepository', run: () => { const r = activeRepo(); return r && gitSync(r.root, 'fetch'); } },
+    { id: 'git.pull', title: 'Pull', category: 'Git', when: 'gitRepository', run: () => { const r = activeRepo(); return r && gitSync(r.root, 'pull'); } },
+    { id: 'git.pullRebase', title: 'Pull (Rebase)', category: 'Git', when: 'gitRepository', run: () => { const r = activeRepo(); return r && gitSync(r.root, 'pullRebase'); } },
+    { id: 'git.push', title: 'Push', category: 'Git', when: 'gitRepository', run: () => { const r = activeRepo(); return r && gitSync(r.root, 'push'); } },
+    { id: 'git.stash', title: 'Stash Changes…', category: 'Git', when: 'gitRepository', run: () => { const r = activeRepo(); return r && stashPush(r.root); } },
+    { id: 'git.clone', title: 'Clone Repository…', category: 'Git', run: () => cloneRepository() },
+    { id: 'git.showOutput', title: 'Show Git Output', category: 'Git', run: () => { outputPanelUi.set({ channel: 'git' }); showPanelView('output'); } },
     { id: 'window.minimize', title: 'Minimize Window', category: 'Window', icon: 'minimize', run: () => minimizeWindow() },
     { id: 'window.toggleMaximize', title: 'Maximize / Restore Window', category: 'Window', icon: 'maximize', run: () => toggleMaximizeWindow() },
     { id: 'window.close', title: 'Close Window', category: 'Window', icon: 'close', run: () => closeWindow() },
@@ -199,6 +214,7 @@ export function registerWorkbenchContributions() {
     { key: 'Ctrl+3', command: 'editor.focusGroup3' },
     { key: 'Alt+Z', command: 'editor.toggleWordWrap' },
     { key: 'Ctrl+`', command: 'terminal.toggle' },
+    { key: 'Ctrl+Shift+G', command: 'git.showView' },
     { key: 'Ctrl+Shift+`', command: 'terminal.new' },
   ]);
 }

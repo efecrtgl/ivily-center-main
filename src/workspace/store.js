@@ -21,7 +21,7 @@ import * as ipc from '../platform/ipc.js';
 import { flushSession, resetParticipants, restoreSession, setSessionSink } from './session.js';
 
 /** @typedef {import('../platform/ipc.js').WorkspaceInfo} WorkspaceInfo */
-/** @typedef {'launcher' | 'welcome' | 'trust' | 'editor' | 'tools'} EditorPage */
+/** @typedef {'launcher' | 'welcome' | 'trust' | 'editor' | 'tools' | 'diff'} EditorPage */
 
 /** @type {import('../core/store.js').Store<{ current: WorkspaceInfo | null, epoch: number, busy: boolean, page: EditorPage, trustPrompt: boolean }>} */
 export const workspaceStore = createStore({ current: null, epoch: 0, busy: false, page: 'launcher', trustPrompt: false });
@@ -236,3 +236,10 @@ export async function toggleCurrentFavorite() {
     notify({ severity: 'error', title: 'Could not update the workspace', message: errorMessage(e), source: 'workspace' });
   }
 }
+
+/**
+ * Open a workspace produced by another operation (e.g. cloning) through the serialized
+ * transition. `op` resolves to the WorkspaceInfo, or null when the user cancelled.
+ * @param {() => Promise<WorkspaceInfo | null>} op
+ */
+export const openWith = (op, errorTitle) => transition(async () => orUndefined(await op()), errorTitle);

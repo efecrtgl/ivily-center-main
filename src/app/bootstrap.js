@@ -24,6 +24,7 @@ import { applyOptionsToAll, onFsChangedEditor, openDocument, registerEditorSessi
 import { themeStore } from '../theme/engine.js';
 import { installLsp } from '../features/lsp/integration.js';
 import { applyTerminalOptions, installTerminal } from '../features/terminal/model.js';
+import { installGit } from '../features/git/integration.js';
 import { errorMessage } from '../core/errors.js';
 
 /** Apply settings that have UI side effects. Only changed values are re-applied. */
@@ -98,6 +99,7 @@ export async function bootstrap() {
   registerEditorSession();
   installLsp();
   installTerminal();
+  installGit();
   setFileOpener((ref, opts) => openDocument(ref, opts));
   ipc.onEvent(ipc.events.fsChanged, (change) => {
     onFsChanged(change);

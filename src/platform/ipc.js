@@ -211,3 +211,30 @@ export const terminalResize = (id, cols, rows) => call('terminal_resize', { id, 
 export const terminalKill = (id) => call('terminal_kill', { id });
 /** Opens an http(s) link in the default browser (validated by the backend). */
 export const openExternalUrl = (url) => call('open_external_url', { url });
+
+// ── Git (requires the workspaceExecutables trust capability) ─────────────────
+export const gitRepos = () => call('git_repos');
+export const gitStatus = (root) => call('git_status', { root });
+export const gitStage = (root, paths) => call('git_stage', { root, paths });
+export const gitUnstage = (root, paths) => call('git_unstage', { root, paths });
+export const gitDiscard = (root, paths) => call('git_discard', { root, paths });
+export const gitCommit = (root, message, amend, all) => call('git_commit', { root, message, amend, all });
+export const gitBranches = (root) => call('git_branches', { root });
+export const gitBranchCreate = (root, name, start, checkout) => call('git_branch_create', { root, name, start, checkout });
+export const gitSwitch = (root, name, remote) => call('git_switch', { root, name, remote });
+export const gitBranchDelete = (root, name, force) => call('git_branch_delete', { root, name, force });
+export const gitLog = (root, rev, path, skip, limit) => call('git_log', { root, rev, path, skip, limit });
+export const gitCommitFiles = (root, sha) => call('git_commit_files', { root, sha });
+export const gitShow = (root, rev, path) => call('git_show', { root, rev, path });
+/** @param {'fetch' | 'pull' | 'pullRebase' | 'push'} action */
+export const gitSync = (root, action, setUpstream) => call('git_sync', { root, action, setUpstream });
+export const gitStashes = (root) => call('git_stashes', { root });
+export const gitStash = (root, action, name, message, includeUntracked) => call('git_stash', { root, action, name, message, includeUntracked });
+export const gitRemotes = (root) => call('git_remotes', { root });
+export const gitRemote = (root, action, name, url) => call('git_remote', { root, action, name, url });
+export const gitTags = (root) => call('git_tags', { root });
+export const gitTag = (root, action, name, message, sha) => call('git_tag', { root, action, name, message, sha });
+export const gitOperation = (root, action, target, mode) => call('git_operation', { root, action, target, mode });
+export const gitInit = (root) => call('git_init', { root });
+export const gitIgnore = (root, pattern) => call('git_ignore', { root, pattern });
+export const gitClone = (url) => call('git_clone', { url });

@@ -16,6 +16,7 @@ import { searchKeymap, highlightSelectionMatches, search } from '@codemirror/sea
 import { autocompletion, completionKeymap, closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
 import { lintKeymap } from '@codemirror/lint';
 import { tags as t } from '@lezer/highlight';
+import { conflictExtension } from '../git/conflicts.js';
 
 export const compartments = {
   language: new Compartment(),
@@ -125,6 +126,7 @@ export function buildExtensions(o, language, extra = [], lsp = []) {
     rectangularSelection(),
     crosshairCursor(),
     highlightActiveLine(),
+    conflictExtension,
     search({ top: true }),
     compartments.features.of(featuresExt(o)),
     compartments.language.of(o.large ? [] : language),

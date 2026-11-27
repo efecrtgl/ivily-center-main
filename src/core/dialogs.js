@@ -55,3 +55,30 @@ export function answerDialog(id, choice) {
   dialogStore.set((s) => ({ queue: s.queue.filter((d) => d.id !== id) }));
   item?.resolve(choice);
 }
+
+/**
+ * Ask for a line of text. Resolves to the entered value, or `null` when cancelled.
+ * `validate` returns an error message (shown inline) or null.
+ * @param {{ title: string, message?: string, placeholder?: string, value?: string, confirmLabel?: string, validate?: (v: string) => string | null }} req
+ * @returns {Promise<string | null>}
+ */
+export function promptDialog(req) {
+  return new Promise((resolve) => {
+    dialogStore.set((s) => ({
+      queue: [
+        ...s.queue,
+        {
+          title: req.title,
+          message: req.message,
+          input: { placeholder: req.placeholder ?? '', value: req.value ?? '', validate: req.validate },
+          choices: [
+            { id: 'cancel', label: 'Cancel' },
+            { id: 'ok', label: req.confirmLabel ?? 'OK', primary: true },
+          ],
+          id: nextId++,
+          resolve,
+        },
+      ],
+    }));
+  });
+}

@@ -39,5 +39,16 @@ All notable changes to this project are documented here. The format follows
 - Phase 5: editor — CodeMirror 6 with groups/splits, tabs, encodings and line endings, hash-checked
   saving and conflict resolution, auto save, external change handling and hot-exit recovery drafts.
 
+- Phase 6: language provider registry with honest support tiers (structure / syntax / basic) for
+  the required languages and ~90 more; toolchain discovery for ~35 tools (safe probing, install
+  guidance only).
+- Phase 7: language servers (23 known servers) with trust gating, Job Object isolation,
+  completion, hover, signature help, diagnostics, navigation, references, rename and formatting.
+- Phase 8: ConPTY integrated terminal with profile detection (PowerShell, CMD, Git Bash, WSL),
+  tabs, splits, search, clipboard, links and theme-aware colours.
+- Phase 9: Git — status, staging, commits/amend, branches, history, diffs, stashes, tags, remotes,
+  merge/rebase/cherry-pick/revert/reset, conflict resolution in the editor, clone and init; never
+  forced, destructive actions confirmed, gated by workspace trust.
+
 ### Fixed
 - The main window no longer grows by its border width on every launch (inner size is persisted).

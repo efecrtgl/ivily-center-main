@@ -403,3 +403,67 @@ button.statusbar__item:hover { background: color-mix(in srgb, var(--color-status
 .terminal-tab--active { background: var(--color-accent-muted); }
 .terminal-tab__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .terminal-tab .input { min-height: 1.4rem; width: 100%; }
+.modal__input { margin-top: 0.6rem; }
+.modal__input .input { width: 100%; }
+.modal__error { font-size: 0.88em; margin-top: 0.3rem; }
+
+/* ── Source control ───────────────────────────────────────────────────────── */
+.scm { display: flex; flex-direction: column; height: 100%; }
+.scm-head { display: flex; align-items: center; gap: 0.2rem; padding: 0 0.5rem 0.3rem; flex-wrap: wrap; }
+.scm-head .select { width: 100%; margin-bottom: 0.2rem; }
+.scm-branch { flex: 1; justify-content: flex-start; min-width: 0; overflow: hidden; }
+.scm-sync { display: flex; gap: 0.1rem; }
+.scm-sync .btn { min-height: 1.6rem; padding: 0 0.4rem; }
+.scm-tabs { display: flex; flex-wrap: wrap; gap: 0.1rem; padding: 0 0.4rem 0.3rem; border-bottom: var(--border-width) solid var(--color-border); }
+.scm-tab { border: 0; background: transparent; color: var(--color-fg-muted); font-size: 0.85em; padding: 0.15rem 0.4rem; border-radius: var(--radius-sm); cursor: pointer; }
+.scm-tab--active { background: var(--color-accent-muted); color: var(--color-fg); }
+.scm-body { flex: 1; min-height: 0; overflow: auto; }
+.scm-commit { padding: 0.5rem; }
+.scm-message { width: 100%; resize: vertical; padding: 0.35rem 0.5rem; font-family: var(--font-ui); }
+.scm-commit__row { display: flex; justify-content: space-between; align-items: center; margin-top: 0.35rem; }
+.scm-amend { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.88em; }
+.scm-operation { display: flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.6rem; margin: 0 0.5rem 0.4rem; background: color-mix(in srgb, var(--color-warning) 15%, transparent); border-radius: var(--radius-sm); font-size: 0.88em; flex-wrap: wrap; }
+.scm-section__head { display: flex; align-items: center; gap: 0.3rem; padding: 0.25rem 0.5rem; cursor: pointer; }
+.scm-section__head:hover { background: var(--color-surface-hover); }
+.scm-count { margin-left: 0.2rem; }
+.scm-section__actions { margin-left: auto; display: flex; }
+.scm-section__actions .btn--icon, .scm-file__actions .btn--icon { width: 1.4rem; min-height: 1.4rem; font-weight: 700; }
+.scm-list { list-style: none; margin: 0; padding: 0; }
+.scm-file { display: flex; align-items: center; gap: 0.35rem; padding: 0.15rem 0.5rem 0.15rem 1.4rem; cursor: pointer; font-size: 0.93em; white-space: nowrap; }
+.scm-file:hover { background: var(--color-surface-hover); }
+.scm-file__name { flex: none; }
+.scm-file__dir { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; font-size: 0.88em; }
+.scm-file__actions { display: none; }
+.scm-file:hover .scm-file__actions { display: flex; }
+.scm-file__letter { width: 1rem; text-align: center; font-weight: 700; font-family: var(--font-mono); }
+.scm-letter-M { color: var(--color-warning); }
+.scm-letter-A, .scm-letter-U { color: var(--color-success); }
+.scm-letter-D, .scm-letter-C { color: var(--color-danger); }
+.scm-letter-R { color: var(--color-info); }
+.scm-empty { padding: 0.4rem 1.4rem; }
+.scm-tab-actions { padding: 0.3rem 0.5rem; }
+.scm-history { padding-top: 0.2rem; }
+.scm-commit-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.1rem 0.4rem; padding: 0.3rem 0.6rem; cursor: pointer; border-bottom: var(--border-width) solid var(--color-border); }
+.scm-commit-row:hover { background: var(--color-surface-hover); }
+.scm-commit-row__subject { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.scm-commit-row__meta { width: 100%; font-size: 0.82em; }
+.scm-commit-files .scm-file { padding-left: 1.2rem; }
+
+/* ── Diff page ────────────────────────────────────────────────────────────── */
+.diff-page { display: flex; flex-direction: column; height: 100%; }
+.diff-toolbar { flex: none; display: flex; align-items: center; gap: 0.3rem; padding: 0.3rem 0.6rem; border-bottom: var(--border-width) solid var(--color-border); }
+.diff-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.diff-labels { display: grid; grid-template-columns: 1fr 1fr; padding: 0.15rem 0.8rem; font-size: 0.82em; }
+.diff-host { flex: 1; min-height: 0; overflow: auto; }
+.diff-host .cm-mergeView, .diff-host > .cm-editor { min-height: 100%; font-size: var(--editor-font-size, 14px); }
+.cm-changedLine, .cm-insertedLine { background-color: color-mix(in srgb, var(--color-success) 14%, transparent) !important; }
+.cm-deletedChunk, .cm-deletedLine { background-color: color-mix(in srgb, var(--color-danger) 14%, transparent) !important; }
+.cm-changedText { background: color-mix(in srgb, var(--color-success) 30%, transparent) !important; }
+
+/* ── Merge conflicts in the editor ────────────────────────────────────────── */
+.cm-conflict-actions { display: flex; gap: 0.6rem; padding: 0.1rem 0.4rem; font-family: var(--font-ui); font-size: 0.85em; }
+.cm-conflict-actions button { border: 0; background: none; color: var(--color-accent); cursor: pointer; padding: 0; }
+.cm-conflict-actions button:hover { text-decoration: underline; }
+.cm-conflict-current { background-color: color-mix(in srgb, var(--color-success) 13%, transparent); }
+.cm-conflict-incoming { background-color: color-mix(in srgb, var(--color-info) 13%, transparent); }
+.cm-conflict-marker { background-color: color-mix(in srgb, var(--color-fg-muted) 15%, transparent); color: var(--color-fg-muted); }

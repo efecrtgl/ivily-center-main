@@ -7,7 +7,7 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 
 ## Current phase
 
-**Phase 5 — Code editor:** done. **Next: Phase 6 — Language support and toolchain detection.**
+**Phase 9 — Git integration:** done. **Next: Phase 10 — Search, Quick Open and Command Palette.**
 
 ## Phases
 
@@ -19,7 +19,11 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 | 3 | Workspace system & launcher | done | `52f9bfc` backend, `611e072` UI state, `3bda5ed` window fix, `6d6ae4e` UI, then docs. [docs/WORKSPACES.md](docs/WORKSPACES.md) |
 | 4 | File explorer & filesystem | done | `defcb4c` backend, `6c20e52` UI. [docs/EXPLORER.md](docs/EXPLORER.md) |
 | 5 | Code editor | done | `2250911` document I/O, `962bcb5` editor. [docs/EDITOR.md](docs/EDITOR.md) |
-| 6–25 | See plan | planned | |
+| 6 | Language support & toolchains | done | `4d8e963`. [docs/LANGUAGES.md](docs/LANGUAGES.md) |
+| 7 | Language Server Protocol | done | `fd2dffc`. [docs/LSP.md](docs/LSP.md) |
+| 8 | Integrated terminal | done | `d207d27`. [docs/TERMINAL.md](docs/TERMINAL.md) |
+| 9 | Git | done | `e4179dc` backend, then UI. [docs/GIT.md](docs/GIT.md) |
+| 10–25 | See plan | planned | |
 
 ## Phase 3 deliverables
 
@@ -60,6 +64,18 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 * Documents opened from outside the workspace are not restored after a restart (their access token
   is per-process); their unsaved content is still recovered from drafts as an untitled document.
 * The main JavaScript chunk is ~830 kB (CodeMirror core); language grammars are lazy-loaded.
+
+## Notes for Phases 6–9
+
+* LSP was verified against a scripted Node.js server (real process, framing, Job Object) and a
+  scripted transport in the UI; no real language server was installed on the development machine,
+  so completion/hover with e.g. rust-analyzer has not been exercised.
+* The terminal was verified with a real ConPTY session (cmd.exe: echo, resize, exit); the xterm.js
+  UI is tested with a fake terminal.
+* Git was verified against real repositories (status, staging, commits, branches, a real merge
+  conflict, stash); network operations (fetch/pull/push/clone) have not been exercised against a
+  remote.
+* Git requires the `workspaceExecutables` trust capability (see docs/GIT.md for why).
 
 ## Build / test status (local, 2026-11-27)
 

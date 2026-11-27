@@ -21,8 +21,9 @@ import { showPage } from '../workspace/store.js';
 import { workspaceStore } from '../workspace/store.js';
 
 import { ToolsView } from '../features/tools/ToolsView.jsx';
+import { DiffView } from '../features/git/DiffView.jsx';
 
-const PAGES = { launcher: LauncherView, trust: TrustManagerView, welcome: WelcomeView, tools: ToolsView };
+const PAGES = { launcher: LauncherView, trust: TrustManagerView, welcome: WelcomeView, tools: ToolsView, diff: DiffView };
 
 /**
  * Workbench layout:
