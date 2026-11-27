@@ -69,6 +69,8 @@ All notable changes to this project are documented here. The format follows
   recommendations shown, never auto-installed.
 - Phase 17: Ivily Ecosystem Protocol client (IEP 0.1 + Envora adapter, version-gated discovery,
   allowlisted read-only requests) and Center's own `--iep describe` / `--iep request`.
+- Phase 18: Ivily Ecosystem dashboard — module status, capabilities, health, read-only summaries,
+  open module, per-module disable; Welcome page entry points.
 
 ### Fixed
 - The main window no longer grows by its border width on every launch (inner size is persisted).

@@ -79,3 +79,19 @@ development machine the client was also run against locally built Optimizer 0.3.
 0.1.0 (status *ok*, `health` request) and Envora 0.1.0 (status *disabled*, its IEP is off by
 default); the installed Optimizer 0.2.0 was correctly refused without being started. Portly was
 not available as a release build and was not exercised.
+
+## Ivily Ecosystem dashboard (module manager)
+
+*Show Ivily Ecosystem* (command palette, Welcome page) opens a page with one card per module:
+status (*Connected*, *Degraded*, *Access off in the app* for Envora with IEP disabled,
+*Incompatible* with the reason, *Not installed* with a link to the releases page, *Not responding*,
+*Disabled in Ivily Center*), version and available update, protocol, health, 7-day activity count,
+location and capabilities (planned or not-granted ones are marked).
+
+* Read-only summaries can be requested per module (Portly ports/projects, Structura projects and an
+  analysis of the first workspace folder, Envora's granted summaries, Optimizer health); results
+  are shown as key/value lists.
+* *Open …* starts the module's own window (the executable must carry the expected product name).
+* *Use in Ivily Center* turns a module off (`ecosystem.disabledModules`); a disabled module is never
+  located, started or queried.
+* *Refresh* re-reads every module in parallel; otherwise the last result is reused. Nothing polls.

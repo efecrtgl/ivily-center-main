@@ -7,7 +7,7 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 
 ## Current phase
 
-**Phase 17 — IEP client:** done. **Next: Phase 18 — Module manager and dashboard.**
+**Phase 18 — Module manager and dashboard:** done. **Next: Phase 19 — Update manager.**
 
 ## Phases
 
@@ -31,7 +31,8 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 | 15 | Debugging (DAP) | done | `ce9f520` backend, then UI. [docs/DEBUGGING.md](docs/DEBUGGING.md). No real adapter installed — verified with scripted adapters. |
 | 16 | Declarative extensions | done | [docs/EXTENSIONS.md](docs/EXTENSIONS.md) |
 | 17 | IEP client and Center's `--iep` endpoint | done | [docs/IEP.md](docs/IEP.md); verified against real Optimizer/Structura/Envora builds |
-| 18–25 | See plan | planned | |
+| 18 | Ivily Ecosystem dashboard | done | [docs/IEP.md](docs/IEP.md#ivily-ecosystem-dashboard-module-manager) |
+| 19–25 | See plan | planned | |
 
 ## Phase 3 deliverables
 

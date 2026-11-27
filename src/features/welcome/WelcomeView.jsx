@@ -24,9 +24,24 @@ export function WelcomeView() {
           <h1>Ivily Center</h1>
           <p className="muted">
             Development build {info?.version ?? __APP_VERSION__}.{' '}
-            {workspace ? `Workspace “${workspace.record.name}” is open.` : 'No workspace is open.'} The file explorer and the
-            editor are being built next.
+            {workspace ? `Workspace “${workspace.record.name}” is open.` : 'No workspace is open.'}
           </p>
+          <div className="welcome__start">
+            {!workspace && (
+              <button type="button" className="btn btn--primary" onClick={() => executeCommand('workspace.openFolder')}>
+                Open Folder…
+              </button>
+            )}
+            <button type="button" className="btn" onClick={() => executeCommand('workbench.commandPalette')}>
+              Show All Commands
+            </button>
+            <button type="button" className="btn" onClick={() => executeCommand('workbench.quickOpen')}>
+              Go to File…
+            </button>
+            <button type="button" className="btn btn--ghost" onClick={() => executeCommand('ecosystem.showDashboard')}>
+              Ivily Ecosystem
+            </button>
+          </div>
         </header>
 
         <section className="welcome__section" aria-labelledby="welcome-themes">

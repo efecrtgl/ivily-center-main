@@ -577,3 +577,21 @@ button.statusbar__item:hover { background: color-mix(in srgb, var(--color-status
 .ext-item__meta { font-size: 0.8em; }
 .ext-item__desc { font-size: 0.9em; margin: 0.2rem 0; }
 .ext-item__contrib { margin: 0.1rem 0 0; padding-left: 1rem; font-size: 0.8em; }
+
+/* Ivily ecosystem dashboard */
+.module-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr)); gap: 0.9rem; margin-top: 0.8rem; }
+.module-card { border: var(--border-width) solid var(--color-border); border-radius: var(--radius-md, 8px); padding: 0.8rem 0.9rem; background: var(--color-surface); display: flex; flex-direction: column; gap: 0.5rem; }
+.module-card__head { display: flex; justify-content: space-between; gap: 0.6rem; align-items: flex-start; }
+.module-card__head h2 { margin: 0 0 0.15rem; font-size: 1.05rem; }
+.module-facts { display: grid; grid-template-columns: max-content 1fr; gap: 0.15rem 0.7rem; margin: 0; font-size: 0.9em; }
+.module-facts dt { color: var(--color-fg-muted); }
+.module-facts dd { margin: 0; min-width: 0; }
+.module-path { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-mono); font-size: 0.85em; }
+.module-message { margin: 0; font-size: 0.9em; }
+.module-caps { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+.module-actions { display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center; }
+.module-detail { border-top: var(--border-width) solid var(--color-border); padding-top: 0.4rem; max-height: 16rem; overflow: auto; font-size: 0.85em; font-family: var(--font-mono); }
+.module-row { display: flex; gap: 0.5rem; }
+.module-row__key { color: var(--color-fg-muted); }
+.link-like { border: 0; background: none; color: var(--color-accent); padding: 0; cursor: pointer; font: inherit; text-decoration: underline; }
+.welcome__start { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.8rem; }

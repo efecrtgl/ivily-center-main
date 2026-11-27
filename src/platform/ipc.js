@@ -239,6 +239,11 @@ export const extensionsInstallConfirm = (token) => call('extensions_install_conf
 export const extensionsSetEnabled = (id, enabled) => call('extensions_set_enabled', { id, enabled });
 export const extensionsUninstall = (id) => call('extensions_uninstall', { id });
 
+// ── Ivily modules (IEP, read-only) ────────────────────────────────────────────
+export const modulesStatus = (refresh = false) => call('modules_status', { refresh });
+export const moduleRequest = (product, method, params) => call('module_request', { product, method, params });
+export const moduleOpen = (product) => call('module_open', { product });
+
 // ── Tasks (running requires the taskExecution trust capability + approval) ──
 export const tasksList = () => call('tasks_list');
 /** Starts one task in a terminal session; `approve` records the user's approval of its command. */

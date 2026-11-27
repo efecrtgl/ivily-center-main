@@ -242,6 +242,7 @@ export function registerWorkbenchContributions() {
     { id: 'debug.revokeApprovals', title: 'Revoke Launch Approvals', category: 'Debug', when: 'workspaceOpen', run: () => revokeDebugApprovals() },
     { id: 'extensions.show', title: 'Show Extensions', category: 'Extensions', icon: 'extensions', run: () => toggleSidebarView('extensions') },
     { id: 'extensions.install', title: 'Install Extension from Folder…', category: 'Extensions', run: () => installExtension() },
+    { id: 'ecosystem.showDashboard', title: 'Show Ivily Ecosystem', category: 'Ecosystem', icon: 'ecosystem', run: () => showPage('modules') },
     { id: 'git.showView', title: 'Show Source Control', category: 'Git', icon: 'git', run: () => updateLayout({ sidebarVisible: true, sidebarView: 'scm' }) },
     { id: 'git.refresh', title: 'Refresh', category: 'Git', icon: 'refresh', when: 'workspaceOpen', run: () => loadRepos() },
     { id: 'git.checkout', title: 'Checkout to…', category: 'Git', when: 'gitRepository', run: () => { const r = activeRepo(); return r && gitCheckout(r.root); } },
