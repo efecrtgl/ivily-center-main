@@ -27,6 +27,7 @@ export const compartments = {
   features: new Compartment(),
   font: new Compartment(),
   extra: new Compartment(),
+  lsp: new Compartment(),
 };
 
 export const highlightStyle = HighlightStyle.define([
@@ -111,8 +112,9 @@ export const featuresExt = (o) =>
  * @param {EditorOptions} o
  * @param {import('@codemirror/state').Extension} language
  * @param {import('@codemirror/state').Extension[]} extra
+ * @param {import('@codemirror/state').Extension} [lsp]
  */
-export function buildExtensions(o, language, extra = []) {
+export function buildExtensions(o, language, extra = [], lsp = []) {
   return [
     compartments.gutter.of(gutterExt(o)),
     highlightSpecialChars(),
@@ -132,6 +134,7 @@ export function buildExtensions(o, language, extra = []) {
     compartments.readOnly.of(readOnlyExt(o)),
     compartments.font.of(editorTheme(o.dark)),
     compartments.extra.of(extra),
+    compartments.lsp.of(o.large ? [] : lsp),
     keymap.of([...closeBracketsKeymap, ...defaultKeymap, ...searchKeymap, ...historyKeymap, ...foldKeymap, ...completionKeymap, ...lintKeymap, indentWithTab]),
   ];
 }

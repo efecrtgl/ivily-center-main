@@ -23,6 +23,8 @@ import {
   saveAll, saveDocument, splitEditor,
 } from '../features/editor/model.js';
 import { pickEncoding, pickEol, pickLanguage } from '../features/editor/EditorStatus.jsx';
+import { findReferences, formatDocument, jumpToDefinition, jumpToImplementation, jumpToTypeDefinition, renameSymbol } from '@codemirror/lsp-client';
+import { restartServers } from '../features/lsp/manager.js';
 
 function cycleTab(delta) {
   const s = editorStore.get();
@@ -125,6 +127,13 @@ export function registerWorkbenchContributions() {
     { id: 'editor.changeEncoding', title: 'Change File Encoding', category: 'File', when: 'editorFocus', run: () => pickEncoding() },
     { id: 'editor.changeEol', title: 'Change End of Line Sequence', category: 'File', when: 'editorFocus', run: () => pickEol() },
     { id: 'editor.changeLanguage', title: 'Change Language Mode', category: 'File', when: 'editorFocus', run: () => pickLanguage() },
+    { id: 'editor.goToDefinition', title: 'Go to Definition', category: 'Language', when: 'editorFocus', run: withEditor((ed) => ed.view && jumpToDefinition(ed.view)) },
+    { id: 'editor.goToTypeDefinition', title: 'Go to Type Definition', category: 'Language', when: 'editorFocus', run: withEditor((ed) => ed.view && jumpToTypeDefinition(ed.view)) },
+    { id: 'editor.goToImplementation', title: 'Go to Implementation', category: 'Language', when: 'editorFocus', run: withEditor((ed) => ed.view && jumpToImplementation(ed.view)) },
+    { id: 'editor.findReferences', title: 'Find All References', category: 'Language', when: 'editorFocus', run: withEditor((ed) => ed.view && findReferences(ed.view)) },
+    { id: 'editor.renameSymbol', title: 'Rename Symbol', category: 'Language', when: 'editorFocus', run: withEditor((ed) => ed.view && renameSymbol(ed.view)) },
+    { id: 'editor.formatDocument', title: 'Format Document', category: 'Language', when: 'editorFocus', run: withEditor((ed) => ed.view && formatDocument(ed.view)) },
+    { id: 'lsp.restart', title: 'Restart Language Servers', category: 'Language', icon: 'refresh', when: 'workspaceOpen', run: () => restartServers() },
     { id: 'window.minimize', title: 'Minimize Window', category: 'Window', icon: 'minimize', run: () => minimizeWindow() },
     { id: 'window.toggleMaximize', title: 'Maximize / Restore Window', category: 'Window', icon: 'maximize', run: () => toggleMaximizeWindow() },
     { id: 'window.close', title: 'Close Window', category: 'Window', icon: 'close', run: () => closeWindow() },

@@ -42,6 +42,9 @@ pub struct AppState {
     pub workspace_hook: std::sync::OnceLock<WorkspaceHook>,
     /// Last toolchain detection (tools, timestamp).
     pub toolchain_cache: Mutex<Option<(Vec<crate::toolchains::Tool>, i64)>>,
+    /// Running language servers by instance id.
+    pub lsp: Mutex<HashMap<u64, crate::lsp::ServerProcess>>,
+    pub lsp_next: std::sync::atomic::AtomicU64,
 }
 
 impl AppState {
@@ -60,6 +63,7 @@ impl AppState {
     pub fn init_in(dir: &Path, cli_path: Option<PathBuf>) -> Self {
         let output = Arc::new(OutputHub::new());
         output.register("workspace", "Workspace").expect("valid channel id");
+        output.register("lsp", "Language Servers").expect("valid channel id");
         output.info("app", format!("{} {} starting", crate::APP_NAME, crate::APP_VERSION));
 
         let opened = db::open_app_db(dir);
@@ -122,6 +126,8 @@ impl AppState {
             watchers: Mutex::new(HashMap::new()),
             workspace_hook: std::sync::OnceLock::new(),
             toolchain_cache: Mutex::new(None),
+            lsp: Mutex::new(HashMap::new()),
+            lsp_next: std::sync::atomic::AtomicU64::new(1),
         }
     }
 }

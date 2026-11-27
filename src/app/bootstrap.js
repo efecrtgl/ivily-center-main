@@ -22,6 +22,7 @@ import { flushSession } from '../workspace/session.js';
 import { onFsChanged, registerExplorerSession, setFileOpener } from '../features/explorer/model.js';
 import { applyOptionsToAll, onFsChangedEditor, openDocument, registerEditorSession } from '../features/editor/model.js';
 import { themeStore } from '../theme/engine.js';
+import { installLsp } from '../features/lsp/integration.js';
 import { errorMessage } from '../core/errors.js';
 
 /** Apply settings that have UI side effects. Only changed values are re-applied. */
@@ -93,6 +94,7 @@ export async function bootstrap() {
   startOutput();
   registerExplorerSession();
   registerEditorSession();
+  installLsp();
   setFileOpener((ref, opts) => openDocument(ref, opts));
   ipc.onEvent(ipc.events.fsChanged, (change) => {
     onFsChanged(change);

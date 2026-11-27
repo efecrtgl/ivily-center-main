@@ -62,6 +62,47 @@ function ToolRow({ t, relevant }) {
   );
 }
 
+function ServersTab() {
+  const [list, setList] = useState(null);
+  useEffect(() => {
+    if (ipc.isTauri()) ipc.lspServers().then(setList, () => setList([]));
+    else setList([]);
+  }, []);
+  const copy = (text) => {
+    navigator.clipboard?.writeText(text);
+    notify({ title: 'Install command copied', message: 'Run it in a terminal. Ivily Center never installs language servers by itself.', source: 'tools' });
+  };
+  return (
+    <section>
+      <p className="muted">
+        Language servers provide completion, hover, diagnostics, go to definition, references, rename and formatting. They run only in
+        workspaces trusted for language servers. A specific executable can be set in Settings → Language Servers.
+      </p>
+      {!list && <div className="empty-state">Loading…</div>}
+      {list && (
+        <table className="trust-table tools-table">
+          <thead><tr><th>Server</th><th>Languages</th><th>Status</th><th /></tr></thead>
+          <tbody>
+            {list.map((s) => (
+              <tr key={s.id}>
+                <td><strong>{s.name}</strong><div className="subtle mono">{s.id}</div></td>
+                <td className="subtle">{s.languages.join(', ')}</td>
+                <td>
+                  {s.disabled ? <span className="subtle">Disabled</span> : s.path ? <span className="sev-info">Installed</span> : <span className="subtle">Not installed</span>}
+                  {s.path && <div className="mono subtle tools-path" title={s.path}>{s.path}</div>}
+                </td>
+                <td className="tools-actions">
+                  {!s.path && <button type="button" className="btn btn--ghost" onClick={() => copy(s.install)} title={s.install}>Copy install command</button>}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </section>
+  );
+}
+
 /** "Languages & Tools" page. */
 export function ToolsView() {
   const data = useStore(toolsStore);
@@ -102,6 +143,7 @@ export function ToolsView() {
         <div className="settings__tabs tools-tabs" role="tablist">
           <button type="button" role="tab" aria-selected={tab === 'tools'} className={`settings__tab${tab === 'tools' ? ' settings__tab--active' : ''}`} onClick={() => setTab('tools')}>Toolchains</button>
           <button type="button" role="tab" aria-selected={tab === 'languages'} className={`settings__tab${tab === 'languages' ? ' settings__tab--active' : ''}`} onClick={() => setTab('languages')}>Languages</button>
+          <button type="button" role="tab" aria-selected={tab === 'servers'} className={`settings__tab${tab === 'servers' ? ' settings__tab--active' : ''}`} onClick={() => setTab('servers')}>Language Servers</button>
         </div>
 
         {tab === 'tools' && (
@@ -123,6 +165,8 @@ export function ToolsView() {
             )}
           </section>
         )}
+
+        {tab === 'servers' && <ServersTab />}
 
         {tab === 'languages' && (
           <section>

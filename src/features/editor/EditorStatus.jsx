@@ -3,6 +3,8 @@ import { useSetting } from '../../core/settings.js';
 import { quickPick } from '../../core/quickPick.js';
 import { activeEditor, cursorStore, docsStore, editorStore, setDocLanguage, setEncoding, setEol } from './model.js';
 import { availableLanguages } from './languages.js';
+import { languageIntelStore } from '../tools/ToolsView.jsx';
+import { showPage } from '../../workspace/store.js';
 
 export const ENCODINGS = [
   { id: 'utf-8', label: 'UTF-8' },
@@ -56,6 +58,7 @@ export function EditorStatus() {
   const cur = useStore(cursorStore);
   const tabSize = useSetting('editor.tabSize') ?? 4;
   const spaces = useSetting('editor.insertSpaces') !== false;
+  const intel = useStore(languageIntelStore, (i) => (meta?.languageId ? i[meta.languageId] : null));
   if (!meta) return null;
   const enc = ENCODINGS.find((e) => e.id === meta.encoding)?.label ?? meta.encoding;
   return (
@@ -72,6 +75,11 @@ export function EditorStatus() {
         {meta.mixedEol ? '*' : ''}
       </button>
       <button type="button" className="statusbar__item" title="Select language mode" onClick={pickLanguage}>{meta.languageName}</button>
+      {intel && (
+        <button type="button" className={`statusbar__item lsp-status lsp-status--${intel.state}`} title={`${intel.server}: ${intel.state}${intel.state === 'blocked' ? ' — trust the workspace for language servers to enable it' : ''}`} onClick={() => showPage(intel.state === 'blocked' ? 'trust' : 'tools')}>
+          {intel.state === 'running' ? '{ }' : intel.state === 'starting' ? '{…}' : '{!}'}
+        </button>
+      )}
     </>
   );
 }

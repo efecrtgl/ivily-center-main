@@ -10,6 +10,7 @@ pub mod db;
 pub mod editor_io;
 pub mod error;
 pub mod fs;
+pub mod lsp;
 pub mod output;
 pub mod settings;
 pub mod state;
@@ -35,7 +36,10 @@ pub fn run() {
                 let _ = handle.emit(commands::events::OUTPUT_ENTRY, entry);
             }));
             let hook_app = app.handle().clone();
-            let _ = st.workspace_hook.set(Box::new(move |label| commands::fs::sync_watcher(&hook_app, label)));
+            let _ = st.workspace_hook.set(Box::new(move |label| {
+                commands::fs::sync_watcher(&hook_app, label);
+                commands::lsp::stop_window(&hook_app.state::<state::AppState>(), label);
+            }));
             if let Some(w) = app.get_webview_window("main") {
                 window::runtime::restore_and_show(&w, &st);
             }
@@ -89,6 +93,10 @@ pub fn run() {
             commands::editor::draft_save,
             commands::editor::draft_list,
             commands::editor::draft_delete,
+            commands::lsp::lsp_servers,
+            commands::lsp::lsp_start,
+            commands::lsp::lsp_send,
+            commands::lsp::lsp_stop,
             commands::toolchains::toolchains_detect,
             commands::toolchains::toolchains_open_homepage,
             commands::fs::fs_list,

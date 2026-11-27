@@ -49,6 +49,7 @@ const syncAnnotation = Annotation.define();
  * @property {import('@codemirror/state').Extension} language
  * @property {string} languageName
  * @property {string | null} [languageId]
+ * @property {import('@codemirror/state').Extension} [lspExtension]
  */
 
 /**
@@ -151,6 +152,7 @@ function publishMeta(doc) {
     eol: doc.eol,
     mixedEol: doc.mixedEol,
     languageName: doc.languageName,
+    languageId: doc.languageId ?? null,
   };
   const prev = docsStore.get()[doc.key];
   if (prev && Object.keys(meta).every((k) => prev[k] === meta[k])) return;
@@ -220,7 +222,7 @@ function extensionsFor(doc, groupId) {
     docKeyFacet.of(doc.key),
     EditorView.updateListener.of((u) => onUpdate(groupId, doc.key, u)),
     EditorView.domEventHandlers({ blur: () => onBlur(doc.key) }),
-  ]);
+  ], doc.lspExtension ?? []);
 }
 
 function stateFor(groupId, key, selection) {
@@ -420,6 +422,8 @@ function dropTabState(groupId, key) {
   tabStates.delete(stateKey(groupId, key));
   scrolls.delete(stateKey(groupId, key));
   if (!editorStore.get().groups.some((g) => g.tabs.some((t) => t.key === key))) {
+    const closing = docs.get(key);
+    if (closing) closeListeners.forEach((fn) => fn(closing));
     docs.delete(key);
     docsStore.set((s) => {
       const { [key]: _gone, ...rest } = s;
@@ -797,6 +801,7 @@ async function checkDisk(key) {
 // ── Session ─────────────────────────────────────────────────────────────────
 
 function resetAll() {
+  for (const d of docs.values()) closeListeners.forEach((fn) => fn(d));
   for (const t of autoSaveTimers.values()) clearTimeout(t);
   autoSaveTimers.clear();
   for (const t of draftTimers.values()) clearTimeout(t);
@@ -918,6 +923,29 @@ export function registerEditorSession() {
     reset: resetAll,
   });
   registerFlushHook(flushDrafts);
+}
+
+/** @type {Set<(doc: Doc) => void>} */
+const closeListeners = new Set();
+/** Notified when a document is closed for good (LSP sends didClose). */
+export function onDocumentClosed(fn) {
+  closeListeners.add(fn);
+  return () => closeListeners.delete(fn);
+}
+
+/** Install (or replace) the language-server extension of a document in every state and view. */
+export function setLspExtension(key, ext) {
+  const doc = docs.get(key);
+  if (!doc) return;
+  doc.lspExtension = ext;
+  const effects = compartments.lsp.reconfigure(doc.large ? [] : ext);
+  for (const [k, st] of tabStates) if (k.endsWith(`|${key}`)) tabStates.set(k, st.update({ effects }).state);
+  for (const g of editorStore.get().groups) if (g.active === key) views.get(g.id)?.dispatch({ effects });
+}
+
+/** Live views currently showing a document. */
+export function viewsOf(key) {
+  return editorStore.get().groups.filter((g) => g.active === key).map((g) => views.get(g.id)).filter(Boolean);
 }
 
 /** @type {Set<(doc: Doc) => void>} */

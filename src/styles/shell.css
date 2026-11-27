@@ -374,3 +374,9 @@ button.statusbar__item:hover { background: color-mix(in srgb, var(--color-status
 .tools-actions { white-space: nowrap; text-align: right; }
 .tools-row--needed { background: color-mix(in srgb, var(--color-warning) 10%, transparent); }
 .tools-filter { width: 18rem; margin-bottom: 0.6rem; }
+
+.lsp-status { font-family: var(--font-mono); }
+.lsp-status--error, .lsp-status--stopped { color: var(--color-danger); }
+.lsp-status--blocked, .lsp-status--missing { color: var(--color-warning); }
+.cm-lsp-documentation { font-family: var(--font-ui); font-size: 0.92em; max-width: 36rem; }
+.cm-lsp-documentation pre, .cm-lsp-documentation code { font-family: var(--font-mono); }

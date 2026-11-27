@@ -193,3 +193,10 @@ export const draftDelete = (key) => call('draft_delete', { key });
 export const toolchainsDetect = (refresh = false) => call('toolchains_detect', { refresh });
 /** Opens the official download page of a known tool (by id). */
 export const toolchainsOpenHomepage = (id) => call('toolchains_open_homepage', { id });
+
+// ── Language servers ─────────────────────────────────────────────────────────
+export const lspServers = () => call('lsp_servers');
+/** Starts (or reuses) a server for this window's workspace; requires the languageServers trust capability. */
+export const lspStart = (server) => call('lsp_start', { server });
+export const lspSend = (id, message) => call('lsp_send', { id, message });
+export const lspStop = (id) => call('lsp_stop', { id });

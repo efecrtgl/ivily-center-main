@@ -152,6 +152,43 @@ pub const SETTINGS: &[SettingDef] = &[
         default: D::Str("crlf"),
         scopes: ScopeSet::UserAndWorkspace,
     },
+    // ── Language servers ──────────────────────────────────────────────────────
+    SettingDef {
+        key: "lsp.enabled",
+        title: "Enable language servers",
+        description: "Start installed language servers for completion, diagnostics and navigation. Servers only start in workspaces trusted for language servers.",
+        category: "Language Servers",
+        ty: T::Bool,
+        default: D::Bool(true),
+        scopes: ScopeSet::UserAndWorkspace,
+    },
+    SettingDef {
+        key: "lsp.disabledServers",
+        title: "Disabled language servers",
+        description: "Server ids (one per line) that should not be started, e.g. pylsp.",
+        category: "Language Servers",
+        ty: T::StringList { max_items: 50, max_len: 64 },
+        default: D::List(&[]),
+        scopes: ScopeSet::UserAndWorkspace,
+    },
+    SettingDef {
+        key: "lsp.serverPaths",
+        title: "Language server executables",
+        description: "Use a specific executable for a server: one 'id=C:\\full\\path\\server.exe' per line. User setting only.",
+        category: "Language Servers",
+        ty: T::StringList { max_items: 50, max_len: 1024 },
+        default: D::List(&[]),
+        scopes: ScopeSet::User,
+    },
+    SettingDef {
+        key: "lsp.trace",
+        title: "Trace language server messages",
+        description: "Log incoming messages (truncated) to the Language Servers output channel.",
+        category: "Language Servers",
+        ty: T::Bool,
+        default: D::Bool(false),
+        scopes: ScopeSet::User,
+    },
     // ── Files & Explorer ──────────────────────────────────────────────────────
     SettingDef {
         key: "files.exclude",

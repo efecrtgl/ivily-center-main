@@ -1,5 +1,7 @@
 //! Small shared primitives: time, application paths and startup issues.
 
+pub mod process;
+
 use serde::Serialize;
 use std::path::PathBuf;
 
