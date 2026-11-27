@@ -136,6 +136,7 @@ pub fn run() {
             commands::git::git_clone,
             commands::export::save_text_dialog,
             commands::export::save_text_confirm,
+            commands::export::open_text_dialog,
             commands::tasks::tasks_list,
             commands::tasks::task_run,
             commands::tasks::tasks_revoke_approvals,

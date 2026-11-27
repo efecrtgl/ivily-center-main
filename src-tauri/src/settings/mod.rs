@@ -21,6 +21,11 @@ pub enum SettingType {
     Bool,
     /// `(value, label)` pairs.
     Enum(&'static [(&'static str, &'static str)]),
+    /// One of `options`, or an id `<prefix><a-z0-9->` (user-defined themes).
+    EnumOrCustom {
+        options: &'static [(&'static str, &'static str)],
+        custom_prefix: &'static str,
+    },
     Integer {
         min: i64,
         max: i64,
@@ -108,6 +113,18 @@ pub fn validate(def: &SettingDef, value: &Value) -> AppResult<Value> {
         SettingType::Enum(options) => {
             let s = value.as_str().ok_or_else(|| bad("expected a string".into()))?;
             if options.iter().any(|(v, _)| *v == s) {
+                Ok(json!(s))
+            } else {
+                Err(bad(format!("'{s}' is not one of the allowed values")))
+            }
+        }
+        SettingType::EnumOrCustom { options, custom_prefix } => {
+            let s = value.as_str().ok_or_else(|| bad("expected a string".into()))?;
+            let custom = s.strip_prefix(custom_prefix).is_some_and(|rest| {
+                (1..=40).contains(&rest.len())
+                    && rest.chars().all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-')
+            });
+            if custom || options.iter().any(|(v, _)| *v == s) {
                 Ok(json!(s))
             } else {
                 Err(bad(format!("'{s}' is not one of the allowed values")))
@@ -360,7 +377,7 @@ pub fn schema_dto() -> Vec<SettingSchemaDto> {
             let mut max_items = None;
             let (ty, options, min, max, max_length) = match d.ty {
                 SettingType::Bool => ("boolean", None, None, None, None),
-                SettingType::Enum(o) => (
+                SettingType::Enum(o) | SettingType::EnumOrCustom { options: o, .. } => (
                     "enum",
                     Some(o.iter().map(|(value, label)| OptionDto { value, label }).collect()),
                     None,
@@ -430,6 +447,9 @@ mod tests {
         let theme = find("appearance.theme").unwrap();
         assert!(validate(theme, &json!("pixel-dark")).is_ok());
         assert!(validate(theme, &json!("nope")).is_err());
+        assert!(validate(theme, &json!("user-my-theme-2")).is_ok());
+        assert!(validate(theme, &json!("user-")).is_err());
+        assert!(validate(theme, &json!("user-Bad;")).is_err());
         assert!(validate(theme, &json!(3)).is_err());
         let size = find("appearance.uiFontSize").unwrap();
         assert!(validate(size, &json!(13)).is_ok());

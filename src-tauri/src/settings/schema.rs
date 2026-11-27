@@ -21,7 +21,7 @@ pub const SETTINGS: &[SettingDef] = &[
         title: "Theme",
         description: "Colour theme, typography, component style and icon pack of the whole application.",
         category: "Appearance",
-        ty: T::Enum(THEMES),
+        ty: T::EnumOrCustom { options: THEMES, custom_prefix: "user-" },
         default: D::Str("modern-dark"),
         scopes: ScopeSet::UserAndWorkspace,
     },
