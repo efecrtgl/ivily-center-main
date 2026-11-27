@@ -76,6 +76,10 @@ All notable changes to this project are documented here. The format follows
 - Phase 20: backups of Ivily Center's own data (verified zip archives with manifest and hashes,
   manual/automatic with retention, staged restore with safety backup, export/import).
 
+### Changed
+- Phase 21: security and performance review; xterm.js and secondary pages load on demand (main
+  bundle 1.5 MB → 1.08 MB); `zip` upgraded to 9.x (advisories in 2.x).
+
 ### Fixed
 - Validation errors now include their message when shown in logs, histories and statuses.
 - The main window no longer grows by its border width on every launch (inner size is persisted).

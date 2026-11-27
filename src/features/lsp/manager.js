@@ -4,7 +4,7 @@
 // owns the process. A custom Workspace adapts @codemirror/lsp-client to Ivily's editor model:
 // documents are tracked independently of views (tab switches do not close them on the server),
 // changes are computed from the document text, and cross-file navigation opens Ivily editor tabs.
-import { ChangeSet } from '@codemirror/state';
+import { ChangeSet, EditorState } from '@codemirror/state';
 import { LSPClient, LSPPlugin, Workspace, languageServerExtensions } from '@codemirror/lsp-client';
 import DOMPurify from 'dompurify';
 import { createStore } from '../../core/store.js';
@@ -14,7 +14,7 @@ import { uiLog } from '../../core/output.js';
 import * as ipc from '../../platform/ipc.js';
 import { workspaceStore } from '../../workspace/store.js';
 import { refToUri, uriToRef } from './uri.js';
-import { languageIntelStore } from '../tools/ToolsView.jsx';
+import { languageIntelStore } from '../tools/model.js';
 
 /** @typedef {{ id: string, name: string, languages: string[], path: string | null, disabled: boolean, homepage: string, install: string }} ServerInfo */
 
@@ -118,7 +118,6 @@ class IvilyWorkspace extends Workspace {
     if (!ref) return null;
     try {
       const d = await ipc.docRead(ref);
-      const { EditorState } = await import('@codemirror/state');
       return { uri, languageId: '', version: 0, doc: EditorState.create({ doc: d.content }).doc, getView: () => null };
     } catch {
       return null;

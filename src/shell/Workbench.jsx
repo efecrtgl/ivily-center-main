@@ -1,3 +1,4 @@
+import { Suspense, lazy } from 'react';
 import { useStore } from '../core/store.js';
 import { viewStore, viewsAt } from '../core/views.js';
 import { LIMITS, layoutStore, updateLayout } from '../core/layout.js';
@@ -9,7 +10,6 @@ import { Splitter } from './Splitter.jsx';
 import { Toasts } from './Notifications.jsx';
 import { WelcomeView } from '../features/welcome/WelcomeView.jsx';
 import { LauncherView } from '../features/launcher/LauncherView.jsx';
-import { TrustManagerView } from '../features/trust/TrustManagerView.jsx';
 import { TrustDialog } from '../features/trust/TrustDialog.jsx';
 import { RestrictedBanner } from '../features/trust/RestrictedBanner.jsx';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
@@ -20,13 +20,16 @@ import { editorStore } from '../features/editor/model.js';
 import { showPage } from '../workspace/store.js';
 import { workspaceStore } from '../workspace/store.js';
 
-import { ToolsView } from '../features/tools/ToolsView.jsx';
-import { DiffView } from '../features/git/DiffView.jsx';
-import { KeybindingsView } from '../features/keybindings/KeybindingsView.jsx';
-import { PreviewView } from '../features/preview/PreviewView.jsx';
-import { ModulesView } from '../features/modules/ModulesView.jsx';
-import { UpdatesView } from '../features/update/UpdatesView.jsx';
-import { BackupsView } from '../features/backup/BackupsView.jsx';
+// Pages that are not needed at startup load on first use.
+const TrustManagerView = lazy(() => import('../features/trust/TrustManagerView.jsx').then((m) => ({ default: m.TrustManagerView })));
+const ToolsView = lazy(() => import('../features/tools/ToolsView.jsx').then((m) => ({ default: m.ToolsView })));
+const DiffView = lazy(() => import('../features/git/DiffView.jsx').then((m) => ({ default: m.DiffView })));
+const KeybindingsView = lazy(() => import('../features/keybindings/KeybindingsView.jsx').then((m) => ({ default: m.KeybindingsView })));
+const PreviewView = lazy(() => import('../features/preview/PreviewView.jsx').then((m) => ({ default: m.PreviewView })));
+const ModulesView = lazy(() => import('../features/modules/ModulesView.jsx').then((m) => ({ default: m.ModulesView })));
+const UpdatesView = lazy(() => import('../features/update/UpdatesView.jsx').then((m) => ({ default: m.UpdatesView })));
+const BackupsView = lazy(() => import('../features/backup/BackupsView.jsx').then((m) => ({ default: m.BackupsView })));
+
 
 const PAGES = { launcher: LauncherView, trust: TrustManagerView, welcome: WelcomeView, tools: ToolsView, diff: DiffView, keybindings: KeybindingsView, preview: PreviewView, modules: ModulesView, updates: UpdatesView, backups: BackupsView };
 
@@ -58,7 +61,9 @@ export function Workbench() {
             <aside className="sidebar" style={{ width: layout.sidebarWidth }} aria-label={sidebar.title}>
               <div className="sidebar__header section-title">{sidebar.title}</div>
               <div className="sidebar__body">
-                <SidebarView />
+                <Suspense fallback={null}>
+                  <SidebarView />
+                </Suspense>
               </div>
             </aside>
             <Splitter
@@ -83,7 +88,9 @@ export function Workbench() {
                     ← Back to editors
                   </button>
                 )}
-                <Page />
+                <Suspense fallback={<div className="subtle page-loading">Loading…</div>}>
+                  <Page />
+                </Suspense>
               </div>
             )}
           </main>

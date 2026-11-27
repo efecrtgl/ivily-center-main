@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Icon } from '../../icons/Icon.jsx';
 import { useStore } from '../../core/store.js';
-import { createStore } from '../../core/store.js';
+import { detectTools, languageIntelStore, toolsStore } from './model.js';
 import { notify } from '../../core/notifications.js';
 import { errorMessage } from '../../core/errors.js';
 import * as ipc from '../../platform/ipc.js';
@@ -10,24 +10,6 @@ import { registerBuiltinLanguages } from '../../languages/builtin.js';
 import { showPage, workspaceStore } from '../../workspace/store.js';
 import { confirmDialog } from '../../core/dialogs.js';
 import { runInNewTerminal, terminalStore, loadProfiles } from '../terminal/model.js';
-
-/** Detection results shared with other features (e.g. LSP server discovery). */
-export const toolsStore = createStore(/** @type {null | { tools: any[], relevant: string[], detectedAt: number }} */ (null));
-
-/** Language intelligence status per language id, filled by the LSP manager (Phase 7). */
-export const languageIntelStore = createStore(/** @type {Record<string, { server: string, state: string }>} */ ({}));
-
-export async function detectTools(refresh = false) {
-  if (!ipc.isTauri()) return null;
-  try {
-    const r = await ipc.toolchainsDetect(refresh);
-    toolsStore.set(r);
-    return r;
-  } catch (e) {
-    notify({ severity: 'error', title: 'Tool detection failed', message: errorMessage(e), source: 'tools' });
-    return null;
-  }
-}
 
 const STATUS = {
   available: { label: 'Installed', cls: 'sev-info' },

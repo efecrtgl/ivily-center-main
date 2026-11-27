@@ -13,7 +13,7 @@ import {
   activeRepo, badgeOf, checkout, commit, createBranch, deleteBranch, discard, gitStore, historyOperation, loadRepos, refreshStatus, resetTo, stage,
   stashAction, stashPush, sync, toWorkspacePath, unstage,
 } from './model.js';
-import { openCommitDiff, openStatusDiff } from './DiffView.jsx';
+import { openCommitDiff, openStatusDiff } from './diffModel.js';
 
 const baseName = (p) => p.slice(p.lastIndexOf('/') + 1);
 const dirName = (p) => (p.includes('/') ? p.slice(0, p.lastIndexOf('/')) : '');

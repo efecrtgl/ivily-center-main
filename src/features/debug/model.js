@@ -12,7 +12,7 @@ import { showPanelView, updateLayout } from '../../core/layout.js';
 import * as ipc from '../../platform/ipc.js';
 import { markSessionDirty, registerSessionParticipant } from '../../workspace/session.js';
 import { workspaceStore } from '../../workspace/store.js';
-import { activeEditor, registerEditorExtension, revealInDocument, viewsOf } from '../editor/model.js';
+import { activeEditor, openDocument, registerEditorExtension, revealInDocument, viewsOf } from '../editor/model.js';
 import { toWorkspaceRef } from '../tasks/matchers.js';
 import { DapClient } from './client.js';
 
@@ -463,7 +463,6 @@ const TEMPLATE = `{
 export async function configureLaunch() {
   const ws = workspaceStore.get().current;
   if (!ws || !ipc.isTauri()) return;
-  const { openDocument } = await import('../editor/model.js');
   const exists = (e) => errorCode(e) === 'conflict';
   try {
     await ipc.fsCreateDir(0, '.ivily').catch((e) => {

@@ -6,7 +6,7 @@ import * as ipc from '../../platform/ipc.js';
 import { isCurrentEpoch, workspaceStore } from '../../workspace/store.js';
 import { registerFlushHook } from '../../workspace/session.js';
 import { renderMarkdown } from '../preview/markdown.js';
-import { followLink } from '../preview/PreviewView.jsx';
+import { followLink } from '../preview/model.js';
 
 const SAVE_DELAY = 600;
 let pending = null; // { epoch, text }

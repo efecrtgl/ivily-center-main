@@ -12,8 +12,8 @@ import { getSetting, setSetting } from '../../core/settings.js';
 import { normalizeChord, registerDefaultKeybindings } from '../../core/keybindings.js';
 import { hasCommand } from '../../core/commands.js';
 import * as ipc from '../../platform/ipc.js';
-import { registerTheme, unregisterTheme } from '../../theme/engine.js';
-import { DEFAULT_THEME } from '../../theme/index.js';
+import { getTheme, registerTheme, unregisterTheme } from '../../theme/engine.js';
+import { DEFAULT_THEME, setActiveTheme } from '../../theme/index.js';
 import { registerIconPack, unregisterIconPack } from '../../icons/registry.js';
 import { languageById, registerLanguage } from '../../languages/registry.js';
 import { getDoc, registerEditorExtension } from '../editor/model.js';
@@ -185,10 +185,7 @@ export async function loadExtensions() {
   extensionsStore.set({ installed: r.installed, issues: r.issues, recommendations: r.recommendations, problems, loaded: true });
   // A theme that disappeared falls back to the default.
   const theme = getSetting('appearance.theme');
-  if (typeof theme === 'string' && theme.startsWith('user-') && !(await import('../../theme/engine.js')).getTheme(theme)) {
-    const { setActiveTheme } = await import('../../theme/index.js');
-    setActiveTheme(DEFAULT_THEME);
-  }
+  if (typeof theme === 'string' && theme.startsWith('user-') && !getTheme(theme)) setActiveTheme(DEFAULT_THEME);
 }
 
 export async function installExtension() {

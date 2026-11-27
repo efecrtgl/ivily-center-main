@@ -38,7 +38,7 @@ import {
   toggleBreakpoint,
 } from '../features/debug/model.js';
 import { NotesView } from '../features/notes/NotesView.jsx';
-import { openPreview } from '../features/preview/PreviewView.jsx';
+import { openPreview } from '../features/preview/model.js';
 import { clearBookmarks, goToBookmark, listBookmarks, toggleBookmark } from '../features/bookmarks/model.js';
 import { ProblemsView, goToProblem } from '../features/problems/ProblemsView.jsx';
 import { exportOutputChannel } from '../features/output/OutputView.jsx';

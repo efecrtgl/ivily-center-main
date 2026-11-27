@@ -7,7 +7,7 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 
 ## Current phase
 
-**Phase 20 — Backup and restore:** done. **Next: Phase 21 — Security, performance and stability.**
+**Phase 21 — Security, performance, stability:** done. **Next: Phase 22 — Multi-window and accessibility.**
 
 ## Phases
 
@@ -34,7 +34,8 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 | 18 | Ivily Ecosystem dashboard | done | [docs/IEP.md](docs/IEP.md#ivily-ecosystem-dashboard-module-manager) |
 | 19 | Update manager | done | [docs/UPDATES.md](docs/UPDATES.md); end-to-end install untested until a signed release exists |
 | 20 | Backup and restore | done | [docs/BACKUP.md](docs/BACKUP.md) |
-| 21–25 | See plan | planned | |
+| 21 | Security, performance, stability | done | [docs/SECURITY-REVIEW.md](docs/SECURITY-REVIEW.md) |
+| 22–25 | See plan | planned | |
 
 ## Phase 3 deliverables
 
@@ -74,7 +75,7 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
   have not yet been exercised interactively in the running application.
 * Documents opened from outside the workspace are not restored after a restart (their access token
   is per-process); their unsaved content is still recovered from drafts as an untitled document.
-* The main JavaScript chunk is ~830 kB (CodeMirror core); language grammars are lazy-loaded.
+* The main JavaScript chunk is ~1.08 MB after code splitting in Phase 21 (CodeMirror core, React, the workbench); terminals, diffs and secondary pages load on demand.
 
 ## Notes for Phases 6–9
 

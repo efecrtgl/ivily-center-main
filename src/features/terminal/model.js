@@ -4,10 +4,6 @@
 // arrives as raw bytes over an IPC channel; input, resize and kill go to the backend, which owns
 // the ConPTY session and its Job Object. Terminals belong to the workspace: switching workspaces
 // closes them (they are never restarted automatically — starting a shell is always a user action).
-import { Terminal } from '@xterm/xterm';
-import { FitAddon } from '@xterm/addon-fit';
-import { SearchAddon } from '@xterm/addon-search';
-import { WebLinksAddon } from '@xterm/addon-web-links';
 import { Channel } from '@tauri-apps/api/core';
 import { createStore } from '../../core/store.js';
 import { notify } from '../../core/notifications.js';
@@ -96,7 +92,23 @@ async function defaultProfile() {
   return profiles.find((p) => p.id === want) ?? profiles.find((p) => p.id === 'pwsh') ?? profiles.find((p) => p.id === 'powershell') ?? profiles[0] ?? null;
 }
 
+/** xterm.js and its add-ons, loaded with the first terminal. */
+let xtermLib = null;
+async function loadXterm() {
+  if (!xtermLib) {
+    const [{ Terminal }, { FitAddon }, { SearchAddon }, { WebLinksAddon }] = await Promise.all([
+      import('@xterm/xterm'),
+      import('@xterm/addon-fit'),
+      import('@xterm/addon-search'),
+      import('@xterm/addon-web-links'),
+    ]);
+    xtermLib = { Terminal, FitAddon, SearchAddon, WebLinksAddon };
+  }
+  return xtermLib;
+}
+
 function createXterm(id) {
+  const { Terminal, FitAddon, SearchAddon, WebLinksAddon } = xtermLib;
   const term = new Terminal({
     allowProposedApi: true,
     cursorBlink: true,
@@ -166,6 +178,7 @@ export async function createTerminal(opts = {}) {
     return null;
   }
   const id = nextId++;
+  await loadXterm();
   const { term, fit } = createXterm(id);
   terminalStore.set((s) => {
     const terminals = [...s.terminals, { id, backendId: null, title: profile.name, profile: profile.id, status: 'starting', exitCode: null }];

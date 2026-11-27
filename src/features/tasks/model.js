@@ -12,6 +12,7 @@ import { uiLog } from '../../core/output.js';
 import * as ipc from '../../platform/ipc.js';
 import { isCurrentEpoch, workspaceStore } from '../../workspace/store.js';
 import { createTerminal, onTerminalExited, terminalStore } from '../terminal/model.js';
+import { activeEditor, openDocument } from '../editor/model.js';
 import { createMatcher, lineSplitter, toWorkspaceRef } from './matchers.js';
 
 export const HISTORY_KEY = 'ui.tasks.history';
@@ -346,7 +347,6 @@ export async function configureTasks() {
     if (!item) return;
     root = Number(item.id);
   }
-  const { openDocument, activeEditor } = await import('../editor/model.js');
   const exists = (e) => errorCode(e) === 'conflict';
   try {
     await ipc.fsCreateDir(root, '.ivily').catch((e) => {

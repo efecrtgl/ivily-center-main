@@ -3,7 +3,7 @@ import { useSetting } from '../../core/settings.js';
 import { quickPick } from '../../core/quickPick.js';
 import { activeEditor, cursorStore, docsStore, editorStore, setDocLanguage, setEncoding, setEol } from './model.js';
 import { availableLanguages } from './languages.js';
-import { languageIntelStore } from '../tools/ToolsView.jsx';
+import { languageIntelStore } from '../tools/model.js';
 import { showPage } from '../../workspace/store.js';
 
 export const ENCODINGS = [
