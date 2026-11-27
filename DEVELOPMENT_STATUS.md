@@ -7,7 +7,7 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 
 ## Current phase
 
-**Phase 24 — Documentation:** done. **Next: Phase 25 — Installer and first release.**
+**Phase 25 — Installer and first release:** installer built and verified locally; release workflow added; tag `v0.1.0` pushed (see Release status). **All phases 0–25 are implemented.**
 
 ## Phases
 
@@ -38,7 +38,7 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 | 22 | Multi-window, accessibility | done | [docs/WINDOWS-AND-ACCESSIBILITY.md](docs/WINDOWS-AND-ACCESSIBILITY.md) |
 | 23 | Comprehensive testing | done | [docs/TESTING.md](docs/TESTING.md): 149 Rust + 185 frontend tests, coverage, real-app smoke tests |
 | 24 | Documentation | done | README, ARCHITECTURE (as built, ADRs 11–15), SECURITY, THIRD_PARTY_NOTICES, stale references removed |
-| 25 | Installer and first release | planned | |
+| 25 | Installer and first release | done (publication depends on the signing secret) | [docs/RELEASING.md](docs/RELEASING.md) |
 
 ## Phase 3 deliverables
 
@@ -126,7 +126,16 @@ CI results: see GitHub Actions.
 
 ## Release status
 
-Unreleased (version 0.0.1).
+Version **0.1.0**.
+
+* Local build: `src-tauri/target/release/bundle/nsis/Ivily Center_0.1.0_x64-setup.exe` (5.27 MiB),
+  SHA-256 `64098b3310fd1962e5f7cafdb53017147f5846019a7959ae61ad2340a83f198b`. The release executable
+  reports version 0.1.0 and answers `--iep describe`. Built **without** updater artifacts (no signing
+  key was used locally); for testing only.
+* Published releases are produced only by `.github/workflows/release.yml` on a `v*` tag. It requires
+  the repository secrets `TAURI_SIGNING_PRIVATE_KEY` / `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`, creates a
+  **draft** release with signed updater artifacts, `latest.json` and `SHA256SUMS.txt`, and tests
+  install/uninstall on the runner. The draft must be published by the repository owner.
 
 ## Repository synchronisation
 

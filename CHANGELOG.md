@@ -6,6 +6,15 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-28
+
+First release: a complete, standalone development environment for Windows and the optional hub of
+the Ivily ecosystem. Highlights: workspaces with Workspace Trust, explorer, CodeMirror 6 editor,
+60+ languages and LSP, ConPTY terminal, Git, search and Quick Open, tasks, problems, debugging (DAP),
+themes and declarative extensions, Ivily Ecosystem Protocol client and dashboard, signed updates,
+verified backups, multiple windows and accessibility. Known limitations are listed in
+DEVELOPMENT_STATUS.md.
+
 ### Added
 - Phase 0: repository audit, architecture and roadmap (`docs/`).
 - Phase 1: repository infrastructure — Tauri 2 + React (plain JS) + Vite scaffold, minimal
@@ -89,3 +98,6 @@ All notable changes to this project are documented here. The format follows
 ### Fixed
 - Validation errors now include their message when shown in logs, histories and statuses.
 - The main window no longer grows by its border width on every launch (inner size is persisted).
+
+[Unreleased]: https://github.com/efecrtgl/ivily-center-main/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/efecrtgl/ivily-center-main/releases/tag/v0.1.0

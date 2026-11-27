@@ -1,7 +1,7 @@
 {
   "name": "ivily-center",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Ivily Center — standalone development environment and Ivily ecosystem hub",
   "license": "MIT",
   "type": "module",

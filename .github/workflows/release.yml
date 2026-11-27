@@ -1,0 +1,109 @@
+name: Release
+
+# When a tag vX.Y.Z is pushed:
+#   1. checks that the tag matches the app version,
+#   2. runs the frontend and Rust test suites,
+#   3. requires the updater signing key (no unsigned or fake-signed release is ever produced),
+#   4. builds the NSIS installer, signs the updater artifacts and creates a DRAFT GitHub release
+#      with latest.json,
+#   5. verifies the artifacts and tests install/uninstall on the clean runner,
+#   6. uploads SHA256SUMS.txt.
+# The draft is published by a maintainer after review. If any step fails, nothing is published.
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Tag and app version must match
+        shell: pwsh
+        run: ./scripts/check-version.ps1 -Tag "${{ github.ref_name }}"
+
+      - run: npm ci
+      - run: npm test
+      - name: Rust tests
+        working-directory: src-tauri
+        run: cargo test --locked
+
+      - name: Updater signing key must be configured
+        shell: pwsh
+        env:
+          KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+        run: |
+          if (-not $env:KEY) { Write-Error "The repository secret TAURI_SIGNING_PRIVATE_KEY is not set. See docs/RELEASING.md."; exit 1 }
+
+      - name: Release notes
+        id: notes
+        shell: pwsh
+        run: |
+          $v = "${{ github.ref_name }}".TrimStart('v')
+          $text = Get-Content CHANGELOG.md -Raw
+          $m = [regex]::Match($text, "(?ms)^## \[$([regex]::Escape($v))\][^\n]*\n(.*?)(?=^## \[|^\[Unreleased\]:|\z)")
+          $body = if ($m.Success) { $m.Groups[1].Value.Trim() } else { "See CHANGELOG.md." }
+          $body += "`n`nVerify downloads with SHA256SUMS.txt. Installer: per-user, no administrator rights."
+          "body<<EOF_NOTES" | Out-File -Append -Encoding utf8 $env:GITHUB_OUTPUT
+          $body | Out-File -Append -Encoding utf8 $env:GITHUB_OUTPUT
+          "EOF_NOTES" | Out-File -Append -Encoding utf8 $env:GITHUB_OUTPUT
+
+      - name: Build, sign and create the draft release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "Ivily Center ${{ github.ref_name }}"
+          releaseBody: ${{ steps.notes.outputs.body }}
+          releaseDraft: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          includeUpdaterJson: true
+          updaterJsonPreferNsis: true
+          args: --config src-tauri/tauri.release.conf.json
+
+      - name: Verify artifacts
+        shell: pwsh
+        run: |
+          $v = "${{ github.ref_name }}".TrimStart('v')
+          $dir = "src-tauri/target/release/bundle/nsis"
+          $exe = Join-Path $dir "Ivily Center_${v}_x64-setup.exe"
+          if (-not (Test-Path $exe)) { Write-Error "Installer not found: $exe"; exit 1 }
+          if (-not (Test-Path "$exe.sig")) { Write-Error "Updater signature not found"; exit 1 }
+          if ((Get-Item $exe).Length -lt 1MB) { Write-Error "Installer is unexpectedly small"; exit 1 }
+          $app = "src-tauri/target/release/ivily-center.exe"
+          $appVer = (Get-Item $app).VersionInfo.ProductVersion
+          if (-not $appVer.StartsWith($v.Split('-')[0])) { Write-Error "App version ($appVer) does not match the tag ($v)"; exit 1 }
+          Write-Host "Installer: $exe ($([math]::Round((Get-Item $exe).Length/1MB,2)) MB), app version $appVer"
+
+      - name: Install and uninstall on the clean runner
+        shell: pwsh
+        run: |
+          $v = "${{ github.ref_name }}".TrimStart('v')
+          ./scripts/test-installer.ps1 -Installer "src-tauri/target/release/bundle/nsis/Ivily Center_${v}_x64-setup.exe" -ExpectedVersion $v
+
+      - name: SHA-256 checksums
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $files = Get-ChildItem src-tauri/target/release/bundle/nsis -File
+          # GitHub replaces spaces in uploaded asset names with dots; the sums use the published names.
+          $lines = $files | ForEach-Object { "{0}  {1}" -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower(), ($_.Name -replace ' ', '.') }
+          $lines | Set-Content -Encoding utf8 SHA256SUMS.txt
+          Get-Content SHA256SUMS.txt
+          gh release upload "${{ github.ref_name }}" SHA256SUMS.txt --clobber
