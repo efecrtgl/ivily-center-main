@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { exportText } from '../../core/exportText.js';
 import { Icon } from '../../icons/Icon.jsx';
 import { useStore } from '../../core/store.js';
 import { clearChannel, formatEntry, loadChannels, openChannel, outputStore } from '../../core/output.js';
@@ -9,6 +10,13 @@ import { createStore } from '../../core/store.js';
 export const outputUi = createStore({ channel: 'app' });
 
 const LEVELS = ['trace', 'info', 'warn', 'error'];
+
+/** Save the whole selected channel (already redacted by the backend) to a file. */
+export function exportOutputChannel(channel = outputUi.get().channel) {
+  const lines = outputStore.get().entries[channel] || [];
+  const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+  return exportText({ title: 'Save Output As', suggestedName: `ivily-${channel}-${stamp}.log`, extension: 'log', content: `${lines.map(formatEntry).join('\n')}\n` });
+}
 
 export function OutputView() {
   const { channels, entries } = useStore(outputStore);
@@ -69,6 +77,9 @@ export function OutputView() {
         </label>
         <button type="button" className="btn btn--ghost btn--icon" title="Copy visible output" aria-label="Copy visible output" onClick={copy}>
           <Icon name="copy" size={14} />
+        </button>
+        <button type="button" className="btn btn--ghost btn--icon" title="Save output as…" aria-label="Save output as" onClick={() => exportOutputChannel(channel)}>
+          <Icon name="file-plus" size={14} />
         </button>
         <button type="button" className="btn btn--ghost btn--icon" title="Clear channel" aria-label="Clear channel" onClick={() => clearChannel(channel)}>
           <Icon name="trash" size={14} />

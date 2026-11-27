@@ -55,6 +55,8 @@ All notable changes to this project are documented here. The format follows
 - Phase 11: tasks from `.ivily/tasks.json`, `.vscode/tasks.json`, npm scripts and Cargo; trust-gated
   with approval of the exact command on first run; dependencies (sequence/parallel), terminate,
   rerun, history and problem matchers (rustc, tsc, gcc, eslint, msCompile).
+- Phase 12: Problems panel (language-server diagnostics and task problems, filters, F8 navigation,
+  status-bar counts, running-task indicator) and *Save Output As…* with confirmed overwrite.
 
 ### Fixed
 - The main window no longer grows by its border width on every launch (inner size is persisted).

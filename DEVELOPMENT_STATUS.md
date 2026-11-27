@@ -7,7 +7,7 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 
 ## Current phase
 
-**Phase 11 — Tasks:** done. **Next: Phase 12 — Problems panel and Output export.**
+**Phase 12 — Problems and Output export:** done. **Next: Phase 13 — Settings import/export, user themes and icon packs.**
 
 ## Phases
 
@@ -25,7 +25,8 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 | 9 | Git | done | `e4179dc` backend, then UI. [docs/GIT.md](docs/GIT.md) |
 | 10 | Search, Quick Open, Command Palette, shortcuts | done | backend + UI commits. [docs/SEARCH.md](docs/SEARCH.md) |
 | 11 | Tasks | done | [docs/TASKS.md](docs/TASKS.md) |
-| 12–25 | See plan | planned | |
+| 12 | Problems panel, output export | done | [docs/PROBLEMS.md](docs/PROBLEMS.md) |
+| 13–25 | See plan | planned | |
 
 ## Phase 3 deliverables
 

@@ -28,6 +28,8 @@ import { restartServers } from '../features/lsp/manager.js';
 import { TerminalView } from '../features/terminal/TerminalView.jsx';
 import { ScmView } from '../features/git/ScmView.jsx';
 import { SearchView } from '../features/search/SearchView.jsx';
+import { ProblemsView, goToProblem } from '../features/problems/ProblemsView.jsx';
+import { exportOutputChannel } from '../features/output/OutputView.jsx';
 import { configureTasks, pickAndRun, pickAndTerminate, rerunLast, revokeApprovals as revokeTaskApprovals, showHistory as showTaskHistory } from '../features/tasks/model.js';
 import { searchStore } from '../features/search/model.js';
 import { openCommandPalette, openQuickOpen } from '../features/palette/quickOpen.js';
@@ -91,6 +93,7 @@ export function registerWorkbenchContributions() {
   registerView({ id: 'scm', title: 'Source Control', icon: 'git', location: 'sidebar', component: ScmView, order: 20, command: 'git.showView' });
   registerView({ id: 'settings', title: 'Settings', icon: 'settings', location: 'sidebar', component: SettingsView, order: 100, group: 'bottom', command: 'preferences.openSettings' });
   registerView({ id: 'terminal', title: 'Terminal', icon: 'terminal', location: 'panel', component: TerminalView, order: 10, command: 'terminal.toggle' });
+  registerView({ id: 'problems', title: 'Problems', icon: 'warning', location: 'panel', component: ProblemsView, order: 5, command: 'workbench.showProblems' });
   registerView({ id: 'output', title: 'Output', icon: 'output', location: 'panel', component: OutputView, order: 20, command: 'workbench.showOutput' });
 
   // ── Commands ───────────────────────────────────────────────────────────────
@@ -191,6 +194,10 @@ export function registerWorkbenchContributions() {
     { id: 'tasks.history', title: 'Show Task History', category: 'Tasks', when: 'workspaceOpen', run: () => showTaskHistory() },
     { id: 'tasks.configure', title: 'Configure Tasks (.ivily/tasks.json)', category: 'Tasks', when: 'workspaceOpen', run: () => configureTasks() },
     { id: 'tasks.revokeApprovals', title: 'Revoke Task Approvals', category: 'Tasks', when: 'workspaceOpen', run: () => revokeTaskApprovals() },
+    { id: 'workbench.showProblems', title: 'Show Problems', category: 'View', icon: 'warning', run: () => showPanelView('problems') },
+    { id: 'problems.next', title: 'Go to Next Problem', category: 'Go', run: () => goToProblem(1) },
+    { id: 'problems.previous', title: 'Go to Previous Problem', category: 'Go', run: () => goToProblem(-1) },
+    { id: 'output.export', title: 'Save Output As…', category: 'Output', run: () => exportOutputChannel() },
     { id: 'git.showView', title: 'Show Source Control', category: 'Git', icon: 'git', run: () => updateLayout({ sidebarVisible: true, sidebarView: 'scm' }) },
     { id: 'git.refresh', title: 'Refresh', category: 'Git', icon: 'refresh', when: 'workspaceOpen', run: () => loadRepos() },
     { id: 'git.checkout', title: 'Checkout to…', category: 'Git', when: 'gitRepository', run: () => { const r = activeRepo(); return r && gitCheckout(r.root); } },
@@ -247,6 +254,9 @@ export function registerWorkbenchContributions() {
     { key: 'Ctrl+`', command: 'terminal.toggle' },
     { key: 'Ctrl+Shift+G', command: 'git.showView' },
     { key: 'Ctrl+P', command: 'workbench.quickOpen' },
+    { key: 'Ctrl+Shift+M', command: 'workbench.showProblems' },
+    { key: 'F8', command: 'problems.next' },
+    { key: 'Shift+F8', command: 'problems.previous' },
     { key: 'Ctrl+Shift+B', command: 'tasks.build' },
     { key: 'Ctrl+E', command: 'workbench.quickOpen' },
     { key: 'Ctrl+Shift+P', command: 'workbench.commandPalette' },

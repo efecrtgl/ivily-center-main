@@ -212,6 +212,11 @@ export const terminalKill = (id) => call('terminal_kill', { id });
 /** Opens an http(s) link in the default browser (validated by the backend). */
 export const openExternalUrl = (url) => call('open_external_url', { url });
 
+// ── Export ───────────────────────────────────────────────────────────────────
+/** Native save dialog for generated text; may return `{ kind: 'confirmOverwrite', token, path }`. */
+export const saveTextDialog = (title, suggestedName, extension, content) => call('save_text_dialog', { title, suggestedName, extension, content });
+export const saveTextConfirm = (token, content) => call('save_text_confirm', { token, content });
+
 // ── Tasks (running requires the taskExecution trust capability + approval) ──
 export const tasksList = () => call('tasks_list');
 /** Starts one task in a terminal session; `approve` records the user's approval of its command. */

@@ -11,6 +11,27 @@ import { showPage, workspaceStore } from '../workspace/store.js';
 import { LEVEL_LABEL } from '../workspace/trust.js';
 import { EditorStatus } from '../features/editor/EditorStatus.jsx';
 import { activeRepo, checkout as gitCheckout, gitStore } from '../features/git/model.js';
+import { useProblems } from '../features/problems/ProblemsView.jsx';
+import { countProblems } from '../features/problems/model.js';
+import { showPanelView } from '../core/layout.js';
+import { tasksStore } from '../features/tasks/model.js';
+
+function ProblemsStatus() {
+  const c = countProblems(useProblems());
+  const running = useStore(tasksStore, (s) => Object.keys(s.running).length);
+  return (
+    <>
+      <button type="button" className="statusbar__item" title="Problems (Ctrl+Shift+M)" aria-label={`${c.error} errors, ${c.warning} warnings`} onClick={() => showPanelView('problems')}>
+        <Icon name="error" size={13} /> {c.error} <Icon name="warning" size={13} /> {c.warning}
+      </button>
+      {running > 0 && (
+        <button type="button" className="statusbar__item" title="Running tasks — click to stop one" onClick={() => import('../core/commands.js').then((m) => m.executeCommand('tasks.terminate'))}>
+          <Icon name="terminal" size={13} /> {running} task{running === 1 ? '' : 's'}
+        </button>
+      )}
+    </>
+  );
+}
 
 export function StatusBar() {
   const unread = useStore(notificationStore, unreadCount);
@@ -48,6 +69,7 @@ Click to show the launcher`} onClick={() => showPage('launcher')}>
             {(gitStatus.ahead > 0 || gitStatus.behind > 0) && <span className="subtle"> ↓{gitStatus.behind} ↑{gitStatus.ahead}</span>}
           </button>
         )}
+        {ws && <ProblemsStatus />}
         {storage === 'memory' && (
           <span className="statusbar__item statusbar__item--warning" title="Settings and state are not being saved this session. See notifications for details.">
             <Icon name="warning" size={13} /> Not saving

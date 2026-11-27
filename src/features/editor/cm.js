@@ -137,6 +137,6 @@ export function buildExtensions(o, language, extra = [], lsp = []) {
     compartments.font.of(editorTheme(o.dark)),
     compartments.extra.of(extra),
     compartments.lsp.of(o.large ? [] : lsp),
-    keymap.of([...closeBracketsKeymap, ...defaultKeymap, ...searchKeymap, ...historyKeymap, ...foldKeymap, ...completionKeymap, ...lintKeymap, indentWithTab]),
+    keymap.of([...closeBracketsKeymap, ...defaultKeymap, ...searchKeymap, ...historyKeymap, ...foldKeymap, ...completionKeymap, ...lintKeymap.filter((k) => k.key !== 'Mod-Shift-m'), indentWithTab]),
   ];
 }
