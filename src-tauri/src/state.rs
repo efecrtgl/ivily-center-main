@@ -82,8 +82,19 @@ impl AppState {
         output.register("debug", "Debug").expect("valid channel id");
         output.info("app", format!("{} {} starting", crate::APP_NAME, crate::APP_VERSION));
 
+        // A restore staged in the previous session is applied before the database is opened.
+        let restored = crate::backup::apply_pending(dir);
         let opened = db::open_app_db(dir);
         let mut issues = opened.issues;
+        match restored {
+            Some(Ok(msg)) => issues.push(crate::core::StartupIssue::new(crate::core::Severity::Info, "backup_restored", msg)),
+            Some(Err(e)) => issues.push(crate::core::StartupIssue::new(
+                crate::core::Severity::Error,
+                "backup_restore_failed",
+                format!("The staged restore could not be applied: {e}. Your data was not changed; the staged files are kept in pending-restore."),
+            )),
+            None => {}
+        }
         for i in &issues {
             output.log("database", level_of(i), &i.message);
         }

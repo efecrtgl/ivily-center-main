@@ -4,6 +4,7 @@
 //! subsystem modules (`db`, `settings`, `output`, `workspace`, ...) do not depend on Tauri.
 
 pub mod app_state;
+pub mod backup;
 pub mod commands;
 pub mod core;
 pub mod dap;
@@ -160,6 +161,16 @@ pub fn run() {
             commands::update::update_check,
             commands::update::update_install,
             commands::update::update_info,
+            commands::backup::backup_list,
+            commands::backup::backup_create,
+            commands::backup::backup_verify,
+            commands::backup::backup_restore,
+            commands::backup::backup_cancel_restore,
+            commands::backup::backup_delete,
+            commands::backup::backup_export,
+            commands::backup::backup_export_confirm,
+            commands::backup::backup_import,
+            commands::backup::app_restart,
             commands::tasks::tasks_list,
             commands::tasks::task_run,
             commands::tasks::tasks_revoke_approvals,

@@ -7,7 +7,7 @@ use serde::Serialize;
 #[derive(Debug, thiserror::Error)]
 pub enum AppError {
     /// User input failed validation. `code` is a stable identifier translated by the UI.
-    #[error("validation error: {code}")]
+    #[error("{detail}")]
     Validation { code: &'static str, detail: String },
 
     #[error("not found: {0}")]
