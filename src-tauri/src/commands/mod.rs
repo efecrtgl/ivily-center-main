@@ -2,6 +2,7 @@
 //! subsystem module. No business logic lives here.
 
 pub mod app;
+pub mod fs;
 pub mod output;
 pub mod settings;
 pub mod ui_state;

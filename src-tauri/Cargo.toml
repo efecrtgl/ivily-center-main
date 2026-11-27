@@ -27,6 +27,10 @@ dirs = "6"
 regex = "1"
 dunce = "1"
 sha2 = "0.10"
+ignore = "0.4"
+globset = "0.4"
+notify = "9"
+trash = "5"
 
 [dev-dependencies]
 tempfile = "3"

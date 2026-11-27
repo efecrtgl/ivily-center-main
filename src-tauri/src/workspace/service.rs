@@ -71,6 +71,7 @@ fn activate(state: &AppState, label: &str, ws: OpenWorkspace) -> AppResult<Works
     );
     let info = info(state, &ws)?;
     state.workspaces.lock().insert(label.to_string(), ws);
+    state.workspace_changed(label);
     Ok(info)
 }
 
@@ -92,8 +93,10 @@ pub fn open_record(state: &AppState, label: &str, id: &str) -> AppResult<Workspa
 }
 
 pub fn close(state: &AppState, label: &str) -> AppResult<()> {
-    if let Some(ws) = state.workspaces.lock().remove(label) {
+    let closed = state.workspaces.lock().remove(label);
+    if let Some(ws) = closed {
         state.output.info("workspace", format!("closed '{}'", ws.record.name));
+        state.workspace_changed(label);
     }
     session::set_last_workspace(&state.db.lock(), None)
 }

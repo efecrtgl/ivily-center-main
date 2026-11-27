@@ -28,6 +28,11 @@ pub enum SettingType {
     String {
         max_len: usize,
     },
+    /// A list of strings (e.g. glob patterns).
+    StringList {
+        max_items: usize,
+        max_len: usize,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -35,6 +40,7 @@ pub enum DefaultValue {
     Bool(bool),
     Int(i64),
     Str(&'static str),
+    List(&'static [&'static str]),
 }
 
 impl DefaultValue {
@@ -43,6 +49,7 @@ impl DefaultValue {
             DefaultValue::Bool(b) => json!(b),
             DefaultValue::Int(i) => json!(i),
             DefaultValue::Str(s) => json!(s),
+            DefaultValue::List(l) => json!(l),
         }
     }
 }
@@ -121,6 +128,26 @@ pub fn validate(def: &SettingDef, value: &Value) -> AppResult<Value> {
             } else {
                 Err(bad(format!("must be at most {max_len} characters without control characters")))
             }
+        }
+        SettingType::StringList { max_items, max_len } => {
+            let arr = value.as_array().ok_or_else(|| bad("expected a list of strings".into()))?;
+            if arr.len() > max_items {
+                return Err(bad(format!("at most {max_items} entries")));
+            }
+            let mut out = Vec::with_capacity(arr.len());
+            for v in arr {
+                let s = v.as_str().ok_or_else(|| bad("every entry must be a string".into()))?.trim();
+                if s.is_empty() {
+                    continue;
+                }
+                if s.chars().count() > max_len || s.chars().any(|c| c.is_control()) {
+                    return Err(bad(format!(
+                        "entries must be at most {max_len} characters without control characters"
+                    )));
+                }
+                out.push(Value::from(s));
+            }
+            Ok(Value::Array(out))
         }
     }
 }
@@ -314,6 +341,8 @@ pub struct SettingSchemaDto {
     pub max: Option<i64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub max_length: Option<usize>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub max_items: Option<usize>,
     pub default: Value,
     pub scopes: Vec<&'static str>,
 }
@@ -328,6 +357,7 @@ pub fn schema_dto() -> Vec<SettingSchemaDto> {
     SETTINGS
         .iter()
         .map(|d| {
+            let mut max_items = None;
             let (ty, options, min, max, max_length) = match d.ty {
                 SettingType::Bool => ("boolean", None, None, None, None),
                 SettingType::Enum(o) => (
@@ -339,6 +369,10 @@ pub fn schema_dto() -> Vec<SettingSchemaDto> {
                 ),
                 SettingType::Integer { min, max } => ("integer", None, Some(min), Some(max), None),
                 SettingType::String { max_len } => ("string", None, None, None, Some(max_len)),
+                SettingType::StringList { max_items: n, max_len } => {
+                    max_items = Some(n);
+                    ("stringList", None, None, None, Some(max_len))
+                }
             };
             SettingSchemaDto {
                 key: d.key,
@@ -350,6 +384,7 @@ pub fn schema_dto() -> Vec<SettingSchemaDto> {
                 min,
                 max,
                 max_length,
+                max_items,
                 default: d.default.to_json(),
                 scopes: match d.scopes {
                     ScopeSet::User => vec!["user"],

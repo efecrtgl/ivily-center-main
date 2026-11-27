@@ -8,6 +8,7 @@ pub mod commands;
 pub mod core;
 pub mod db;
 pub mod error;
+pub mod fs;
 pub mod output;
 pub mod settings;
 pub mod state;
@@ -31,6 +32,8 @@ pub fn run() {
             st.output.set_sink(Box::new(move |entry| {
                 let _ = handle.emit(commands::events::OUTPUT_ENTRY, entry);
             }));
+            let hook_app = app.handle().clone();
+            let _ = st.workspace_hook.set(Box::new(move |label| commands::fs::sync_watcher(&hook_app, label)));
             if let Some(w) = app.get_webview_window("main") {
                 window::runtime::restore_and_show(&w, &st);
             }
@@ -76,6 +79,17 @@ pub fn run() {
             commands::workspace::session_load,
             commands::workspace::session_save,
             commands::workspace::session_ready,
+            commands::fs::fs_list,
+            commands::fs::fs_create_file,
+            commands::fs::fs_create_dir,
+            commands::fs::fs_rename,
+            commands::fs::fs_copy,
+            commands::fs::fs_move,
+            commands::fs::fs_duplicate,
+            commands::fs::fs_trash,
+            commands::fs::fs_delete_permanently,
+            commands::fs::fs_properties,
+            commands::fs::fs_reveal,
         ])
         .build(tauri::generate_context!())
         .expect("error while building Ivily Center");

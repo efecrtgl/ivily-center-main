@@ -14,6 +14,9 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
+/// Callback receiving a window label.
+pub type WorkspaceHook = Box<dyn Fn(&str) + Send + Sync>;
+
 pub struct AppState {
     pub db: Mutex<Connection>,
     pub db_health: DbHealth,
@@ -32,6 +35,19 @@ pub struct AppState {
     /// Folder or workspace file passed on the command line (consumed by the first startup call).
     pub cli_path: Mutex<Option<PathBuf>>,
     pub startup_done: Mutex<bool>,
+    /// File watchers per window (replaced whenever the window's workspace changes).
+    pub watchers: Mutex<HashMap<String, crate::fs::watch::WatchHandle>>,
+    /// Called with a window label whenever that window's workspace changes (opened, switched,
+    /// closed, reloaded). Set once by the Tauri layer to restart per-workspace services.
+    pub workspace_hook: std::sync::OnceLock<WorkspaceHook>,
+}
+
+impl AppState {
+    pub fn workspace_changed(&self, label: &str) {
+        if let Some(hook) = self.workspace_hook.get() {
+            hook(label);
+        }
+    }
 }
 
 impl AppState {
@@ -101,6 +117,8 @@ impl AppState {
             startup_health,
             cli_path: Mutex::new(cli_path),
             startup_done: Mutex::new(false),
+            watchers: Mutex::new(HashMap::new()),
+            workspace_hook: std::sync::OnceLock::new(),
         }
     }
 }
