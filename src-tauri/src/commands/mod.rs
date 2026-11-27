@@ -7,6 +7,7 @@ pub mod export;
 pub mod fs;
 pub mod git;
 pub mod lsp;
+pub mod notes;
 pub mod output;
 pub mod search;
 pub mod settings;
