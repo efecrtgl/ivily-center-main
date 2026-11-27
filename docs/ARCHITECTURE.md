@@ -101,8 +101,9 @@ workspace (`src-tauri/crates/*`) when a subsystem's API stabilises (expected fir
 * Deletes go to the Recycle Bin by default; permanent delete requires explicit confirmation.
 
 ### 4.3 Workspace Trust
-A workspace is **restricted** until the user trusts it (per folder, stored in the app DB, never in
-the workspace). In restricted mode:
+Implemented in Phase 3 — see [WORKSPACES.md](WORKSPACES.md#workspace-trust) (per folder and per
+capability, folder or folder-and-children scope, session or remembered, revocable). A workspace is
+**restricted** until the user trusts it (stored in the app DB, never in the workspace). In restricted mode:
 
 | Allowed | Blocked |
 |---|---|
@@ -155,7 +156,7 @@ with a clear error instead of being downgraded.
   which is why themes are more than colour maps. CodeMirror and xterm.js themes are derived from
   the same tokens.
 
-## 7. Implemented so far (Phase 2)
+## 7. Implemented so far (Phases 2–3)
 
 | Subsystem | Implementation | Docs |
 |---|---|---|
@@ -165,6 +166,7 @@ with a clear error instead of being downgraded.
 | Window manager | `src-tauri/src/window/`, `src/shell/TitleBar.jsx`, `src/platform/window.js` | below |
 | Theme engine, icons | `src/theme/`, `src/icons/` | [THEMES.md](THEMES.md) |
 | Commands, keybindings, views, notifications | `src/core/` | [COMMANDS.md](COMMANDS.md) |
+| Workspaces, launcher, Workspace Trust, sessions (Phase 3) | `src-tauri/src/workspace/`, `src/workspace/`, `src/features/launcher/`, `src/features/trust/` | [WORKSPACES.md](WORKSPACES.md) |
 
 **Window manager.** The window is frameless (`decorations: false`) with the native shadow and native
 edge resizing. It starts hidden; Rust validates saved bounds against the monitors' *work areas*

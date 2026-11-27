@@ -23,7 +23,8 @@ registerCommand({ id: 'workbench.togglePanel', title: 'Toggle Panel', category: 
 Commands and keybindings may be conditional on context keys:
 `!`, `&&`, `||`, `==`, `!=`, parentheses, quoted or bare literals. Unknown keys are falsy; a malformed
 clause evaluates to false and is logged. Current keys: `sidebarVisible`, `panelVisible`,
-`activeSidebarView`, `activePanel`, `notificationCenterOpen`.
+`activeSidebarView`, `activePanel`, `notificationCenterOpen`, `workspaceOpen`, `workspaceKind`,
+`workspaceFavorite`, `workspaceTrusted`, `workspaceTrustLevel` and `workspaceTrust.<capability>`.
 
 ## Keybindings (`core/keybindings.js`)
 
@@ -45,6 +46,8 @@ clause evaluates to false and is logged. Current keys: `sidebarVisible`, `panelV
 | Ctrl+= / Ctrl+NumpadAdd | View: Increase Interface Size |
 | Ctrl+- / Ctrl+NumpadSubtract | View: Decrease Interface Size |
 | Ctrl+0 | View: Reset Interface Size |
+| Ctrl+Alt+O | Workspace: Open Folder… |
+| Ctrl+R | Workspace: Show Launcher / Recent Workspaces |
 
 Browser shortcuts that make no sense in an IDE (F5/Ctrl+R reload, Ctrl+P print, Ctrl+F page find,
 Ctrl+S save page, Ctrl+U view source) are suppressed. In release builds the browser context menu is

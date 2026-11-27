@@ -7,7 +7,7 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 
 ## Current phase
 
-**Phase 2 — Core & custom window:** done. **Next: Phase 3 — Workspace system and launcher** (not started).
+**Phase 3 — Workspace system and launcher:** done. **Next: Phase 4 — File explorer and filesystem operations** (not started).
 
 ## Phases
 
@@ -15,37 +15,39 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 |---|---|---|---|
 | 0 | Audit, architecture, planning | done | [docs/DEVELOPMENT_PLAN.md](docs/DEVELOPMENT_PLAN.md), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
 | 1 | Repository infrastructure | done | Scaffold, community files, CI. Release workflow deferred to Phase 25 (needs updater signing). |
-| 2 | Core & custom window | done | Three commits: `ffc8066` backend foundation, `58b9731` UI core, then window & shell (see git log). |
-| 3 | Workspace system & launcher | planned | Includes Workspace Trust (roadmap change, plan §3). |
+| 2 | Core & custom window | done | `ffc8066`, `58b9731`, `7725969`. Window-size regression fixed in Phase 3 (`3bda5ed`). |
+| 3 | Workspace system & launcher | done | `52f9bfc` backend, `611e072` UI state, `3bda5ed` window fix, `6d6ae4e` UI, then docs. [docs/WORKSPACES.md](docs/WORKSPACES.md) |
 | 4–25 | See plan | planned | |
 
-## Phase 2 deliverables
+## Phase 3 deliverables
 
-| Area | Delivered | Not included (belongs to a later phase) |
+| Area | Delivered | Not included (later phase) |
 |---|---|---|
-| Database | SQLite, transactional migrations, pre-migration backup, corrupt/newer-schema handling, ownership rules ([DATABASE.md](docs/DATABASE.md)) | Backup/restore UI, export/import (Phase 20) |
-| Settings | Rust-validated typed registry, default < user < workspace resolution (workspace storage and resolution tested; no workspaces exist yet), key-rename migration, searchable Settings view with reset | Settings import/export, keybinding editor (Phases 10, 13) |
-| Themes | Token schema, 4 style layers, 6 themes, 2 icon packs, bundled fonts ([THEMES.md](docs/THEMES.md)) | File-type/folder icons (Phase 4), CodeMirror/xterm theme adapters (Phases 5, 8), custom theme files (Phase 16) |
-| Commands | Registry, `when` clauses, keybindings with overrides/removals/conflicts, 22 commands (16 workbench + 6 theme commands) ([COMMANDS.md](docs/COMMANDS.md)) | Command Palette UI, keybinding editor (Phase 10) |
-| Output | Redacted bounded channels, Output panel | Export, per-subsystem channels (added with each subsystem) |
-| Notifications | Store, toasts, notification centre, level / do-not-disturb / timeout settings | Per-category notification rules |
-| Window | Frameless window, custom title bar and controls, drag region, bounds persistence with monitor/work-area clamping, context-aware title, workbench layout with persisted resizable regions | Multi-window (Phase 22) |
+| Opening | Folder and `*.ivily-workspace` workspaces via backend-owned dialogs, recents, discovery tokens and the command line; validated canonical paths; duplicate collapse; per-window workspace context | Second-instance forwarding of command-line paths, multi-window (Phase 22) |
+| Registry | Recents, favorites, groups, display names, availability checks with timeout, relocation, removal that never touches disk | Project notes (Phase 14), Git/health summaries in the launcher (Phase 9) |
+| Launcher | Optional editor-area page, filter, favorites/recent sections, project discovery, startup choice | Project templates / project creation |
+| Settings | Workspace layer (DB for folders, file for workspace files), User/Workspace tabs, per-layer values, conflict handling | More workspace-capable settings arrive with their features (editor, files, terminal …) |
+| Workspace files | Format v1, relative folders, unknown-field preservation, explicit Save As with overwrite confirmation, atomic hash-checked writes, reload | Editing folder lists in the UI |
+| Trust | Per folder and capability, folder/parent scope, session/remembered, remembered denial, revocation, prompt, banner, status item, trust manager, backend gate `workspace_untrusted` | Nothing executes yet; subsystems from Phases 7, 8, 11, 15, 16 must call the gate |
+| Sessions | Per-workspace documents with participants (layout now), previous-version fallback, flush on switch/close, crash detection, safe mode | Editor/explorer/terminal participants (their phases) |
 
-## Architectural decisions
+## Architectural decisions (Phase 3)
 
-See [ARCHITECTURE.md §8](docs/ARCHITECTURE.md#8-key-technology-decisions-adr-summary). Phase 2 additions:
-
-* Settings schema lives in Rust only; the UI receives it over IPC (single source of truth).
-* Themes = tokens + style layer + icon pack; features use tokens and semantic class names only.
-* Keybindings use physical key codes (layout-independent).
-* UI-writable state is namespaced (`ui.*`); output channels have a UI-writable allow-list.
+* The webview never supplies filesystem paths; locations come from backend dialogs, ids, opaque tokens or the command line.
+* Workspace-scoped commands resolve the workspace from the calling window (multi-window ready).
+* Trust is keyed by folder path and stored only in the app database; workspace files can never carry trust.
+* One serialized transition (flush → backend → reset → epoch → publish → restore) for all workspace changes.
+* Features persist workspace UI state through session participants rather than on their own.
+* See also [ARCHITECTURE.md §8](docs/ARCHITECTURE.md#8-key-technology-decisions-adr-summary).
 
 ## Known issues / limitations
 
 * Windows 11 Snap Layouts flyout is not shown when hovering the custom maximize button.
-* The Explorer view is an honest empty state; folders cannot be opened until Phases 3–4.
-* `appearance.reduceMotion = system` is read at startup and when the setting changes; a change of the
-  Windows animation setting while the app runs is not picked up live.
+* The Explorer lists workspace folders only; browsing files arrives in Phase 4.
+* A command-line path given to a second launch starts a second instance (no single-instance forwarding yet).
+* Trust is bound to a path: if a trusted folder is deleted and another folder is created at the same path, it is trusted too.
+* A workspace file's folder list cannot be edited in the UI yet (edit the file and use Reload Workspace File).
+* `appearance.reduceMotion = system` is not re-read when the Windows animation setting changes while running.
 * Ivily Envora's IEP envelope differs from IEP 0.1 (adapter planned for Phase 17).
 * `gh` CLI is not installed on the development machine; pushes are verified with `git ls-remote`.
 
@@ -53,12 +55,13 @@ See [ARCHITECTURE.md §8](docs/ARCHITECTURE.md#8-key-technology-decisions-adr-su
 
 | Check | Result |
 |---|---|
-| `npm test` (Vitest) | 10 files, 65 tests passed |
+| `npm test` (Vitest) | 12 files, 81 tests passed |
 | `npm run build` | ok |
 | `cargo fmt --check` | ok |
 | `cargo clippy --all-targets --locked -- -D warnings` | ok |
-| `cargo test --locked` | 32 passed |
-| `npm run tauri dev` smoke run | App started without errors; database created at schema v1; native title set; window bounds persisted on close. Visual inspection of the rendered UI was **not** performed. |
+| `cargo test --locked` | 73 passed |
+| Real-app runs (debug build, no visual inspection) | Verified: v1→v2 migration of an existing database with backup; command-line folder opened as a workspace (title, registry record, last-workspace pointer, session saved on close, **no automatic trust**, nothing written into the folder); last workspace restored on a plain start; deleted folder → launcher with the record kept; killed process → unclean-exit marker; clean exit recorded; window size stable across launches. |
+| Not verified in the real app | Native dialogs (open/save/locate/discover), the trust dialog and launcher interactions, and the rendered appearance — covered by unit/component tests only. |
 
 CI results: see GitHub Actions.
 

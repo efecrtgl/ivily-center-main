@@ -23,3 +23,15 @@ All notable changes to this project are documented here. The format follows
   - Frameless window with custom title bar, persisted bounds clamped to connected monitors,
     workbench layout (activity bar, side bar, panel, status bar) with resizable, persisted regions,
     searchable Settings view and theme picker.
+- Phase 3: workspaces.
+  - Folder and `*.ivily-workspace` workspaces with validated, canonical paths, duplicate detection,
+    availability checks, relocation, favorites, groups and display names.
+  - Optional launcher with recents, favorites, filter, project discovery and startup choice.
+  - Workspace-level settings (database for folders, file for workspace files) with User/Workspace tabs.
+  - Explicit, atomic, conflict-checked workspace file writing; never overwrites without confirmation.
+  - Workspace Trust: per-folder, per-capability, folder or parent scope, session or remembered,
+    remembered denial, revocation, trust manager, Restricted Mode banner, backend enforcement gate.
+  - Per-workspace sessions with participants, previous-version fallback, crash detection and safe mode.
+
+### Fixed
+- The main window no longer grows by its border width on every launch (inner size is persisted).

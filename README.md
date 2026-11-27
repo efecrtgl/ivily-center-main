@@ -4,9 +4,10 @@ Ivily Center is an open-source, Windows-first development environment built with
 React and CodeMirror 6. It is designed to be a genuinely usable standalone IDE, and the optional
 integration hub of the Ivily ecosystem (Ivily Optimizer, Envora, Portly and Structura).
 
-> **Status: early development.** The application foundation exists: custom window, workbench
-> layout, settings, themes, commands, output and notifications. IDE features (workspaces, file
-> explorer, editor, terminal, Git, …) are not implemented yet. See
+> **Status: early development.** Implemented: custom window and workbench, settings, themes,
+> commands, output, notifications, workspaces (folders and workspace files), the launcher, Workspace
+> Trust and session restore. Not implemented yet: file explorer contents, editor, terminal, Git and
+> the other IDE features. See
 > [DEVELOPMENT_STATUS.md](DEVELOPMENT_STATUS.md) for what exists today.
 
 ## Principles
