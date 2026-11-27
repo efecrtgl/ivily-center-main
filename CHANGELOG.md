@@ -67,6 +67,8 @@ All notable changes to this project are documented here. The format follows
 - Phase 16: declarative extensions (themes, icon packs, snippets, shortcuts, file associations)
   installed from a folder after a contribution preview; enable/disable/remove; workspace
   recommendations shown, never auto-installed.
+- Phase 17: Ivily Ecosystem Protocol client (IEP 0.1 + Envora adapter, version-gated discovery,
+  allowlisted read-only requests) and Center's own `--iep describe` / `--iep request`.
 
 ### Fixed
 - The main window no longer grows by its border width on every launch (inner size is persisted).

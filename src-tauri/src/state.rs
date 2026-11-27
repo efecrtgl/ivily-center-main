@@ -50,6 +50,8 @@ pub struct AppState {
     pub dap_next: std::sync::atomic::AtomicU64,
     /// Detected debug adapters (cached).
     pub dap_adapters: Mutex<Option<Vec<crate::dap::Adapter>>>,
+    /// Last known Ivily module status (IEP).
+    pub modules: Mutex<Option<Vec<crate::iep::ModuleStatus>>>,
     pub terminals: Mutex<HashMap<u64, crate::terminal::Session>>,
     pub terminal_next: std::sync::atomic::AtomicU64,
     pub terminal_profiles: Mutex<Option<Vec<crate::terminal::Profile>>>,
@@ -145,6 +147,7 @@ impl AppState {
             dap: Mutex::new(HashMap::new()),
             dap_next: std::sync::atomic::AtomicU64::new(1),
             dap_adapters: Mutex::new(None),
+            modules: Mutex::new(None),
             terminals: Mutex::new(HashMap::new()),
             terminal_next: std::sync::atomic::AtomicU64::new(1),
             terminal_profiles: Mutex::new(None),

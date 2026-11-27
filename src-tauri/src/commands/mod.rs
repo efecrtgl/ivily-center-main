@@ -9,6 +9,7 @@ pub mod extensions;
 pub mod fs;
 pub mod git;
 pub mod lsp;
+pub mod modules;
 pub mod notes;
 pub mod output;
 pub mod search;

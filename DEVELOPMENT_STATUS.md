@@ -7,7 +7,7 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 
 ## Current phase
 
-**Phase 16 — Extensions:** done. **Next: Phase 17 — IEP client and integrations.**
+**Phase 17 — IEP client:** done. **Next: Phase 18 — Module manager and dashboard.**
 
 ## Phases
 
@@ -30,7 +30,8 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 | 14 | Notes, bookmarks, Markdown/HTML preview | done | [docs/NOTES.md](docs/NOTES.md) |
 | 15 | Debugging (DAP) | done | `ce9f520` backend, then UI. [docs/DEBUGGING.md](docs/DEBUGGING.md). No real adapter installed — verified with scripted adapters. |
 | 16 | Declarative extensions | done | [docs/EXTENSIONS.md](docs/EXTENSIONS.md) |
-| 17–25 | See plan | planned | |
+| 17 | IEP client and Center's `--iep` endpoint | done | [docs/IEP.md](docs/IEP.md); verified against real Optimizer/Structura/Envora builds |
+| 18–25 | See plan | planned | |
 
 ## Phase 3 deliverables
 
@@ -60,7 +61,7 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 * Trust is bound to a path: if a trusted folder is deleted and another folder is created at the same path, it is trusted too.
 * A workspace file's folder list cannot be edited in the UI yet (edit the file and use Reload Workspace File).
 * `appearance.reduceMotion = system` is not re-read when the Windows animation setting changes while running.
-* Ivily Envora's IEP envelope differs from IEP 0.1 (adapter planned for Phase 17).
+* Ivily Envora's IEP envelope differs from IEP 0.1 (handled by an adapter in Center; alignment belongs in the Envora repository).
 * `gh` CLI is not installed on the development machine; pushes are verified with `git ls-remote`.
 
 ## Notes for Phases 4–5

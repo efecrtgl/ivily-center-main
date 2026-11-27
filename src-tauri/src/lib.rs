@@ -13,6 +13,7 @@ pub mod error;
 pub mod extensions;
 pub mod fs;
 pub mod git;
+pub mod iep;
 pub mod lsp;
 pub mod output;
 pub mod search;
@@ -152,6 +153,9 @@ pub fn run() {
             commands::extensions::extensions_install_confirm,
             commands::extensions::extensions_set_enabled,
             commands::extensions::extensions_uninstall,
+            commands::modules::modules_status,
+            commands::modules::module_request,
+            commands::modules::module_open,
             commands::tasks::tasks_list,
             commands::tasks::task_run,
             commands::tasks::tasks_revoke_approvals,
