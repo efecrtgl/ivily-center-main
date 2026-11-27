@@ -9,9 +9,17 @@ use serde_json::Value;
 use tauri::{AppHandle, Manager, State, Window};
 
 fn overrides(state: &AppState, label: &str) -> AppResult<Vec<String>> {
+    list_setting(state, label, "ecosystem.modulePaths")
+}
+
+fn disabled(state: &AppState, label: &str) -> AppResult<Vec<String>> {
+    list_setting(state, label, "ecosystem.disabledModules")
+}
+
+fn list_setting(state: &AppState, label: &str, key: &str) -> AppResult<Vec<String>> {
     Ok(service::resolve_settings(state, label)?
         .values
-        .get("ecosystem.modulePaths")
+        .get(key)
         .and_then(|v| v.value.as_array().cloned())
         .unwrap_or_default()
         .into_iter()
@@ -43,9 +51,22 @@ pub async fn modules_status(app: AppHandle, window: Window, refresh: Option<bool
         }
     }
     let ov = overrides(&state, window.label())?;
+    let off = disabled(&state, window.label())?;
     let list = tauri::async_runtime::spawn_blocking(move || {
         std::thread::scope(|s| {
-            let handles: Vec<_> = iep::PROVIDERS.iter().map(|p| s.spawn(|| iep::status(p, &ov))).collect();
+            let handles: Vec<_> = iep::PROVIDERS
+                .iter()
+                .map(|p| {
+                    let (ov, off) = (&ov, &off);
+                    s.spawn(move || {
+                        if off.iter().any(|d| d == p.product) {
+                            iep::ModuleStatus::off(p)
+                        } else {
+                            iep::status(p, ov)
+                        }
+                    })
+                })
+                .collect();
             handles.into_iter().filter_map(|h| h.join().ok()).collect::<Vec<_>>()
         })
     })
@@ -83,6 +104,9 @@ pub async fn module_request(
         ));
     }
     let p = iep::provider(&product).ok_or_else(|| AppError::NotFound(format!("module {product}")))?;
+    if disabled(&state, window.label())?.iter().any(|d| d == p.product) {
+        return Err(AppError::validation("module_disabled", format!("{} is disabled in Ivily Center", p.name)));
+    }
     let path = iep::locate(p, &overrides(&state, window.label())?)
         .ok_or_else(|| AppError::NotFound(format!("{} is not installed", p.name)))?;
     iep::check_binary(p, &path).map_err(|e| AppError::validation("module_incompatible", e))?;

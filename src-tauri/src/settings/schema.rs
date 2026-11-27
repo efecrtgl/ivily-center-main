@@ -254,6 +254,15 @@ pub const SETTINGS: &[SettingDef] = &[
         scopes: ScopeSet::User,
     },
     SettingDef {
+        key: "ecosystem.disabledModules",
+        title: "Disabled modules",
+        description: "Ivily apps Ivily Center never starts or queries (product ids such as ivily-portly).",
+        category: "Ecosystem",
+        ty: T::StringList { max_items: 10, max_len: 40 },
+        default: D::List(&[]),
+        scopes: ScopeSet::User,
+    },
+    SettingDef {
         key: "debug.adapters",
         title: "Additional debug adapters",
         description: "Debug adapters that speak DAP over stdio, one per line as type|C:\\absolute\\path\\adapter.exe|arguments. The type matches the \"type\" of launch configurations.",

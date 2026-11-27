@@ -302,6 +302,24 @@ pub struct ModuleStatus {
     pub checked_at: i64,
 }
 
+impl ModuleStatus {
+    /// A module the user disabled: not located, not started.
+    pub fn off(p: &'static Provider) -> Self {
+        ModuleStatus {
+            product: p.product,
+            name: p.name,
+            description: p.description,
+            repository: p.repository,
+            path: None,
+            version: None,
+            status: "off",
+            message: Some("Disabled in Ivily Center.".into()),
+            info: None,
+            checked_at: crate::core::now_ms(),
+        }
+    }
+}
+
 /// Describe a module (no side effects in the module: describe is read-only by contract).
 pub fn status(p: &'static Provider, overrides: &[String]) -> ModuleStatus {
     let mut s = ModuleStatus {
