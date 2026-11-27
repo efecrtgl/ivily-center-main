@@ -9,6 +9,7 @@ pub mod lsp;
 pub mod output;
 pub mod search;
 pub mod settings;
+pub mod tasks;
 pub mod terminal;
 pub mod toolchains;
 pub mod ui_state;

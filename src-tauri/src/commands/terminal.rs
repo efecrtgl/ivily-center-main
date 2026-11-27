@@ -75,12 +75,23 @@ pub fn terminal_create(
     }
     .or_else(dirs::home_dir)
     .ok_or_else(|| AppError::Internal("no working directory".into()))?;
-    let (session, mut reader) = terminal::spawn(&p, &cwd, cols, rows, &label)?;
+    let (session, reader) = terminal::spawn(&p, &cwd, cols, rows, &label)?;
     let id = state.terminal_next.fetch_add(1, Ordering::Relaxed);
     state.output.info("app", format!("terminal {id}: started {} in {}", p.name, cwd.display()));
     state.terminals.lock().insert(id, session);
+    pump(app, label, id, reader, on_data)?;
+    Ok(id)
+}
 
-    let app2 = app.clone();
+/// Forward a session's output to the webview; when it ends, report the exit code (waiting
+/// briefly for the process to finish after its output closed).
+pub fn pump(
+    app: AppHandle,
+    label: String,
+    id: u64,
+    mut reader: Box<dyn Read + Send>,
+    on_data: Channel<InvokeResponseBody>,
+) -> AppResult<()> {
     std::thread::Builder::new()
         .name(format!("terminal-{id}"))
         .spawn(move || {
@@ -95,12 +106,20 @@ pub fn terminal_create(
                     }
                 }
             }
-            let st = app2.state::<AppState>();
-            let code = st.terminals.lock().remove(&id).and_then(|mut s| s.try_exit_code());
-            let _ = app2.emit_to(label.as_str(), TERMINAL_EXIT, ExitEvent { id, code });
+            let st = app.state::<AppState>();
+            let mut code = None;
+            for _ in 0..40 {
+                code = st.terminals.lock().get_mut(&id).and_then(|s| s.try_exit_code());
+                if code.is_some() {
+                    break;
+                }
+                std::thread::sleep(std::time::Duration::from_millis(50));
+            }
+            st.terminals.lock().remove(&id);
+            let _ = app.emit_to(label.as_str(), TERMINAL_EXIT, ExitEvent { id, code });
         })
         .map_err(|e| AppError::Internal(e.to_string()))?;
-    Ok(id)
+    Ok(())
 }
 
 fn with_session<T>(

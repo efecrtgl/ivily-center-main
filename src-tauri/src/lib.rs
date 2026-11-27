@@ -16,6 +16,7 @@ pub mod output;
 pub mod search;
 pub mod settings;
 pub mod state;
+pub mod tasks;
 pub mod terminal;
 pub mod toolchains;
 pub mod window;
@@ -133,6 +134,9 @@ pub fn run() {
             commands::git::git_init,
             commands::git::git_ignore,
             commands::git::git_clone,
+            commands::tasks::tasks_list,
+            commands::tasks::task_run,
+            commands::tasks::tasks_revoke_approvals,
             commands::search::search_run,
             commands::search::search_cancel,
             commands::search::search_replace,

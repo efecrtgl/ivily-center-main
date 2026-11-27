@@ -236,6 +236,15 @@ pub const SETTINGS: &[SettingDef] = &[
         scopes: ScopeSet::User,
     },
     SettingDef {
+        key: "tasks.shell",
+        title: "Task shell",
+        description: "Shell for shell tasks. Automatic uses PowerShell 7 when installed, otherwise Windows PowerShell. cmd cannot run commands containing double quotes.",
+        category: "Tasks",
+        ty: T::Enum(&[("auto", "Automatic"), ("pwsh", "PowerShell 7"), ("powershell", "Windows PowerShell"), ("cmd", "Command Prompt")]),
+        default: D::Str("auto"),
+        scopes: ScopeSet::User,
+    },
+    SettingDef {
         key: "terminal.cursorStyle",
         title: "Cursor style",
         description: "Shape of the terminal cursor.",
