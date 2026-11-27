@@ -136,6 +136,11 @@ Version **0.1.0**.
   the repository secrets `TAURI_SIGNING_PRIVATE_KEY` / `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`, creates a
   **draft** release with signed updater artifacts, `latest.json` and `SHA256SUMS.txt`, and tests
   install/uninstall on the runner. The draft must be published by the repository owner.
+* Tag `v0.1.0` was pushed on 2026-11-28. Release run 46071136970: version check, `npm ci`, frontend
+  and Rust tests **passed**; it then **stopped at "Updater signing key must be configured"** because
+  the repository secret is not set. **No GitHub release exists yet.** To publish: add the two
+  secrets (docs/RELEASING.md) and re-run the failed workflow run (or delete and re-push the tag),
+  then publish the draft.
 
 ## Repository synchronisation
 
