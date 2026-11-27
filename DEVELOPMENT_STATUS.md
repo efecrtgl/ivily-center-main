@@ -7,7 +7,7 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 
 ## Current phase
 
-**Phase 3 — Workspace system and launcher:** done. **Next: Phase 4 — File explorer and filesystem operations** (not started).
+**Phase 5 — Code editor:** done. **Next: Phase 6 — Language support and toolchain detection.**
 
 ## Phases
 
@@ -17,7 +17,9 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 | 1 | Repository infrastructure | done | Scaffold, community files, CI. Release workflow deferred to Phase 25 (needs updater signing). |
 | 2 | Core & custom window | done | `ffc8066`, `58b9731`, `7725969`. Window-size regression fixed in Phase 3 (`3bda5ed`). |
 | 3 | Workspace system & launcher | done | `52f9bfc` backend, `611e072` UI state, `3bda5ed` window fix, `6d6ae4e` UI, then docs. [docs/WORKSPACES.md](docs/WORKSPACES.md) |
-| 4–25 | See plan | planned | |
+| 4 | File explorer & filesystem | done | `defcb4c` backend, `6c20e52` UI. [docs/EXPLORER.md](docs/EXPLORER.md) |
+| 5 | Code editor | done | `2250911` document I/O, `962bcb5` editor. [docs/EDITOR.md](docs/EDITOR.md) |
+| 6–25 | See plan | planned | |
 
 ## Phase 3 deliverables
 
@@ -43,13 +45,21 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 ## Known issues / limitations
 
 * Windows 11 Snap Layouts flyout is not shown when hovering the custom maximize button.
-* The Explorer lists workspace folders only; browsing files arrives in Phase 4.
 * A command-line path given to a second launch starts a second instance (no single-instance forwarding yet).
 * Trust is bound to a path: if a trusted folder is deleted and another folder is created at the same path, it is trusted too.
 * A workspace file's folder list cannot be edited in the UI yet (edit the file and use Reload Workspace File).
 * `appearance.reduceMotion = system` is not re-read when the Windows animation setting changes while running.
 * Ivily Envora's IEP envelope differs from IEP 0.1 (adapter planned for Phase 17).
 * `gh` CLI is not installed on the development machine; pushes are verified with `git ls-remote`.
+
+## Notes for Phases 4–5
+
+* Explorer and editor were verified with unit/component tests (backend operations against real
+  temporary folders, including a real junction-escape attempt; UI against a mocked backend). They
+  have not yet been exercised interactively in the running application.
+* Documents opened from outside the workspace are not restored after a restart (their access token
+  is per-process); their unsaved content is still recovered from drafts as an untitled document.
+* The main JavaScript chunk is ~830 kB (CodeMirror core); language grammars are lazy-loaded.
 
 ## Build / test status (local, 2026-11-27)
 

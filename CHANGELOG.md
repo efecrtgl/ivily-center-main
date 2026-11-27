@@ -33,5 +33,11 @@ All notable changes to this project are documented here. The format follows
     remembered denial, revocation, trust manager, Restricted Mode banner, backend enforcement gate.
   - Per-workspace sessions with participants, previous-version fallback, crash detection and safe mode.
 
+- Phase 4: file explorer — workspace-scoped, traversal-safe file operations (no overwrites,
+  Recycle Bin deletion), lazy virtualized tree with .gitignore/exclusions, watcher, keyboard and
+  multi-select, drag and drop, file-type icons for ~90 types.
+- Phase 5: editor — CodeMirror 6 with groups/splits, tabs, encodings and line endings, hash-checked
+  saving and conflict resolution, auto save, external change handling and hot-exit recovery drafts.
+
 ### Fixed
 - The main window no longer grows by its border width on every launch (inner size is persisted).
