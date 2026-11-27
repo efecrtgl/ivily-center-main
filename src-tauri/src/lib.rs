@@ -57,12 +57,24 @@ pub fn run() {
             Ok(())
         })
         .on_window_event(|w, event| {
-            if let Some(ww) = w.app_handle().get_webview_window(w.label()) {
-                window::runtime::on_event(&ww, event, &w.state::<state::AppState>());
+            let st = w.state::<state::AppState>();
+            if let tauri::WindowEvent::Destroyed = event {
+                if w.label() != "main" {
+                    workspace::service::window_destroyed(&st, w.label());
+                }
+                return;
+            }
+            // Bounds are remembered for the main window only.
+            if w.label() == "main" {
+                if let Some(ww) = w.app_handle().get_webview_window(w.label()) {
+                    window::runtime::on_event(&ww, event, &st);
+                }
             }
         })
         .invoke_handler(tauri::generate_handler![
             commands::app::app_info,
+            commands::app::window_new,
+            commands::app::window_focus,
             commands::settings::settings_schema,
             commands::settings::settings_values,
             commands::settings::settings_set,

@@ -57,7 +57,16 @@ pub fn info(state: &AppState, ws: &OpenWorkspace) -> AppResult<WorkspaceInfo> {
 
 /// Make `ws` the window's workspace (replacing any previous one) and remember it for restore.
 fn activate(state: &AppState, label: &str, ws: OpenWorkspace) -> AppResult<WorkspaceInfo> {
-    session::set_last_workspace(&state.db.lock(), Some(&ws.record.id))?;
+    // One window per workspace: a second window would share files, terminals and sessions.
+    if let Some((other, _)) =
+        state.workspaces.lock().iter().find(|(l, w)| l.as_str() != label && w.record.id == ws.record.id)
+    {
+        return Err(AppError::validation("workspace_open_elsewhere", other.clone()));
+    }
+    // The main window's workspace is the one restored at the next start.
+    if label == "main" {
+        session::set_last_workspace(&state.db.lock(), Some(&ws.record.id))?;
+    }
     let missing = ws.folders.iter().filter(|f| !f.available).count();
     state.output.info(
         "workspace",
@@ -98,7 +107,18 @@ pub fn close(state: &AppState, label: &str) -> AppResult<()> {
         state.output.info("workspace", format!("closed '{}'", ws.record.name));
         state.workspace_changed(label);
     }
-    session::set_last_workspace(&state.db.lock(), None)
+    if label == "main" {
+        session::set_last_workspace(&state.db.lock(), None)?;
+    }
+    Ok(())
+}
+
+/// A window was destroyed: release its workspace and stop its processes (no restore change).
+pub fn window_destroyed(state: &AppState, label: &str) {
+    if state.workspaces.lock().remove(label).is_some() || label != "main" {
+        state.workspace_changed(label);
+    }
+    state.file_index.lock().remove(label);
 }
 
 pub fn remove(state: &AppState, id: &str) -> AppResult<()> {
@@ -468,6 +488,25 @@ mod tests {
         let data = tempfile::tempdir().unwrap();
         let s = AppState::init_in(data.path(), None);
         (data, s)
+    }
+
+    #[test]
+    fn one_window_per_workspace_and_only_main_sets_the_restore_target() {
+        let (_d, s) = state();
+        let a = tempfile::tempdir().unwrap();
+        let b = tempfile::tempdir().unwrap();
+        let wa = open_path(&s, W, a.path()).unwrap();
+        let e = open_record(&s, "w-1", &wa.record.id).unwrap_err();
+        assert_eq!(e.code(), "workspace_open_elsewhere");
+        assert_eq!(e.to_string(), "main");
+        let wb = open_path(&s, "w-1", b.path()).unwrap();
+        assert_eq!(session::last_workspace(&s.db.lock()).unwrap().as_deref(), Some(wa.record.id.as_str()));
+        window_destroyed(&s, "w-1");
+        assert!(current(&s, "w-1").is_none());
+        // Once released, the workspace can be opened in another window.
+        open_record(&s, "w-2", &wb.record.id).unwrap();
+        close(&s, "w-2").unwrap();
+        assert_eq!(session::last_workspace(&s.db.lock()).unwrap().as_deref(), Some(wa.record.id.as_str()));
     }
 
     #[test]
