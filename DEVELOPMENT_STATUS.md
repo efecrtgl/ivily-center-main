@@ -7,7 +7,7 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 
 ## Current phase
 
-**Phase 10 — Search, Quick Open and Command Palette:** done. **Next: Phase 11 — Tasks.**
+**Phase 11 — Tasks:** done. **Next: Phase 12 — Problems panel and Output export.**
 
 ## Phases
 
@@ -24,7 +24,8 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 | 8 | Integrated terminal | done | `d207d27`. [docs/TERMINAL.md](docs/TERMINAL.md) |
 | 9 | Git | done | `e4179dc` backend, then UI. [docs/GIT.md](docs/GIT.md) |
 | 10 | Search, Quick Open, Command Palette, shortcuts | done | backend + UI commits. [docs/SEARCH.md](docs/SEARCH.md) |
-| 11–25 | See plan | planned | |
+| 11 | Tasks | done | [docs/TASKS.md](docs/TASKS.md) |
+| 12–25 | See plan | planned | |
 
 ## Phase 3 deliverables
 
@@ -83,6 +84,13 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 * Search, replace and the Quick Open index were tested against real temporary folders (ignore
   rules, binaries, options, limit/cancel, replacement); the UI against a mocked backend.
 * Symbol modes (`@`, `#`) depend on a running language server and are untested with a real one.
+
+## Notes for Phase 11
+
+* Task discovery, dependency planning, approval fingerprints and PowerShell exit-code propagation
+  are tested against real files and a real `powershell.exe`; the run path reuses the tested ConPTY
+  session code. The UI flow (approval dialog, chains, problem matching) is tested with a mocked
+  backend. Tasks have not been run interactively in the application window.
 
 ## Build / test status (local, 2026-11-27)
 

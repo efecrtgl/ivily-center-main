@@ -7,6 +7,7 @@
 //      welcome), session flush before the window closes, "ready" signal for crash detection
 import { initThemes, setActiveTheme, applyMotionPreference, applyUiFontSize, DEFAULT_THEME } from '../theme/index.js';
 import { installSearch } from '../features/search/integration.js';
+import { installTasks } from '../features/tasks/model.js';
 import { registerWorkbenchContributions } from './contributions.js';
 import { loadSettings, settingsStore } from '../core/settings.js';
 import { setNotificationPrefs, notify } from '../core/notifications.js';
@@ -102,6 +103,7 @@ export async function bootstrap() {
   installTerminal();
   installGit();
   installSearch();
+  installTasks();
   setFileOpener((ref, opts) => openDocument(ref, opts));
   ipc.onEvent(ipc.events.fsChanged, (change) => {
     onFsChanged(change);

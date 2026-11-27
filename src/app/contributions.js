@@ -28,6 +28,7 @@ import { restartServers } from '../features/lsp/manager.js';
 import { TerminalView } from '../features/terminal/TerminalView.jsx';
 import { ScmView } from '../features/git/ScmView.jsx';
 import { SearchView } from '../features/search/SearchView.jsx';
+import { configureTasks, pickAndRun, pickAndTerminate, rerunLast, revokeApprovals as revokeTaskApprovals, showHistory as showTaskHistory } from '../features/tasks/model.js';
 import { searchStore } from '../features/search/model.js';
 import { openCommandPalette, openQuickOpen } from '../features/palette/quickOpen.js';
 import { activeRepo, checkout as gitCheckout, cloneRepository, createBranch as gitCreateBranch, loadRepos, stashPush, sync as gitSync } from '../features/git/model.js';
@@ -182,6 +183,14 @@ export function registerWorkbenchContributions() {
     { id: 'search.show', title: 'Search in Files', category: 'Search', icon: 'search', run: () => showSearch(false) },
     { id: 'search.replace', title: 'Replace in Files', category: 'Search', run: () => showSearch(true) },
     { id: 'preferences.openKeybindings', title: 'Open Keyboard Shortcuts', category: 'Preferences', icon: 'keyboard', run: () => showPage('keybindings') },
+    { id: 'tasks.run', title: 'Run Task…', category: 'Tasks', when: 'workspaceOpen', run: () => pickAndRun() },
+    { id: 'tasks.build', title: 'Run Build Task', category: 'Tasks', when: 'workspaceOpen', run: () => pickAndRun('build') },
+    { id: 'tasks.test', title: 'Run Test Task', category: 'Tasks', when: 'workspaceOpen', run: () => pickAndRun('test') },
+    { id: 'tasks.rerun', title: 'Rerun Last Task', category: 'Tasks', when: 'workspaceOpen', run: () => rerunLast() },
+    { id: 'tasks.terminate', title: 'Terminate Task…', category: 'Tasks', when: 'workspaceOpen', run: () => pickAndTerminate() },
+    { id: 'tasks.history', title: 'Show Task History', category: 'Tasks', when: 'workspaceOpen', run: () => showTaskHistory() },
+    { id: 'tasks.configure', title: 'Configure Tasks (.ivily/tasks.json)', category: 'Tasks', when: 'workspaceOpen', run: () => configureTasks() },
+    { id: 'tasks.revokeApprovals', title: 'Revoke Task Approvals', category: 'Tasks', when: 'workspaceOpen', run: () => revokeTaskApprovals() },
     { id: 'git.showView', title: 'Show Source Control', category: 'Git', icon: 'git', run: () => updateLayout({ sidebarVisible: true, sidebarView: 'scm' }) },
     { id: 'git.refresh', title: 'Refresh', category: 'Git', icon: 'refresh', when: 'workspaceOpen', run: () => loadRepos() },
     { id: 'git.checkout', title: 'Checkout to…', category: 'Git', when: 'gitRepository', run: () => { const r = activeRepo(); return r && gitCheckout(r.root); } },
@@ -238,6 +247,7 @@ export function registerWorkbenchContributions() {
     { key: 'Ctrl+`', command: 'terminal.toggle' },
     { key: 'Ctrl+Shift+G', command: 'git.showView' },
     { key: 'Ctrl+P', command: 'workbench.quickOpen' },
+    { key: 'Ctrl+Shift+B', command: 'tasks.build' },
     { key: 'Ctrl+E', command: 'workbench.quickOpen' },
     { key: 'Ctrl+Shift+P', command: 'workbench.commandPalette' },
     { key: 'F1', command: 'workbench.commandPalette' },

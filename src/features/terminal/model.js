@@ -141,13 +141,26 @@ function createXterm(id) {
   return { term, fit };
 }
 
+/** @type {Set<(e: { id: number, backendId: number, code: number | null }) => void>} */
+const exitListeners = new Set();
+/** Exits reported before the start call returned (very short tasks): backendId → code. */
+const earlyExits = new Map();
+/** Be told when any terminal's process exits (tasks use this). */
+export function onTerminalExited(fn) {
+  exitListeners.add(fn);
+  return () => exitListeners.delete(fn);
+}
+
 /**
- * Start a terminal (explicit user action).
- * @param {{ profileId?: string, groupId?: number, root?: number }} [opts]
+ * Start a terminal (explicit user action). `start` replaces the shell with another backend
+ * session (tasks); `onOutput` receives the raw output bytes as well.
+ * @param {{ profileId?: string, groupId?: number, root?: number, title?: string, start?: (channel: any, cols: number, rows: number) => Promise<number>, onOutput?: (bytes: Uint8Array) => void, onStarted?: (backendId: number) => void }} [opts]
  */
 export async function createTerminal(opts = {}) {
   if (!ipc.isTauri()) return null;
-  const profile = opts.profileId ? terminalStore.get().profiles.find((p) => p.id === opts.profileId) ?? (await loadProfiles()).find((p) => p.id === opts.profileId) : await defaultProfile();
+  const profile = opts.start
+    ? { id: 'task', name: opts.title ?? 'Task' }
+    : opts.profileId ? terminalStore.get().profiles.find((p) => p.id === opts.profileId) ?? (await loadProfiles()).find((p) => p.id === opts.profileId) : await defaultProfile();
   if (!profile) {
     notify({ severity: 'error', title: 'No terminal profile available', source: 'terminal' });
     return null;
@@ -163,11 +176,23 @@ export async function createTerminal(opts = {}) {
   });
   showPanelView('terminal');
   const channel = new Channel();
-  channel.onmessage = (data) => term.write(data instanceof ArrayBuffer ? new Uint8Array(data) : data);
+  channel.onmessage = (data) => {
+    const bytes = data instanceof ArrayBuffer ? new Uint8Array(data) : data;
+    term.write(bytes);
+    if (opts.onOutput && bytes instanceof Uint8Array) opts.onOutput(bytes);
+  };
   try {
     const dims = fit.proposeDimensions() ?? { cols: 100, rows: 30 };
-    const backendId = await ipc.terminalCreate(profile.id, opts.root ?? 0, Math.max(2, dims.cols || 100), Math.max(2, dims.rows || 30), channel);
+    const cols = Math.max(2, dims.cols || 100);
+    const rows = Math.max(2, dims.rows || 30);
+    const backendId = opts.start ? await opts.start(channel, cols, rows) : await ipc.terminalCreate(profile.id, opts.root ?? 0, cols, rows, channel);
     update(id, { backendId, status: 'running' });
+    opts.onStarted?.(backendId, id);
+    if (earlyExits.has(backendId)) {
+      const code = earlyExits.get(backendId);
+      earlyExits.delete(backendId);
+      queueMicrotask(() => onTerminalExit({ id: backendId, code }));
+    }
     term.onData((d) => ipc.terminalWrite(backendId, d).catch(() => {}));
     let resizeTimer = null;
     term.onResize(({ cols, rows }) => {
@@ -178,6 +203,7 @@ export async function createTerminal(opts = {}) {
   } catch (e) {
     update(id, { status: 'exited' });
     term.write(`\r\n\x1b[31mCould not start ${profile.name}: ${errorMessage(e)}\x1b[0m\r\n`);
+    if (opts.start) throw e;
   }
   return id;
 }
@@ -185,14 +211,23 @@ export async function createTerminal(opts = {}) {
 /** Backend: a shell exited. */
 export function onTerminalExit({ id: backendId, code }) {
   const t = terminalStore.get().terminals.find((x) => x.backendId === backendId);
-  if (!t) return;
+  if (!t) {
+    earlyExits.set(backendId, code ?? null);
+    if (earlyExits.size > 50) earlyExits.delete(earlyExits.keys().next().value);
+    return;
+  }
+  if (t.status === 'exited') return;
   update(t.id, { status: 'exited', exitCode: code ?? null });
   instances.get(t.id)?.term.write(`\r\n\x1b[2m[process exited${code != null ? ` with code ${code}` : ''}]\x1b[0m\r\n`);
+  for (const fn of exitListeners) fn({ id: t.id, backendId, code: code ?? null });
 }
 
 export function killTerminal(id) {
   const t = terminalStore.get().terminals.find((x) => x.id === id);
-  if (t?.backendId != null && t.status !== 'exited') ipc.terminalKill(t.backendId).catch(() => {});
+  if (t?.backendId != null && t.status !== 'exited') {
+    ipc.terminalKill(t.backendId).catch(() => {});
+    for (const fn of exitListeners) fn({ id, backendId: t.backendId, code: null });
+  }
   instances.get(id)?.term.dispose();
   instances.delete(id);
   terminalStore.set((s) => {

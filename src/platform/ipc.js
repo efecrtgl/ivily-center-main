@@ -212,6 +212,12 @@ export const terminalKill = (id) => call('terminal_kill', { id });
 /** Opens an http(s) link in the default browser (validated by the backend). */
 export const openExternalUrl = (url) => call('open_external_url', { url });
 
+// ── Tasks (running requires the taskExecution trust capability + approval) ──
+export const tasksList = () => call('tasks_list');
+/** Starts one task in a terminal session; `approve` records the user's approval of its command. */
+export const taskRun = (id, approve, cols, rows, onData) => call('task_run', { id, approve, cols, rows, onData });
+export const tasksRevokeApprovals = () => call('tasks_revoke_approvals');
+
 // ── Search ───────────────────────────────────────────────────────────────────
 /**
  * @typedef {{ pattern: string, isRegex?: boolean, caseSensitive?: boolean, wholeWord?: boolean, include?: string[], exclude?: string[], useIgnore?: boolean, maxResults?: number }} SearchQuery

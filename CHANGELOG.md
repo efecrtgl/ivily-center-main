@@ -52,6 +52,9 @@ All notable changes to this project are documented here. The format follows
 - Phase 10: search in files (streaming, regex/case/word, include/exclude, .gitignore, history)
   with confirmed, hash-checked replace; Quick Open with backend fuzzy file index and `>` `@` `#`
   `:` modes; Command Palette; Keyboard Shortcuts editor with recording, conflicts and reset.
+- Phase 11: tasks from `.ivily/tasks.json`, `.vscode/tasks.json`, npm scripts and Cargo; trust-gated
+  with approval of the exact command on first run; dependencies (sequence/parallel), terminate,
+  rerun, history and problem matchers (rustc, tsc, gcc, eslint, msCompile).
 
 ### Fixed
 - The main window no longer grows by its border width on every launch (inner size is persisted).
