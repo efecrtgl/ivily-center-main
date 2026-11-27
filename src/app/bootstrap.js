@@ -6,6 +6,7 @@
 //   5. workspace startup plan (decided by the backend: command-line path, restore, launcher,
 //      welcome), session flush before the window closes, "ready" signal for crash detection
 import { initThemes, setActiveTheme, applyMotionPreference, applyUiFontSize, DEFAULT_THEME } from '../theme/index.js';
+import { installSearch } from '../features/search/integration.js';
 import { registerWorkbenchContributions } from './contributions.js';
 import { loadSettings, settingsStore } from '../core/settings.js';
 import { setNotificationPrefs, notify } from '../core/notifications.js';
@@ -100,6 +101,7 @@ export async function bootstrap() {
   installLsp();
   installTerminal();
   installGit();
+  installSearch();
   setFileOpener((ref, opts) => openDocument(ref, opts));
   ipc.onEvent(ipc.events.fsChanged, (change) => {
     onFsChanged(change);

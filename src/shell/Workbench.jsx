@@ -22,8 +22,9 @@ import { workspaceStore } from '../workspace/store.js';
 
 import { ToolsView } from '../features/tools/ToolsView.jsx';
 import { DiffView } from '../features/git/DiffView.jsx';
+import { KeybindingsView } from '../features/keybindings/KeybindingsView.jsx';
 
-const PAGES = { launcher: LauncherView, trust: TrustManagerView, welcome: WelcomeView, tools: ToolsView, diff: DiffView };
+const PAGES = { launcher: LauncherView, trust: TrustManagerView, welcome: WelcomeView, tools: ToolsView, diff: DiffView, keybindings: KeybindingsView };
 
 /**
  * Workbench layout:

@@ -4,7 +4,7 @@ import { createStore } from './store.js';
 
 /**
  * @typedef {{ id: string, label: string, description?: string, detail?: string, keybinding?: string, icon?: string, group?: string }} PickItem
- * @typedef {{ placeholder?: string, items: PickItem[] | ((query: string) => PickItem[] | Promise<PickItem[]>), activeId?: string, matchOnDescription?: boolean }} PickRequest
+ * @typedef {{ placeholder?: string, items: PickItem[] | ((query: string) => PickItem[] | Promise<PickItem[]>), activeId?: string, matchOnDescription?: boolean, value?: string }} PickRequest
  */
 
 /** @type {import('./store.js').Store<(PickRequest & { resolve: (item: PickItem | null) => void }) | null>} */

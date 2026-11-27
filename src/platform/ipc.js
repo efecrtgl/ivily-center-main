@@ -212,6 +212,18 @@ export const terminalKill = (id) => call('terminal_kill', { id });
 /** Opens an http(s) link in the default browser (validated by the backend). */
 export const openExternalUrl = (url) => call('open_external_url', { url });
 
+// ── Search ───────────────────────────────────────────────────────────────────
+/**
+ * @typedef {{ pattern: string, isRegex?: boolean, caseSensitive?: boolean, wholeWord?: boolean, include?: string[], exclude?: string[], useIgnore?: boolean, maxResults?: number }} SearchQuery
+ */
+/** Streams `{ root, path, matches }[]` batches on `onResults` (a Channel); resolves to the summary. */
+export const searchRun = (id, query, onResults) => call('search_run', { id, query, onResults });
+export const searchCancel = (id) => call('search_cancel', { id });
+/** Replace in confirmed files; returns per-file results (files that changed are skipped). */
+export const searchReplace = (query, replacement, files) => call('search_replace', { query, replacement, files });
+/** Fuzzy file search over the cached workspace index. */
+export const quickOpen = (query, limit) => call('quick_open', { query, limit });
+
 // ── Git (requires the workspaceExecutables trust capability) ─────────────────
 export const gitRepos = () => call('git_repos');
 export const gitStatus = (root) => call('git_status', { root });

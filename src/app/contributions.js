@@ -27,9 +27,22 @@ import { findReferences, formatDocument, jumpToDefinition, jumpToImplementation,
 import { restartServers } from '../features/lsp/manager.js';
 import { TerminalView } from '../features/terminal/TerminalView.jsx';
 import { ScmView } from '../features/git/ScmView.jsx';
+import { SearchView } from '../features/search/SearchView.jsx';
+import { searchStore } from '../features/search/model.js';
+import { openCommandPalette, openQuickOpen } from '../features/palette/quickOpen.js';
 import { activeRepo, checkout as gitCheckout, cloneRepository, createBranch as gitCreateBranch, loadRepos, stashPush, sync as gitSync } from '../features/git/model.js';
 import { outputUi as outputPanelUi } from '../features/output/OutputView.jsx';
 import { activeTerminalId, clearTerminal, createTerminal, killTerminal, newTerminalWithProfile, splitTerminal, terminalStore } from '../features/terminal/model.js';
+
+/** Show the Search view, seeded with the editor selection (single line) when there is one. */
+function showSearch(replace) {
+  const ed = activeEditor();
+  const sel = ed?.view?.state.selection.main;
+  const text = sel && !sel.empty ? ed.view.state.sliceDoc(sel.from, sel.to) : '';
+  searchStore.set((s) => ({ ...s, showReplace: replace || s.showReplace, query: text && !text.includes('\n') && text.length < 200 ? text : s.query }));
+  updateLayout({ sidebarVisible: true, sidebarView: 'search' });
+  requestAnimationFrame(() => window.dispatchEvent(new Event('ivily:focus-search')));
+}
 
 function cycleTab(delta) {
   const s = editorStore.get();
@@ -73,6 +86,7 @@ export function registerWorkbenchContributions() {
 
   // ── Views ──────────────────────────────────────────────────────────────────
   registerView({ id: 'explorer', title: 'Explorer', icon: 'files', location: 'sidebar', component: ExplorerView, order: 10, command: 'workbench.showExplorer' });
+  registerView({ id: 'search', title: 'Search', icon: 'search', location: 'sidebar', component: SearchView, order: 15, command: 'search.show' });
   registerView({ id: 'scm', title: 'Source Control', icon: 'git', location: 'sidebar', component: ScmView, order: 20, command: 'git.showView' });
   registerView({ id: 'settings', title: 'Settings', icon: 'settings', location: 'sidebar', component: SettingsView, order: 100, group: 'bottom', command: 'preferences.openSettings' });
   registerView({ id: 'terminal', title: 'Terminal', icon: 'terminal', location: 'panel', component: TerminalView, order: 10, command: 'terminal.toggle' });
@@ -160,6 +174,14 @@ export function registerWorkbenchContributions() {
     { id: 'terminal.split', title: 'Split Terminal', category: 'Terminal', run: () => splitTerminal() },
     { id: 'terminal.kill', title: 'Kill Active Terminal', category: 'Terminal', run: () => { const id = activeTerminalId(); if (id != null) killTerminal(id); } },
     { id: 'terminal.clear', title: 'Clear Terminal', category: 'Terminal', run: () => clearTerminal() },
+    { id: 'workbench.quickOpen', title: 'Go to File…', category: 'Go', icon: 'search', run: () => openQuickOpen('') },
+    { id: 'workbench.commandPalette', title: 'Show All Commands', category: 'View', run: () => openCommandPalette() },
+    { id: 'workbench.gotoLine', title: 'Go to Line…', category: 'Go', when: 'editorFocus', run: () => openQuickOpen(':') },
+    { id: 'workbench.gotoSymbol', title: 'Go to Symbol in Editor…', category: 'Go', when: 'editorFocus', run: () => openQuickOpen('@') },
+    { id: 'workbench.gotoWorkspaceSymbol', title: 'Go to Symbol in Workspace…', category: 'Go', when: 'workspaceOpen', run: () => openQuickOpen('#') },
+    { id: 'search.show', title: 'Search in Files', category: 'Search', icon: 'search', run: () => showSearch(false) },
+    { id: 'search.replace', title: 'Replace in Files', category: 'Search', run: () => showSearch(true) },
+    { id: 'preferences.openKeybindings', title: 'Open Keyboard Shortcuts', category: 'Preferences', icon: 'keyboard', run: () => showPage('keybindings') },
     { id: 'git.showView', title: 'Show Source Control', category: 'Git', icon: 'git', run: () => updateLayout({ sidebarVisible: true, sidebarView: 'scm' }) },
     { id: 'git.refresh', title: 'Refresh', category: 'Git', icon: 'refresh', when: 'workspaceOpen', run: () => loadRepos() },
     { id: 'git.checkout', title: 'Checkout to…', category: 'Git', when: 'gitRepository', run: () => { const r = activeRepo(); return r && gitCheckout(r.root); } },
@@ -215,6 +237,15 @@ export function registerWorkbenchContributions() {
     { key: 'Alt+Z', command: 'editor.toggleWordWrap' },
     { key: 'Ctrl+`', command: 'terminal.toggle' },
     { key: 'Ctrl+Shift+G', command: 'git.showView' },
+    { key: 'Ctrl+P', command: 'workbench.quickOpen' },
+    { key: 'Ctrl+E', command: 'workbench.quickOpen' },
+    { key: 'Ctrl+Shift+P', command: 'workbench.commandPalette' },
+    { key: 'F1', command: 'workbench.commandPalette' },
+    { key: 'Ctrl+G', command: 'workbench.gotoLine' },
+    { key: 'Ctrl+Shift+O', command: 'workbench.gotoSymbol' },
+    { key: 'Ctrl+T', command: 'workbench.gotoWorkspaceSymbol' },
+    { key: 'Ctrl+Shift+F', command: 'search.show' },
+    { key: 'Ctrl+Shift+H', command: 'search.replace' },
     { key: 'Ctrl+Shift+`', command: 'terminal.new' },
   ]);
 }

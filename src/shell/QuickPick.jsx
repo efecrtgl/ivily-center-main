@@ -23,7 +23,7 @@ export function QuickPick() {
 
   useEffect(() => {
     if (!req) return;
-    setQuery('');
+    setQuery(req.value ?? '');
     setActive(0);
     inputRef.current?.focus();
   }, [req]);

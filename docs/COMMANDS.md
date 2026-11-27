@@ -15,7 +15,7 @@ registerCommand({ id: 'workbench.togglePanel', title: 'Toggle Panel', category: 
 * `executeCommand(id, args)` never throws: it resolves to `{ ok, value | reason }`
   (`unknown`, `unavailable`, `error`). Failures are routed to a single handler that logs to the
   *Interface* output channel and shows an error notification.
-* Recently executed commands are tracked (for the Command Palette, Phase 10).
+* Recently executed commands are tracked and listed first in the Command Palette (see docs/SEARCH.md).
 * The title bar buttons, activity bar, shortcuts and theme picker all dispatch commands.
 
 ## `when` clauses (`core/context.js`)
@@ -30,7 +30,7 @@ clause evaluates to false and is logged. Current keys: `sidebarVisible`, `panelV
 
 * Chords are normalized (`ctrl+shift+p` → `Ctrl+Shift+P`). Keys are matched by **physical position**
   (`KeyboardEvent.code`), so shortcuts work identically on Turkish, German, etc. layouts.
-* Default bindings come from features; user bindings (editor UI in Phase 10) override them; a user
+* Default bindings come from features; user bindings (Keyboard Shortcuts editor, docs/SEARCH.md) override them; a user
   entry `{ key, command: '-id' }` removes a default.
 * Plain keys (no Ctrl/Alt/Meta) are never captured inside text inputs.
 * `findConflicts()` reports bindings with the same chord and identical `when` clause.

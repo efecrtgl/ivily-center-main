@@ -280,6 +280,69 @@ export async function restartServers() {
   editorApi?.reattachAll();
 }
 
+/**
+ * Workspace symbols from every running server that supports them (`#` in Quick Open).
+ * @param {string} query
+ * @returns {Promise<{ name: string, kind: number, containerName?: string, ref: { root: number, path: string } | null, line: number, character: number }[]>}
+ */
+export async function workspaceSymbols(query) {
+  const folders = workspaceStore.get().current?.folders ?? [];
+  const out = [];
+  await Promise.all(
+    [...clients.values()].map(async (c) => {
+      try {
+        await c.ready;
+        if (!c.client.serverCapabilities?.workspaceSymbolProvider) return;
+        const r = await c.client.request('workspace/symbol', { query });
+        for (const s of Array.isArray(r) ? r.slice(0, 500) : []) {
+          const loc = s.location ?? {};
+          out.push({ name: String(s.name), kind: s.kind, containerName: s.containerName, ref: loc.uri ? uriToRef(loc.uri, folders) : null, line: (loc.range?.start?.line ?? 0) + 1, character: loc.range?.start?.character ?? 0 });
+        }
+      } catch (e) {
+        uiLog('warn', `workspace/symbol failed: ${errorMessage(e)}`);
+      }
+    }),
+  );
+  return out;
+}
+
+/**
+ * Symbols of one open document (`@` in Quick Open). Flattens hierarchical results.
+ * @param {{ ref: any }} doc
+ * @returns {Promise<{ name: string, kind: number, detail?: string, line: number, character: number, depth: number }[]>}
+ */
+export async function documentSymbols(doc) {
+  if (!doc?.ref || 'external' in doc.ref) return [];
+  const uri = refToUri(doc.ref, workspaceStore.get().current?.folders ?? []);
+  if (!uri) return [];
+  for (const c of clients.values()) {
+    if (!c.client.workspace.getFile(uri)) continue;
+    try {
+      await c.ready;
+      if (!c.client.serverCapabilities?.documentSymbolProvider) return [];
+      await c.client.sync();
+      const r = (await c.client.request('textDocument/documentSymbol', { textDocument: { uri } })) ?? [];
+      const out = [];
+      const walk = (list, depth) => {
+        for (const s of list) {
+          const range = s.selectionRange ?? s.range ?? s.location?.range;
+          out.push({ name: String(s.name), kind: s.kind, detail: s.detail ?? s.containerName, line: (range?.start?.line ?? 0) + 1, character: range?.start?.character ?? 0, depth });
+          if (Array.isArray(s.children)) walk(s.children, depth + 1);
+        }
+      };
+      walk(Array.isArray(r) ? r : [], 0);
+      return out;
+    } catch (e) {
+      uiLog('warn', `documentSymbol failed: ${errorMessage(e)}`);
+      return [];
+    }
+  }
+  return [];
+}
+
+/** LSP SymbolKind → short label. */
+export const SYMBOL_KINDS = ['', 'file', 'module', 'namespace', 'package', 'class', 'method', 'property', 'field', 'constructor', 'enum', 'interface', 'function', 'variable', 'constant', 'string', 'number', 'boolean', 'array', 'object', 'key', 'null', 'enum member', 'struct', 'event', 'operator', 'type parameter'];
+
 /** Wire the manager to the editor model (avoids an import cycle). */
 export function connectEditor(api) {
   editorApi = api;

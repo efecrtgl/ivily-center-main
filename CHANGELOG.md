@@ -49,6 +49,9 @@ All notable changes to this project are documented here. The format follows
 - Phase 9: Git — status, staging, commits/amend, branches, history, diffs, stashes, tags, remotes,
   merge/rebase/cherry-pick/revert/reset, conflict resolution in the editor, clone and init; never
   forced, destructive actions confirmed, gated by workspace trust.
+- Phase 10: search in files (streaming, regex/case/word, include/exclude, .gitignore, history)
+  with confirmed, hash-checked replace; Quick Open with backend fuzzy file index and `>` `@` `#`
+  `:` modes; Command Palette; Keyboard Shortcuts editor with recording, conflicts and reset.
 
 ### Fixed
 - The main window no longer grows by its border width on every launch (inner size is persisted).

@@ -67,6 +67,10 @@ const tabStates = new Map();
 const views = new Map();
 /** @type {Map<string, any>} scroll snapshots per tab */
 const scrolls = new Map();
+/** @type {Map<number, string>} document currently shown by each group's view */
+const shown = new Map();
+/** @type {Map<string, number>} positions to scroll to when a tab is next shown */
+const pendingReveal = new Map();
 
 export const docsStore = createStore(/** @type {Record<string, DocMeta>} */ ({}));
 export const editorStore = createStore({
@@ -254,6 +258,7 @@ export function detachView(groupId) {
     scrolls.set(stateKey(groupId, g.active), v.scrollSnapshot());
   }
   views.delete(groupId);
+  shown.delete(groupId);
 }
 
 /** Swap the view's state when the group's active tab changes. */
@@ -264,10 +269,16 @@ export function showInView(groupId, prevKey, key) {
     tabStates.set(stateKey(groupId, prevKey), view.state);
     scrolls.set(stateKey(groupId, prevKey), view.scrollSnapshot());
   }
+  shown.set(groupId, key);
   if (!key || !docs.has(key)) return;
   view.setState(stateFor(groupId, key));
-  const snap = scrolls.get(stateKey(groupId, key));
-  if (snap) view.dispatch({ effects: snap });
+  const sk = stateKey(groupId, key);
+  const reveal = pendingReveal.get(sk);
+  const snap = scrolls.get(sk);
+  if (reveal !== undefined) {
+    pendingReveal.delete(sk);
+    view.dispatch({ effects: EditorView.scrollIntoView(reveal, { y: 'center' }) });
+  } else if (snap) view.dispatch({ effects: snap });
   updateCursor(view.state);
 }
 
@@ -460,6 +471,43 @@ export async function openDocument(ref, opts = {}) {
   workspaceStore.set((s) => (s.page === 'editor' ? s : { ...s, page: 'editor' }));
   if (opts.focus !== false) requestAnimationFrame?.(() => views.get(groupId)?.focus());
   return key;
+}
+
+/**
+ * Open a document and select a range on a line (1-based line; `from`/`to` are UTF-16 offsets
+ * within the line, clamped). Used by search results, Quick Open (`:line`) and symbols.
+ * @param {import('../../platform/ipc.js').DocRef} ref
+ * @param {number} line
+ * @param {number} [from]
+ * @param {number} [to]
+ * @param {{ preview?: boolean, focus?: boolean }} [opts]
+ */
+export async function revealInDocument(ref, line, from = 0, to = from, opts = {}) {
+  const key = await openDocument(ref, { preview: opts.preview, focus: false });
+  if (!key) return null;
+  revealKey(key, line, from, to, opts.focus !== false);
+  return key;
+}
+
+/** Select a line/range in an open document in the active group. */
+export function revealKey(key, line, from = 0, to = from, focus = true) {
+  const doc = docs.get(key);
+  if (!doc) return;
+  const groupId = editorStore.get().activeGroup;
+  const ln = doc.text.line(Math.max(1, Math.min(doc.text.lines, Math.floor(line) || 1)));
+  const clamp = (n) => Math.min(ln.to, ln.from + Math.max(0, n | 0));
+  const selection = { anchor: clamp(from), head: clamp(to) };
+  const view = views.get(groupId);
+  if (view && shown.get(groupId) === key) {
+    view.dispatch({ selection, effects: EditorView.scrollIntoView(selection.head, { y: 'center' }) });
+    if (focus) view.focus();
+    return;
+  }
+  const sk = stateKey(groupId, key);
+  tabStates.set(sk, stateFor(groupId, key).update({ selection }).state);
+  scrolls.delete(sk);
+  pendingReveal.set(sk, selection.head);
+  if (focus) requestAnimationFrame?.(() => views.get(groupId)?.focus());
 }
 
 export function newUntitled(content = '', name) {

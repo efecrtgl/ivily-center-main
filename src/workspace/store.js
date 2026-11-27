@@ -21,7 +21,7 @@ import * as ipc from '../platform/ipc.js';
 import { flushSession, resetParticipants, restoreSession, setSessionSink } from './session.js';
 
 /** @typedef {import('../platform/ipc.js').WorkspaceInfo} WorkspaceInfo */
-/** @typedef {'launcher' | 'welcome' | 'trust' | 'editor' | 'tools' | 'diff'} EditorPage */
+/** @typedef {'launcher' | 'welcome' | 'trust' | 'editor' | 'tools' | 'diff' | 'keybindings'} EditorPage */
 
 /** @type {import('../core/store.js').Store<{ current: WorkspaceInfo | null, epoch: number, busy: boolean, page: EditorPage, trustPrompt: boolean }>} */
 export const workspaceStore = createStore({ current: null, epoch: 0, busy: false, page: 'launcher', trustPrompt: false });
