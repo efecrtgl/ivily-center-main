@@ -403,3 +403,65 @@ mod tests {
         assert!(text.chars().count() <= PREVIEW_CHARS);
     }
 }
+
+/// Manual benchmark on a large real tree: `cargo test --release bench_large_tree -- --ignored --nocapture`.
+#[cfg(test)]
+mod bench {
+    use super::*;
+    use crate::workspace::paths::normalize_dir;
+    use std::time::Instant;
+
+    #[test]
+    #[ignore]
+    fn bench_large_tree() {
+        let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("..").join("node_modules");
+        let root = normalize_dir(&dir).expect("run `npm ci` first");
+        let walk_q = Query {
+            pattern: "x".into(),
+            is_regex: false,
+            case_sensitive: false,
+            whole_word: false,
+            include: vec![],
+            exclude: vec![],
+            use_ignore: false,
+            max_results: 1,
+        };
+        let t = Instant::now();
+        let mut files = Vec::new();
+        walk(&root, &[], &walk_q, &AtomicBool::new(false), |rel, _| {
+            files.push((0usize, rel));
+            true
+        });
+        let walk_ms = t.elapsed().as_millis();
+        let t = Instant::now();
+        let best = fuzzy::best("editormodel", files.iter().map(|(r, p)| (*r, p.as_str())), 50);
+        let fuzzy_ms = t.elapsed().as_millis();
+        for (pattern, regex) in [("useState", false), (r"function\s+\w+Async", true)] {
+            let q = Query {
+                pattern: pattern.into(),
+                is_regex: regex,
+                case_sensitive: false,
+                whole_word: false,
+                include: vec![],
+                exclude: vec![],
+                use_ignore: false,
+                max_results: 20_000,
+            };
+            let t = Instant::now();
+            let s = run(std::slice::from_ref(&root), &[], &q, Arc::new(AtomicBool::new(false)), |_| {}).unwrap();
+            eprintln!(
+                "search {pattern:?}: {} matches in {} files ({} searched) in {} ms, limit hit: {}",
+                s.matches,
+                s.files,
+                s.files_searched,
+                t.elapsed().as_millis(),
+                s.limit_hit
+            );
+        }
+        eprintln!(
+            "walk: {} files in {walk_ms} ms; fuzzy over all: {fuzzy_ms} ms (best: {:?})",
+            files.len(),
+            best.first().map(|b| &b.1)
+        );
+    }
+}
