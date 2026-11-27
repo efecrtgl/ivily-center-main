@@ -11,8 +11,11 @@ fn current_normal_bounds(w: &WebviewWindow) -> Option<Bounds> {
     if w.is_maximized().unwrap_or(false) || w.is_minimized().unwrap_or(false) {
         return None;
     }
+    // Position is the outer position (what `set_position` sets); size is the *inner* size,
+    // because `set_size` sets the inner size. Saving the outer size made the window grow by the
+    // frame thickness on every launch.
     let pos = w.outer_position().ok()?;
-    let size = w.outer_size().ok()?;
+    let size = w.inner_size().ok()?;
     Some(Bounds { x: pos.x, y: pos.y, width: size.width, height: size.height })
 }
 
