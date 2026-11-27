@@ -30,6 +30,7 @@ import { ScmView } from '../features/git/ScmView.jsx';
 import { SearchView } from '../features/search/SearchView.jsx';
 import { ProblemsView, goToProblem } from '../features/problems/ProblemsView.jsx';
 import { exportOutputChannel } from '../features/output/OutputView.jsx';
+import { exportCurrentTheme, exportSettings, importIconPack, importSettings, importTheme, removeUserItem } from '../features/customize/model.js';
 import { configureTasks, pickAndRun, pickAndTerminate, rerunLast, revokeApprovals as revokeTaskApprovals, showHistory as showTaskHistory } from '../features/tasks/model.js';
 import { searchStore } from '../features/search/model.js';
 import { openCommandPalette, openQuickOpen } from '../features/palette/quickOpen.js';
@@ -198,6 +199,12 @@ export function registerWorkbenchContributions() {
     { id: 'problems.next', title: 'Go to Next Problem', category: 'Go', run: () => goToProblem(1) },
     { id: 'problems.previous', title: 'Go to Previous Problem', category: 'Go', run: () => goToProblem(-1) },
     { id: 'output.export', title: 'Save Output As…', category: 'Output', run: () => exportOutputChannel() },
+    { id: 'preferences.exportSettings', title: 'Export Settings…', category: 'Preferences', run: () => exportSettings() },
+    { id: 'preferences.importSettings', title: 'Import Settings…', category: 'Preferences', run: () => importSettings() },
+    { id: 'preferences.importTheme', title: 'Import Theme…', category: 'Preferences', icon: 'palette', run: () => importTheme() },
+    { id: 'preferences.exportTheme', title: 'Export Current Theme…', category: 'Preferences', run: () => exportCurrentTheme() },
+    { id: 'preferences.importIconPack', title: 'Import Icon Pack…', category: 'Preferences', run: () => importIconPack() },
+    { id: 'preferences.removeCustomization', title: 'Remove User Theme or Icon Pack…', category: 'Preferences', run: () => removeUserItem() },
     { id: 'git.showView', title: 'Show Source Control', category: 'Git', icon: 'git', run: () => updateLayout({ sidebarVisible: true, sidebarView: 'scm' }) },
     { id: 'git.refresh', title: 'Refresh', category: 'Git', icon: 'refresh', when: 'workspaceOpen', run: () => loadRepos() },
     { id: 'git.checkout', title: 'Checkout to…', category: 'Git', when: 'gitRepository', run: () => { const r = activeRepo(); return r && gitCheckout(r.root); } },

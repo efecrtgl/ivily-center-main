@@ -216,6 +216,8 @@ export const openExternalUrl = (url) => call('open_external_url', { url });
 /** Native save dialog for generated text; may return `{ kind: 'confirmOverwrite', token, path }`. */
 export const saveTextDialog = (title, suggestedName, extension, content) => call('save_text_dialog', { title, suggestedName, extension, content });
 export const saveTextConfirm = (token, content) => call('save_text_confirm', { token, content });
+/** Native open dialog; returns `{ name, content }` of the chosen UTF-8 file (≤ 2 MB) or null. */
+export const openTextDialog = (title, extensions) => call('open_text_dialog', { title, extensions });
 
 // ── Tasks (running requires the taskExecution trust capability + approval) ──
 export const tasksList = () => call('tasks_list');

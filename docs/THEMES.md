@@ -60,3 +60,26 @@ File-type and folder icons will be added to the same pack structure in Phase 4.
 
 All fonts are bundled (the CSP allows only `font-src 'self'`): Pixelify Sans and VT323 for the pixel and
 retro layers, JetBrains Mono for code. See [../THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md).
+
+## User themes and icon packs (Phase 13)
+
+*Preferences: Import Theme…* / *Import Icon Pack…* read a JSON file chosen in a native dialog
+(UTF-8, at most 2 MB). Ids are always prefixed with `user-` so built-in themes cannot be replaced.
+
+* **Themes** use the same format and validation as built-in themes (`id`, `name`, `appearance`,
+  `style`, `iconPack`, `tokens`; unknown tokens and CSS constructs such as `url(`, `expression(`,
+  `@import`, `;`, braces and comments are rejected). *Export Current Theme…* writes the active
+  theme with all resolved tokens as a starting point. Installed user themes appear in the theme
+  picker and the Settings view; up to 50 can be installed.
+* **Icon packs**: `{ "id", "name", "fallback": "modern" | "pixel", "icons": { "<icon>": { "kind": "stroke", "viewBox": "0 0 24 24", "d": "<svg path>" } | { "kind": "bitmap", "rows": ["#..#", …] } } }`.
+  Paths must match the SVG path grammar (letters `MLHVCSQTAZ`, numbers, separators), at most 400
+  icons; missing icons fall back to the chosen pack. A theme selects a pack with `"iconPack"`.
+* Both are stored in the local database (UI state) and loaded at startup; broken entries are
+  skipped and logged. *Remove User Theme or Icon Pack…* removes them.
+
+## Settings import / export
+
+*Preferences: Export Settings…* writes your user-scope settings and custom keyboard shortcuts to a
+JSON file (`"$type": "ivily-center-settings", "version": 1`). *Import Settings…* lists what will
+change and asks first; every value is validated by the backend, unknown settings are ignored and
+workspace settings are never touched.

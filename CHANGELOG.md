@@ -57,6 +57,8 @@ All notable changes to this project are documented here. The format follows
   rerun, history and problem matchers (rustc, tsc, gcc, eslint, msCompile).
 - Phase 12: Problems panel (language-server diagnostics and task problems, filters, F8 navigation,
   status-bar counts, running-task indicator) and *Save Output As…* with confirmed overwrite.
+- Phase 13: settings and shortcut import/export (validated, confirmed), user themes and user icon
+  packs (validated JSON, `user-` ids, stored locally), *Export Current Theme…*.
 
 ### Fixed
 - The main window no longer grows by its border width on every launch (inner size is persisted).

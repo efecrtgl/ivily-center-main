@@ -7,7 +7,7 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 
 ## Current phase
 
-**Phase 12 — Problems and Output export:** done. **Next: Phase 13 — Settings import/export, user themes and icon packs.**
+**Phase 13 — Customization:** done. **Next: Phase 14 — Notes, bookmarks and previews.**
 
 ## Phases
 
@@ -26,7 +26,8 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 | 10 | Search, Quick Open, Command Palette, shortcuts | done | backend + UI commits. [docs/SEARCH.md](docs/SEARCH.md) |
 | 11 | Tasks | done | [docs/TASKS.md](docs/TASKS.md) |
 | 12 | Problems panel, output export | done | [docs/PROBLEMS.md](docs/PROBLEMS.md) |
-| 13–25 | See plan | planned | |
+| 13 | Settings import/export, user themes, icon packs | done | [docs/THEMES.md](docs/THEMES.md) |
+| 14–25 | See plan | planned | |
 
 ## Phase 3 deliverables
 

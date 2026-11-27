@@ -60,6 +60,12 @@ export function removeKeybinding(b) {
   return saveUser(removalOf([...user()], b));
 }
 
+/** Replace all user shortcuts (settings import). Invalid entries are dropped. */
+export function replaceUserKeybindings(list) {
+  const { accepted } = setUserKeybindings(list);
+  return saveUser(accepted);
+}
+
 /** Drop all user changes for a command (restores its defaults). */
 export function resetKeybindings(command) {
   return saveUser(user().filter((u) => u.command !== command && u.command !== `-${command}`));

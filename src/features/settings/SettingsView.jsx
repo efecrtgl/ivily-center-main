@@ -1,4 +1,5 @@
 import { useDeferredValue, useState } from 'react';
+import { listThemes } from '../../theme/engine.js';
 import { useStore } from '../../core/store.js';
 import { groupByCategory, resetSetting, searchSettings, setSetting, settingsStore, workspaceScoped } from '../../core/settings.js';
 import { errorCode, errorMessage } from '../../core/errors.js';
@@ -10,6 +11,12 @@ import { workspaceStore } from '../../workspace/store.js';
  * inherited effective value. Validation errors come from Rust.
  * @param {{ s: import('../../core/settings.js').SettingSchema, resolved: any, scope: 'user' | 'workspace' }} props
  */
+/** Built-in theme options plus installed user themes. */
+function themeOptions(options) {
+  const user = listThemes().filter((t) => t.id.startsWith('user-')).map((t) => ({ value: t.id, label: `${t.name} (user)` }));
+  return [...options, ...user];
+}
+
 function SettingRow({ s, resolved, scope }) {
   const [error, setError] = useState(null);
   const [draft, setDraft] = useState(null);
@@ -47,7 +54,7 @@ function SettingRow({ s, resolved, scope }) {
   } else if (s.type === 'enum') {
     control = (
       <select id={id} className="select" value={String(value)} onChange={(e) => commit(e.target.value)}>
-        {s.options.map((o) => (
+        {(s.key === 'appearance.theme' ? themeOptions(s.options) : s.options).map((o) => (
           <option key={o.value} value={o.value}>
             {o.label}
           </option>
