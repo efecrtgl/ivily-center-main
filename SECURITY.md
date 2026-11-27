@@ -13,7 +13,7 @@ Do not open a public issue. You can expect an initial response within 7 days.
 ## Security model
 
 The full design is in [docs/ARCHITECTURE.md §4](docs/ARCHITECTURE.md#4-security-architecture).
-The table below lists only guarantees that are **implemented today**; it grows with each phase.
+The table below lists guarantees that are **implemented**.
 
 | Area | Guarantee | Since |
 |---|---|---|
@@ -28,5 +28,17 @@ The table below lists only guarantees that are **implemented today**; it grows w
 | Workspace Trust | Workspaces are untrusted by default (Restricted Mode). Trust is per folder and per capability, stored only in the app database (never read from a project), revocable, and enforced in the backend (`workspace_untrusted`). Nothing is executed when a workspace is opened. | Phase 3 |
 | Project files | Ivily Center writes into a project only when the user explicitly saves a workspace file: atomically, never replacing an existing file without confirmation, never over external changes. | Phase 3 |
 | Data | The database is never deleted: a corrupt file is moved aside, a newer-schema file is left untouched, and existing data is backed up before migrations. | Phase 2 |
+| Filesystem | File operations accept only (workspace folder, relative path) pairs confined to the folder (symlink/junction escapes refused); deletes go to the Recycle Bin unless "delete permanently" is confirmed; saves are atomic and refuse to overwrite external changes. | Phase 4–5 |
+| Processes | Language servers, terminals, tasks, debug adapters and IEP calls run inside Windows Job Objects (killed with their process tree); nothing elevates; nothing is installed silently (install commands are only shown or run visibly after confirmation). | Phase 6–8 |
+| Language servers / Git | Require the workspace trust capabilities *Language servers* / *Use executables from workspace settings*; Git never force-pushes and confirms destructive operations. | Phase 7, 9 |
+| Tasks / debugging | Require trust *Run tasks* / *Debugging* plus approval of the exact command or resolved launch configuration on first run (re-approval when it changes); unsupported variables are refused; adapters cannot launch processes through Center. | Phase 11, 15 |
+| Search & replace | Replace only touches confirmed files, skips files with unsaved changes and refuses files changed since they were read. | Phase 10 |
+| Imports & extensions | Themes, icon packs, settings and extensions are validated before use; extensions are declarative (no code), copied only as referenced JSON files after a contribution preview. | Phase 13, 16 |
+| Previews | Markdown is sanitized (DOMPurify); HTML previews run in a permission-less sandboxed frame. | Phase 14 |
+| Ecosystem | IEP modules are found only at install locations or user-configured paths, version-gated before launch, run without a window with timeout/output limits, and only allowlisted read-only methods are callable. | Phase 17–18 |
+| Updates | Only from this repository's GitHub Releases, verified against the embedded minisign public key, installed only after confirmation. | Phase 19 |
+| Backups | Archives are verified (paths, SHA-256, database integrity) before restore; restores keep the replaced data. | Phase 20 |
+| Windows | Every window can address only its own workspace; one window per workspace. | Phase 22 |
 
-Planned (not yet implemented): workspace-scoped file operations (Phase 4), process registry with Job Objects, sandboxed HTML preview, signed updates, read-only IEP client with timeouts.
+The threat model, process-launch inventory and residual risks are in
+[docs/SECURITY-REVIEW.md](docs/SECURITY-REVIEW.md).

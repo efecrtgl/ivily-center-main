@@ -25,7 +25,7 @@ Grammars are loaded lazily the first time a file of that language is opened. Tog
 
 `registerLanguage({ id, name, extensions, filenames, pattern, tier, lspId, load })` in
 `src/languages/registry.js`. `load` returns a CodeMirror extension (a Lezer `LanguageSupport` or a
-`StreamLanguage`). Extensions (Phase 16) contribute languages through the same function.
+`StreamLanguage`). Extensions add file associations to existing languages (see EXTENSIONS.md).
 
 ## Toolchain discovery
 

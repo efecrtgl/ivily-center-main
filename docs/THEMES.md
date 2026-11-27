@@ -40,8 +40,8 @@ CodeMirror (Phase 5) and xterm.js (Phase 8) adapters can be themed without chang
 
 `registerTheme` rejects a theme with a missing required token, an unknown token, unknown style layer or
 icon pack, or a value containing `url(`, `expression(`, `javascript:`, `@import`, comments, `; { } < > \`.
-Themes are therefore pure data and cannot load remote resources or inject CSS. Future extension themes
-(Phase 16) go through the same function. A custom theme can choose any registered style layer but cannot
+Themes are therefore pure data and cannot load remote resources or inject CSS. User and extension
+themes go through the same function. A custom theme can choose any registered style layer but cannot
 ship new CSS.
 
 ## Adding a built-in theme
@@ -54,14 +54,14 @@ ship new CSS.
 
 Packs map semantic ids (`settings`, `close`, `warning`, …) to either stroke paths (`modern`, 24×24) or
 12×12 pixel bitmaps (`pixel`, rendered as one crisp-edged SVG path). Missing icons fall back to `modern`.
-File-type and folder icons will be added to the same pack structure in Phase 4.
+File-type and folder icons (`src/icons/fileTypes.js`) are drawn by the active pack's style.
 
 ## Fonts
 
 All fonts are bundled (the CSP allows only `font-src 'self'`): Pixelify Sans and VT323 for the pixel and
 retro layers, JetBrains Mono for code. See [../THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md).
 
-## User themes and icon packs (Phase 13)
+## User themes and icon packs
 
 *Preferences: Import Theme…* / *Import Icon Pack…* read a JSON file chosen in a native dialog
 (UTF-8, at most 2 MB). Ids are always prefixed with `user-` so built-in themes cannot be replaced.

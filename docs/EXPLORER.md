@@ -38,7 +38,7 @@ trigger a reload of what is loaded. Changes inside `.git` are reported separatel
 |---|---|
 | Select / multi-select | Click, Ctrl+click, Shift+click, Shift+arrows, Ctrl+A |
 | Navigate | Arrows, Home/End, PageUp/PageDown; Right expands / enters, Left collapses / goes to parent |
-| Open | Click (preview) or double-click / Enter (pinned) once the editor exists (Phase 5) |
+| Open | Click (preview tab) or double-click / Enter (pinned tab) |
 | New file / folder | Toolbar, context menu or commands; names may contain `/` to create nested folders |
 | Rename | F2 or context menu (inline; the extension is not pre-selected) |
 | Cut / copy / paste | Ctrl+X / Ctrl+C / Ctrl+V or context menu |

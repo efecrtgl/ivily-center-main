@@ -56,7 +56,7 @@ Line numbers, folding, bracket matching and auto-closing, auto-indentation, mult
 (Alt+click, Ctrl+D via the search keymap), rectangular selection (Alt+drag), find & replace (Ctrl+F,
 regex/case/word), selection-match highlighting, active line, word completion, undo/redo, configurable
 font, size, line height, tab size, spaces vs. tabs, word wrap (Alt+Z) and whitespace rendering.
-Language-aware completion, diagnostics and navigation come with language servers (Phase 7).
+Language-aware completion, diagnostics and navigation come from language servers (see LSP.md).
 Syntax highlighting is lazy-loaded per language (see Language support).
 
 A minimap is intentionally not included: an efficient implementation would require a second

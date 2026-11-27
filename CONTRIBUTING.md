@@ -32,6 +32,9 @@ cargo clippy --all-targets --locked -- -D warnings
 cargo test --locked
 ```
 
+Optional but recommended for UI changes: `npm run test:coverage` and the real-app smoke tests
+(`powershell -ExecutionPolicy Bypass -File scripts/smoke/run.ps1`). See [docs/TESTING.md](docs/TESTING.md).
+
 ## Code layout
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). In short:

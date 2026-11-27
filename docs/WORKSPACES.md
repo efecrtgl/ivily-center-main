@@ -111,9 +111,12 @@ Trust is a user decision about folders on this computer, stored only in Ivily Ce
 | Prompt | Shown when an undecided workspace opens (setting `security.workspaceTrust.prompt`). Closing it decides nothing. With prompts off, workspaces open restricted; trust is never granted automatically. |
 
 Enforcement is in the backend: subsystems call `workspace::service::require_capability` (or
-`trust::require`), which fails with error code `workspace_untrusted`. In this version no subsystem
-executes workspace content yet; tasks (Phase 11), terminal profiles (8), language servers (7),
-extensions (16) and debugging (15) must use this gate when they are added.
+`trust::require`), which fails with error code `workspace_untrusted`. Gated subsystems: language
+servers (`languageServers`), Git (`workspaceExecutables`), tasks (`taskExecution`, plus approval of
+each command) and debugging (`debugging`, plus approval of each launch configuration). Terminals
+start only the user's own profiles; extensions are declarative and never come from a workspace
+(workspace recommendations are only listed), so `processLaunch` and `extensions` have nothing to gate
+today.
 
 ## Sessions and crash recovery
 

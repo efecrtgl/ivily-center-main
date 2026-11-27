@@ -7,7 +7,7 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 
 ## Current phase
 
-**Phase 23 — Comprehensive testing:** done. **Next: Phase 24 — Documentation.**
+**Phase 24 — Documentation:** done. **Next: Phase 25 — Installer and first release.**
 
 ## Phases
 
@@ -37,7 +37,8 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 | 21 | Security, performance, stability | done | [docs/SECURITY-REVIEW.md](docs/SECURITY-REVIEW.md) |
 | 22 | Multi-window, accessibility | done | [docs/WINDOWS-AND-ACCESSIBILITY.md](docs/WINDOWS-AND-ACCESSIBILITY.md) |
 | 23 | Comprehensive testing | done | [docs/TESTING.md](docs/TESTING.md): 149 Rust + 185 frontend tests, coverage, real-app smoke tests |
-| 24–25 | See plan | planned | |
+| 24 | Documentation | done | README, ARCHITECTURE (as built, ADRs 11–15), SECURITY, THIRD_PARTY_NOTICES, stale references removed |
+| 25 | Installer and first release | planned | |
 
 ## Phase 3 deliverables
 
@@ -105,17 +106,21 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
   session code. The UI flow (approval dialog, chains, problem matching) is tested with a mocked
   backend. Tasks have not been run interactively in the application window.
 
-## Build / test status (local, 2026-11-27)
+## Build / test status (local, 2026-11-28)
 
 | Check | Result |
 |---|---|
-| `npm test` (Vitest) | 12 files, 81 tests passed |
-| `npm run build` | ok |
+| `npm test` (Vitest) | 32 files, 185 tests passed |
+| `npm run test:coverage` | statements 61.8 %, branches 52.9 %, lines 67.4 % |
+| `npm run build` | ok, no warnings except the main-chunk size note (1.08 MB) |
 | `cargo fmt --check` | ok |
 | `cargo clippy --all-targets --locked -- -D warnings` | ok |
-| `cargo test --locked` | 73 passed |
-| Real-app runs (debug build, no visual inspection) | Verified: v1→v2 migration of an existing database with backup; command-line folder opened as a workspace (title, registry record, last-workspace pointer, session saved on close, **no automatic trust**, nothing written into the folder); last workspace restored on a plain start; deleted folder → launcher with the record kept; killed process → unclean-exit marker; clean exit recorded; window size stable across launches. |
-| Not verified in the real app | Native dialogs (open/save/locate/discover), the trust dialog and launcher interactions, and the rendered appearance — covered by unit/component tests only. |
+| `cargo test --locked` | 149 passed, 1 ignored (benchmark) |
+| `npm audit --omit=dev` / `cargo audit` | 0 vulnerabilities / 0 vulnerabilities (3 informational warnings in Tauri's transitive dependencies) |
+| Real-app smoke tests (`scripts/smoke/run.ps1`) | Workbench renders; Command Palette (76 commands); lazy pages and side-bar views open; second window opens; **no JavaScript exceptions or console errors** |
+| Real-app runs, earlier phases | Database migration with backup; command-line folder → workspace without automatic trust; restore of the last workspace; unclean-exit marker; stable window size |
+| Real external programs | ConPTY shells, PowerShell tasks, Git (local repositories), Node.js scripted LSP server and DAP adapter, real Ivily Optimizer 0.3.0 / Structura 0.1.0 / Envora 0.1.0 builds over IEP, Center's own `--iep` |
+| Not verified | Visual appearance and native dialogs; real language servers and debug adapters; network Git; update download/install (no signed release); Portly over IEP; screen readers |
 
 CI results: see GitHub Actions.
 

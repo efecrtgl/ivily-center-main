@@ -1,8 +1,8 @@
 # Ivily Center — Architecture
 
-Status: **design baseline (Phase 0), foundation implemented in Phase 2**. Sections describe the intended design; each subsystem's
-implementation status is tracked in [../DEVELOPMENT_STATUS.md](../DEVELOPMENT_STATUS.md). When the
-implementation diverges, this document is updated in the same commit.
+Status: **implemented (Phases 0–24)**. This document describes the architecture as built; per-subsystem
+details are in the linked documents and verification status in
+[../DEVELOPMENT_STATUS.md](../DEVELOPMENT_STATUS.md).
 
 ## 1. Process model
 
@@ -16,8 +16,9 @@ implementation diverges, this document is updated in the same commit.
                 │ user-started only             │ on-demand, short-lived
       ┌─────────▼─────────┐            ┌────────▼──────────────┐
       │ shells (ConPTY),  │            │ Ivily modules         │
-      │ language servers, │            │ `exe --iep describe`  │
-      │ tasks, git        │            │ (read-only IEP)       │
+      │ language servers, │            │ `exe --iep …`         │
+      │ tasks, git, debug │            │ (read-only IEP)       │
+      │ adapters          │            │                       │
       └───────────────────┘            └───────────────────────┘
 ```
 
@@ -47,20 +48,22 @@ src-tauri/src/
   db/                      connection, versioned migrations, integrity check
   settings/                schema, defaults, scopes (default < user < workspace), validation
   window/                  window-state persistence, monitor/DPI clamping
-  workspace/ fs/ editor_io/ lang/ lsp/ pty/ git/ search/ tasks/ iep/ modules/ update/ backup/
+  workspace/ fs/ editor_io/ toolchains/ lsp/ terminal/ git/ search/ tasks/ dap/ extensions/
+  iep/ (client + own --iep server) backup/ output/ app_state.rs
+  commands/ also hosts thin modules: modules.rs (IEP dashboard), update.rs, export.rs, notes.rs
 ```
 
 Subsystem modules **do not depend on Tauri** except through narrow traits (event sink, path
 resolver) so they are unit-testable without a window. The single crate will be split into a Cargo
 workspace (`src-tauri/crates/*`) when a subsystem's API stabilises (expected first for `lsp`,
-`pty` and `iep`) — recorded as an ADR when it happens.
+`terminal` and `iep`) — recorded as an ADR when it happens; so far the single crate has been kept.
 
 ## 3. Subsystems and responsibilities
 
 | Subsystem | Responsibility | Owner side |
 |---|---|---|
 | Application core | Startup, state, lifecycle, single instance, crash-safe shutdown | Rust + `app/` |
-| Window manager | Frameless window, title bar, drag regions, state save/restore, DPI/multi-monitor clamping; later multi-window | Rust `window/` + `shell/` |
+| Window manager | Frameless windows, title bar, drag regions, state save/restore, DPI/multi-monitor clamping, multiple windows (one workspace each) | Rust `window/`, `commands/app.rs` + `shell/` |
 | Command registry | Every user action is a command `{id, title, category, when, run}`; menus, palette, shortcuts all dispatch commands | `core/commands` |
 | Keybindings | Default + user bindings, context (`when`) evaluation, conflict detection | `core/keybindings` |
 | Settings | Typed schema with defaults, validation and migration; scopes default < user < workspace | Rust `settings/` + UI |
@@ -70,26 +73,27 @@ workspace (`src-tauri/crates/*`) when a subsystem's API stabilises (expected fir
 | Workspace manager | Workspace records, recents/favourites, profiles, trust, portable workspace file, session | Rust `workspace/` |
 | File explorer / fs | Workspace-scoped path validation, lazy listing, ignore rules, watcher, safe mutations | Rust `fs/` + `features/explorer` |
 | Editor engine | CodeMirror 6 documents/views, groups, tabs, session restore, large-file mode | `features/editor` + Rust `editor_io/` |
-| Language support | Provider registry: id, detection, syntax loader, tier, indentation, comments, folding | `features/languages` |
+| Language support | Provider registry: id, detection, syntax loader, tier; toolchain detection | `src/languages/` + Rust `toolchains/` |
 | LSP manager | Server registry, discovery, process lifecycle, JSON-RPC framing, logs, health | Rust `lsp/` + client glue |
-| Terminal manager | PTY sessions (ConPTY), profiles, resize, lifecycle | Rust `pty/` + xterm.js |
+| Terminal manager | PTY sessions (ConPTY), profiles, resize, lifecycle; also hosts task runs | Rust `terminal/` + xterm.js |
 | Git manager | Git CLI with fixed argv, porcelain v2 parsing, guarded destructive ops | Rust `git/` |
 | Search engine | ripgrep libraries (`ignore`, `grep-*`), streaming, cancellation, replace preview | Rust `search/` |
 | Task engine | Task definitions, approval, process management, history | Rust `tasks/` |
-| Debugging | DAP client, breakpoints model, provider interface | Rust `debug/` (later) |
+| Debugging | DAP transport and launch configurations (Rust), DAP client, breakpoints, UI | Rust `dap/` + `features/debug` |
 | Problems / Output | Diagnostic aggregation; named output channels with redaction | Rust + UI |
 | Notifications | Toasts + notification centre with per-category settings | `core/notifications` |
 | Extension manager | Manifests, permissions, enable/disable; declarative contributions first | Rust `extensions/` |
-| Module manager / IEP | Discovery, describe/request with timeouts, compatibility, dashboard | Rust `iep/`, `modules/` |
-| Update manager | Signed app updates; module update metadata | Rust `update/` |
+| Module manager / IEP | Discovery, version gate, describe/request with timeouts, dashboard; Center's own `--iep` endpoint | Rust `iep/`, `commands/modules.rs` + `features/modules` |
+| Update manager | Signed app updates (tauri-plugin-updater); module update metadata via IEP | Rust `commands/update.rs` + `features/update` |
 | Backup | App-data backup/restore/verify/retention | Rust `backup/` |
-| Resource monitor | Own process + child process stats, sampled only while visible | Rust `monitor/` |
+| Resource monitor | Not implemented (deferred; child processes are visible in their own views) | — |
 
 ## 4. Security architecture
 
 ### 4.1 IPC
-* Capabilities grant only core window permissions and dialog/updater/process plugins. **No**
-  `fs`, `shell`, `http` or `opener`-with-arbitrary-URL permissions.
+* Capabilities grant only core window permissions (to `main` and secondary `w-*` windows). The dialog
+  and updater plugins are used **from Rust only**; the webview has no plugin permissions at all —
+  no `fs`, `shell`, `http`, `dialog`, `updater` or `opener`.
 * Every command validates its input (types via serde with `deny_unknown_fields`, sizes, path
   scope, ids) before doing work. Errors are typed (`AppError`) and never include secrets.
 * CSP: `default-src 'self'`, no remote scripts, no `unsafe-eval`; `freezePrototype: true`.
@@ -113,13 +117,16 @@ Even in trusted workspaces, nothing runs on open: tasks and terminals are starte
 a task's first run shows the exact command line for approval.
 
 ### 4.4 Processes
-Child processes are spawned with explicit argv (never through `cmd /c` string concatenation),
-explicit working directory and an environment built from an allow-list plus user-configured values.
-All are registered, assigned to a Job Object, and killed when their owner closes.
+Child processes are spawned with explicit argv (shell tasks use PowerShell `-EncodedCommand`; `cmd`
+only for quote-free commands), an explicit working directory and the user's environment. Every
+long-lived child (language servers, terminals, tasks, debug adapters, IEP calls) is assigned to a
+Job Object and killed with its process tree when its owner closes. The full inventory of launch
+sites and their gates is in [SECURITY-REVIEW.md](SECURITY-REVIEW.md).
 
 ### 4.5 Previews
-HTML preview renders in an isolated, sandboxed context with no IPC access and scripts disabled by
-default; Markdown is sanitized.
+HTML preview renders in an `<iframe sandbox="">` with no permissions (no scripts, forms, same-origin
+or navigation); Markdown is rendered with marked and sanitized with DOMPurify; links are classified
+and external ones opened only through the validated backend command.
 
 ### 4.6 Logs
 Output channels pass through a redactor (tokens, `Authorization` headers, env vars whose names look
@@ -127,7 +134,8 @@ like secrets). Environment dumps are never logged.
 
 ## 5. Persistence and data ownership
 
-App data: `%LOCALAPPDATA%\IvilyCenter\` — `center.db` (SQLite), `logs\`, `backups\`.
+App data: `%LOCALAPPDATA%\IvilyCenter\` — `center.db` (SQLite), `backups\` (pre-migration copies),
+`app-backups\` (user backups), `notes\`, `extensions\`, `drafts\`.
 
 | Data | Owner | Location |
 |---|---|---|
@@ -135,9 +143,10 @@ App data: `%LOCALAPPDATA%\IvilyCenter\` — `center.db` (SQLite), `logs\`, `back
 | Workspace records, trust, recents, favourites, profiles | Application | DB |
 | Workspace-scoped settings | Workspace | DB by default; optional portable `*.ivily-workspace` file the user saves explicitly |
 | Session (open tabs, layout, cursors) | Session | DB |
-| Notes, bookmarks | Workspace | DB (never written into source files) |
-| Extension settings | Extension | DB, namespaced by extension id |
-| Module integration prefs | Module | DB |
+| Notes | Workspace | `notes\<workspace id>.md` in app data (never written into source files) |
+| Bookmarks, breakpoints | Session | DB (workspace session) |
+| Installed extensions | Application | `extensions\<id>\` in app data |
+| Module integration prefs | Application | DB (user settings `ecosystem.*`) |
 
 Migrations are forward-only, run in a transaction, and a backup of `center.db` is taken before any
 migration that changes existing tables. A database created by a newer Center is opened read-only
@@ -150,23 +159,37 @@ with a clear error instead of being downgraded.
 * **Editor:** one `EditorView` per visible editor group; each open document keeps an
   `EditorState` that is swapped into the view on tab switch (preserves undo history, selection,
   scroll). Language and heavy extensions use `Compartment`s so they can be reconfigured lazily.
-* **Lists** (explorer, search results, problems, git changes) are virtualised.
+* **Lists** render incrementally (explorer children load lazily, search results stream in batches,
+  Quick Open is scored in the backend); secondary pages and xterm.js load on demand.
 * **Themes:** tokens are CSS custom properties on `:root[data-theme]`; components use tokens only.
   Pixel themes additionally swap the component style layer (borders, fonts, icon pack, motion),
   which is why themes are more than colour maps. CodeMirror and xterm.js themes are derived from
   the same tokens.
 
-## 7. Implemented so far (Phases 2–3)
+## 7. Subsystem documents
 
 | Subsystem | Implementation | Docs |
 |---|---|---|
 | Database, app state | `src-tauri/src/db/`, `app_state.rs` | [DATABASE.md](DATABASE.md) |
 | Settings | `src-tauri/src/settings/`, `src/core/settings.js` | [DATABASE.md](DATABASE.md#settings-resolution) |
-| Output | `src-tauri/src/output/`, `src/core/output.js` | [COMMANDS.md](COMMANDS.md#output-channels) |
-| Window manager | `src-tauri/src/window/`, `src/shell/TitleBar.jsx`, `src/platform/window.js` | below |
-| Theme engine, icons | `src/theme/`, `src/icons/` | [THEMES.md](THEMES.md) |
-| Commands, keybindings, views, notifications | `src/core/` | [COMMANDS.md](COMMANDS.md) |
-| Workspaces, launcher, Workspace Trust, sessions (Phase 3) | `src-tauri/src/workspace/`, `src/workspace/`, `src/features/launcher/`, `src/features/trust/` | [WORKSPACES.md](WORKSPACES.md) |
+| Output, notifications, commands, keybindings, views | `src-tauri/src/output/`, `src/core/` | [COMMANDS.md](COMMANDS.md) |
+| Theme engine, icons, customization | `src/theme/`, `src/icons/`, `src/features/customize/` | [THEMES.md](THEMES.md) |
+| Workspaces, launcher, trust, sessions | `src-tauri/src/workspace/`, `src/workspace/`, `src/features/launcher/`, `src/features/trust/` | [WORKSPACES.md](WORKSPACES.md) |
+| Explorer / filesystem | `src-tauri/src/fs/`, `src/features/explorer/` | [EXPLORER.md](EXPLORER.md) |
+| Editor | `src-tauri/src/editor_io/`, `src/features/editor/` | [EDITOR.md](EDITOR.md) |
+| Languages, toolchains, LSP | `src/languages/`, `src-tauri/src/toolchains/`, `src-tauri/src/lsp/`, `src/features/lsp/` | [LANGUAGES.md](LANGUAGES.md), [LSP.md](LSP.md) |
+| Terminal | `src-tauri/src/terminal/`, `src/features/terminal/` | [TERMINAL.md](TERMINAL.md) |
+| Git | `src-tauri/src/git/`, `src/features/git/` | [GIT.md](GIT.md) |
+| Search, Quick Open, palette, shortcuts | `src-tauri/src/search/`, `src/features/search/`, `palette/`, `keybindings/` | [SEARCH.md](SEARCH.md) |
+| Tasks | `src-tauri/src/tasks/`, `src/features/tasks/` | [TASKS.md](TASKS.md) |
+| Problems, output export | `src/features/problems/`, `src-tauri/src/commands/export.rs` | [PROBLEMS.md](PROBLEMS.md) |
+| Notes, bookmarks, previews | `src/features/notes/`, `bookmarks/`, `preview/` | [NOTES.md](NOTES.md) |
+| Debugging | `src-tauri/src/dap/`, `src/features/debug/` | [DEBUGGING.md](DEBUGGING.md) |
+| Extensions | `src-tauri/src/extensions/`, `src/features/extensions/` | [EXTENSIONS.md](EXTENSIONS.md) |
+| IEP, ecosystem dashboard | `src-tauri/src/iep/`, `src/features/modules/` | [IEP.md](IEP.md) |
+| Updates | `src-tauri/src/commands/update.rs`, `src/features/update/` | [UPDATES.md](UPDATES.md) |
+| Backup | `src-tauri/src/backup/`, `src/features/backup/` | [BACKUP.md](BACKUP.md) |
+| Windows, accessibility | `src-tauri/src/window/`, `commands/app.rs` | [WINDOWS-AND-ACCESSIBILITY.md](WINDOWS-AND-ACCESSIBILITY.md) |
 
 **Window manager.** The window is frameless (`decorations: false`) with the native shadow and native
 edge resizing. It starts hidden; Rust validates saved bounds against the monitors' *work areas*
@@ -188,6 +211,11 @@ hovering the custom maximize button (Win+Z and edge snapping work).
 | 5 | Terminal: `portable-pty` (ConPTY) + `@xterm/xterm` | Custom ConPTY bindings (more risk, same result) |
 | 6 | Git: system `git` CLI with porcelain v2 `-z`; respects user config & credential helpers | `git2`/`gix` (credential/hook/config parity issues for write ops) |
 | 7 | Search: `ignore` + `grep-searcher`/`grep-regex` (ripgrep internals) | Spawning `rg` (extra binary dependency) |
-| 8 | LSP: Rust owns processes & framing; JS client glue (evaluate `@codemirror/lsp-client` in Phase 7) | Rust-only client (UI features need editor-side integration anyway) |
+| 8 | LSP: Rust owns processes & framing; `@codemirror/lsp-client` in the UI with a custom workspace adapter | Rust-only client (UI features need editor-side integration anyway) |
 | 9 | IEP client: CLI transport per IEP 0.1 + Envora adapter; named pipes only once providers ship them | Inventing a new transport ahead of providers |
 | 10 | Updates: `tauri-plugin-updater` with the ecosystem's shared minisign key | Custom updater |
+| 11 | Tasks run in a terminal session; shell tasks via PowerShell `-EncodedCommand`; approval bound to a hash of the exact command | `cmd /c` strings (quoting ambiguity), no approval (workspace code runs silently) |
+| 12 | Extensions are declarative JSON only (themes, icon packs, snippets, shortcuts, file associations) | A JS extension host (code execution, permission model, sandboxing cost) |
+| 13 | IEP modules are version-gated through the executable's version resource before any launch | Probing every candidate (older builds open their GUI instead of answering) |
+| 14 | Backups are verified zip archives; restores are staged and applied before the database opens | Live restore into an open database (inconsistent state) |
+| 15 | One window per workspace; per-window scoping for workspace, watchers and processes | Shared workspaces across windows (conflicting sessions and saves) |

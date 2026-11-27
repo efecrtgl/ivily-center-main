@@ -83,6 +83,8 @@ All notable changes to this project are documented here. The format follows
   per-window cleanup), accessible-name audit for all views and pages, Windows high-contrast styles.
 - Phase 23: workbench integration test, model tests, coverage reporting, real-app smoke tests over
   the WebView2 DevTools protocol (`scripts/smoke/`), testing guide.
+- Phase 24: documentation reconciled with the implementation (README feature overview and install
+  guide, architecture as built, security guarantees, third-party notices).
 
 ### Fixed
 - Validation errors now include their message when shown in logs, histories and statuses.
