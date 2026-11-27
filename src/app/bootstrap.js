@@ -12,6 +12,7 @@ import { installBookmarks } from '../features/bookmarks/model.js';
 import { installDebug } from '../features/debug/model.js';
 import { installExtensions, loadExtensions } from '../features/extensions/model.js';
 import { installUpdates, maybeCheckOnStartup } from '../features/update/model.js';
+import { maybeAutoBackup } from '../features/backup/model.js';
 import { loadUserCustomizations } from '../features/customize/model.js';
 import { registerWorkbenchContributions } from './contributions.js';
 import { loadSettings, settingsStore } from '../core/settings.js';
@@ -142,7 +143,9 @@ export async function bootstrap() {
   if (info.status === 'fulfilled') {
     appStore.set({ ready: true, info: info.value });
     for (const issue of info.value?.startupIssues ?? []) {
-      notify({ severity: issue.severity, title: issue.code === 'db_recovered' ? 'Database recovered' : 'Storage problem', message: issue.message, source: 'database', sticky: true });
+      const title = { db_recovered: 'Database recovered', backup_restored: 'Backup restored', backup_restore_failed: 'Restore failed' }[issue.code] ?? 'Storage problem';
+      const actions = issue.code === 'db_recovered' ? [{ label: 'Restore from a backup', command: 'backup.show' }] : [];
+      notify({ severity: issue.severity, title, message: issue.message, source: 'database', sticky: issue.code !== 'backup_restored', actions });
     }
   } else {
     appStore.set({ ready: true, info: null });
@@ -173,6 +176,7 @@ export async function bootstrap() {
     ipc.sessionReady().catch(() => {});
     // At most once a day, a little after startup, and only when enabled.
     setTimeout(() => maybeCheckOnStartup().catch(() => {}), 15000);
+    setTimeout(() => maybeAutoBackup().catch(() => {}), 30000);
   } else {
     showPage('launcher');
   }

@@ -26,8 +26,9 @@ import { KeybindingsView } from '../features/keybindings/KeybindingsView.jsx';
 import { PreviewView } from '../features/preview/PreviewView.jsx';
 import { ModulesView } from '../features/modules/ModulesView.jsx';
 import { UpdatesView } from '../features/update/UpdatesView.jsx';
+import { BackupsView } from '../features/backup/BackupsView.jsx';
 
-const PAGES = { launcher: LauncherView, trust: TrustManagerView, welcome: WelcomeView, tools: ToolsView, diff: DiffView, keybindings: KeybindingsView, preview: PreviewView, modules: ModulesView, updates: UpdatesView };
+const PAGES = { launcher: LauncherView, trust: TrustManagerView, welcome: WelcomeView, tools: ToolsView, diff: DiffView, keybindings: KeybindingsView, preview: PreviewView, modules: ModulesView, updates: UpdatesView, backups: BackupsView };
 
 /**
  * Workbench layout:

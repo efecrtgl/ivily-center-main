@@ -249,6 +249,18 @@ export const updateCheck = () => call('update_check');
 export const updateInstall = (expectedVersion) => call('update_install', { expectedVersion });
 export const updateInfo = () => call('update_info');
 
+// ── Backups (Ivily Center's own data only) ───────────────────────────────────
+export const backupList = () => call('backup_list');
+export const backupCreate = (kind) => call('backup_create', { kind });
+export const backupVerify = (name) => call('backup_verify', { name });
+export const backupRestore = (name) => call('backup_restore', { name });
+export const backupCancelRestore = () => call('backup_cancel_restore');
+export const backupDelete = (name) => call('backup_delete', { name });
+export const backupExport = (name) => call('backup_export', { name });
+export const backupExportConfirm = (name, token) => call('backup_export_confirm', { name, token });
+export const backupImport = () => call('backup_import');
+export const appRestart = () => call('app_restart');
+
 // ── Tasks (running requires the taskExecution trust capability + approval) ──
 export const tasksList = () => call('tasks_list');
 /** Starts one task in a terminal session; `approve` records the user's approval of its command. */

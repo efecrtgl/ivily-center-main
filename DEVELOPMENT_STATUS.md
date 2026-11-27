@@ -7,7 +7,7 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 
 ## Current phase
 
-**Phase 19 — Update manager:** done. **Next: Phase 20 — Backup and restore.**
+**Phase 20 — Backup and restore:** done. **Next: Phase 21 — Security, performance and stability.**
 
 ## Phases
 
@@ -33,7 +33,8 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 | 17 | IEP client and Center's `--iep` endpoint | done | [docs/IEP.md](docs/IEP.md); verified against real Optimizer/Structura/Envora builds |
 | 18 | Ivily Ecosystem dashboard | done | [docs/IEP.md](docs/IEP.md#ivily-ecosystem-dashboard-module-manager) |
 | 19 | Update manager | done | [docs/UPDATES.md](docs/UPDATES.md); end-to-end install untested until a signed release exists |
-| 20–25 | See plan | planned | |
+| 20 | Backup and restore | done | [docs/BACKUP.md](docs/BACKUP.md) |
+| 21–25 | See plan | planned | |
 
 ## Phase 3 deliverables
 

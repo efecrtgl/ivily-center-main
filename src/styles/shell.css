@@ -601,3 +601,4 @@ button.statusbar__item:hover { background: color-mix(in srgb, var(--color-status
 .update-notes { max-height: 22rem; padding: 0.4rem 0; }
 .update-progress { display: block; width: 100%; margin-top: 0.3rem; }
 .statusbar__item--accent { color: var(--color-accent); }
+.kb-num { width: 4.5rem; }

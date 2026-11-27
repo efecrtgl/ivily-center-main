@@ -73,6 +73,9 @@ All notable changes to this project are documented here. The format follows
   open module, per-module disable; Welcome page entry points.
 - Phase 19: signed app updates from GitHub Releases (check, notes, confirmed install, daily
   startup check, history) and the About page.
+- Phase 20: backups of Ivily Center's own data (verified zip archives with manifest and hashes,
+  manual/automatic with retention, staged restore with safety backup, export/import).
 
 ### Fixed
+- Validation errors now include their message when shown in logs, histories and statuses.
 - The main window no longer grows by its border width on every launch (inner size is persisted).
