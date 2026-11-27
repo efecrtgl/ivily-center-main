@@ -3,6 +3,8 @@
 //   2. contributions (commands, views, keybindings)
 //   3. settings → effects (theme, motion, font size, notification preferences)
 //   4. layout, window title, output events, shortcut dispatcher, startup issues
+//   5. workspace startup plan (decided by the backend: command-line path, restore, launcher,
+//      welcome), session flush before the window closes, "ready" signal for crash detection
 import { initThemes, setActiveTheme, applyMotionPreference, applyUiFontSize, DEFAULT_THEME } from '../theme/index.js';
 import { registerWorkbenchContributions } from './contributions.js';
 import { loadSettings, settingsStore } from '../core/settings.js';
@@ -13,7 +15,11 @@ import { initLayout } from '../core/layout.js';
 import { initWindowTitle } from '../core/title.js';
 import { startOutput, uiLog } from '../core/output.js';
 import * as ipc from '../platform/ipc.js';
+import { beforeWindowClose } from '../platform/window.js';
 import { appStore } from './appStore.js';
+import { applyStartup, showPage } from '../workspace/store.js';
+import { flushSession } from '../workspace/session.js';
+import { errorMessage } from '../core/errors.js';
 
 /** Apply settings that have UI side effects. Only changed values are re-applied. */
 function applySettingEffects(values, prev) {
@@ -103,5 +109,19 @@ export async function bootstrap() {
   }
   // Apply effects once even if nothing changed after load (e.g. outside Tauri).
   applySettingEffects(settingsStore.get().values, null);
+
+  if (ipc.isTauri()) {
+    try {
+      await applyStartup(await ipc.workspaceStartup());
+    } catch (e) {
+      showPage('launcher');
+      notify({ severity: 'error', title: 'Could not restore the workspace', message: errorMessage(e), source: 'workspace' });
+    }
+    beforeWindowClose(() => flushSession());
+    // The workbench restored: reset the failed-start counter used for safe mode.
+    ipc.sessionReady().catch(() => {});
+  } else {
+    showPage('launcher');
+  }
   uiLog('info', 'workbench ready');
 }

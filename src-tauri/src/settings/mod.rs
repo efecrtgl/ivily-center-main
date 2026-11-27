@@ -158,8 +158,16 @@ pub enum Source {
 #[derive(Debug, Clone, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct Resolved {
+    /// Effective value.
     pub value: Value,
+    /// Layer the effective value comes from.
     pub source: Source,
+    /// The user layer's own (valid) value, if set — shown when a workspace overrides it.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_value: Option<Value>,
+    /// The workspace layer's own (valid) value, if set.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub workspace_value: Option<Value>,
 }
 
 #[derive(Debug, Clone, Serialize, PartialEq, Eq)]
@@ -203,7 +211,8 @@ pub fn resolve(conn: &Connection, layer: &WorkspaceLayer<'_>) -> AppResult<Resol
     let mut values = BTreeMap::new();
     let mut invalid = Vec::new();
     for def in SETTINGS {
-        let mut resolved = Resolved { value: def.default.to_json(), source: Source::Default };
+        let mut resolved =
+            Resolved { value: def.default.to_json(), source: Source::Default, user_value: None, workspace_value: None };
         let layers: [(&BTreeMap<String, String>, Source, &'static str, bool); 2] = [
             (&user, Source::User, "user", true),
             (&ws, Source::Workspace, "workspace", def.scopes == ScopeSet::UserAndWorkspace),
@@ -212,7 +221,15 @@ pub fn resolve(conn: &Connection, layer: &WorkspaceLayer<'_>) -> AppResult<Resol
             let Some(raw) = map.get(def.key) else { continue };
             let parsed = serde_json::from_str::<Value>(raw).ok().and_then(|v| validate(def, &v).ok());
             match parsed {
-                Some(v) if allowed => resolved = Resolved { value: v, source },
+                Some(v) if allowed => {
+                    if source == Source::User {
+                        resolved.user_value = Some(v.clone());
+                    } else {
+                        resolved.workspace_value = Some(v.clone());
+                    }
+                    resolved.value = v;
+                    resolved.source = source;
+                }
                 _ => invalid.push(InvalidStored { key: def.key.to_string(), scope: scope_name }),
             }
         }
@@ -393,7 +410,10 @@ mod tests {
         assert_eq!(resolve(&c, &WorkspaceLayer::None).unwrap().values["appearance.theme"].source, Source::Default);
         set(&c, &Scope::User, "appearance.theme", &json!("glass")).unwrap();
         let r = resolve(&c, &WorkspaceLayer::None).unwrap();
-        assert_eq!(r.values["appearance.theme"], Resolved { value: json!("glass"), source: Source::User });
+        assert_eq!(
+            (&r.values["appearance.theme"].value, r.values["appearance.theme"].source),
+            (&json!("glass"), Source::User)
+        );
         assert_eq!(get_user(&c, "appearance.theme").unwrap(), json!("glass"));
         reset(&c, &Scope::User, "appearance.theme").unwrap();
         assert_eq!(get_user(&c, "appearance.theme").unwrap(), json!("modern-dark"));
@@ -423,7 +443,10 @@ mod tests {
         set(&c, &Scope::User, "appearance.theme", &json!("glass")).unwrap();
         set(&c, &Scope::workspace("ws1").unwrap(), "appearance.theme", &json!("pixel-dark")).unwrap();
         let r = resolve(&c, &WorkspaceLayer::Db("ws1")).unwrap();
-        assert_eq!(r.values["appearance.theme"], Resolved { value: json!("pixel-dark"), source: Source::Workspace });
+        let theme = &r.values["appearance.theme"];
+        assert_eq!((&theme.value, theme.source), (&json!("pixel-dark"), Source::Workspace));
+        assert_eq!(theme.user_value, Some(json!("glass")), "user value is still reported");
+        assert_eq!(theme.workspace_value, Some(json!("pixel-dark")));
         // Another workspace and no workspace see the user value: no leakage between workspaces.
         assert_eq!(resolve(&c, &WorkspaceLayer::Db("ws2")).unwrap().values["appearance.theme"].value, json!("glass"));
         assert_eq!(resolve(&c, &WorkspaceLayer::None).unwrap().values["appearance.theme"].value, json!("glass"));

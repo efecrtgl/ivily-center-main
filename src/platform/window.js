@@ -29,3 +29,23 @@ export function onMaximizeChange(fn) {
     unlisten?.();
   };
 }
+
+/**
+ * Run `fn` before the window closes (e.g. flush the session). The window closes afterwards even
+ * if `fn` fails; `fn` is bounded by a timeout so a hung save cannot block closing.
+ * @param {() => Promise<void>} fn
+ * @returns {() => void}
+ */
+export function beforeWindowClose(fn, timeoutMs = 2000) {
+  const w = win();
+  if (!w) return () => {};
+  let unlisten = null;
+  let cancelled = false;
+  w.onCloseRequested(async () => {
+    await Promise.race([fn().catch(() => {}), new Promise((r) => setTimeout(r, timeoutMs))]);
+  }).then((u) => (cancelled ? u() : (unlisten = u)));
+  return () => {
+    cancelled = true;
+    unlisten?.();
+  };
+}

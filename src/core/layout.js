@@ -3,6 +3,7 @@
 import { createStore } from './store.js';
 import { setContext } from './context.js';
 import * as ipc from '../platform/ipc.js';
+import { markSessionDirty, registerSessionParticipant } from '../workspace/session.js';
 
 export const LAYOUT_KEY = 'ui.layout';
 export const LIMITS = { sidebarWidth: [170, 640], panelHeight: [100, 900] };
@@ -57,9 +58,22 @@ function syncContext(l) {
 }
 
 let saveTimer = null;
+let participant = null;
 
-/** Load the persisted layout and start persisting changes (debounced). */
+/**
+ * Load the persisted layout and start persisting changes (debounced).
+ * The global `ui.layout` is the default for windows without a workspace and for workspaces
+ * opened for the first time; each workspace's own layout is part of its session.
+ */
 export async function initLayout() {
+  if (!participant) {
+    participant = registerSessionParticipant('layout', {
+      save: () => ({ ...layoutStore.get() }),
+      restore: (data) => {
+        if (data !== undefined) layoutStore.set(sanitizeLayout(data));
+      },
+    });
+  }
   if (ipc.isTauri()) {
     try {
       layoutStore.set(sanitizeLayout(await ipc.uiStateGet(LAYOUT_KEY)));
@@ -71,6 +85,7 @@ export async function initLayout() {
   return layoutStore.subscribe(() => {
     const l = layoutStore.get();
     syncContext(l);
+    markSessionDirty();
     if (!ipc.isTauri()) return;
     clearTimeout(saveTimer);
     saveTimer = setTimeout(() => ipc.uiStateSet(LAYOUT_KEY, l).catch(() => {}), 400);

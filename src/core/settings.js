@@ -18,7 +18,8 @@ import * as ipc from '../platform/ipc.js';
  * @property {('user' | 'workspace')[]} scopes
  */
 
-/** @typedef {{ value: unknown, source: 'default' | 'user' | 'workspace' }} ResolvedValue */
+/** @typedef {{ value: unknown, source: 'default' | 'user' | 'workspace', userValue?: unknown, workspaceValue?: unknown }} ResolvedValue */
+/** @typedef {'user' | 'workspace'} SettingScope */
 
 /** @type {import('./store.js').Store<{ loaded: boolean, schema: SettingSchema[], values: Record<string, ResolvedValue> }>} */
 export const settingsStore = createStore({ loaded: false, schema: [], values: {} });
@@ -53,31 +54,35 @@ export const getSetting = (key) => settingsStore.get().values[key]?.value;
 export const useSetting = (key) => useStore(settingsStore, (s) => s.values[key]?.value);
 
 /**
- * Set a user-scope value. The backend validates; on error the previous value is restored and
- * the error (`{ code, message }`) is rethrown for the caller to display.
- * @param {string} key @param {unknown} value
+ * Set a value in the user scope or in the current window's workspace. The backend validates
+ * (and, for workspace files, refuses to overwrite external changes); errors (`{ code, message }`)
+ * are rethrown for the caller to display. Resolved values are re-read afterwards because a
+ * workspace value may still override a changed user value.
+ * @param {string} key @param {unknown} value @param {SettingScope} [scope]
  */
-export async function setSetting(key, value) {
-  const prev = settingsStore.get().values[key];
-  settingsStore.set((s) => ({ ...s, values: { ...s.values, [key]: { value, source: 'user' } } }));
-  if (!ipc.isTauri()) return value;
-  try {
-    const normalized = await ipc.settingsSet(key, value);
-    settingsStore.set((s) => ({ ...s, values: { ...s.values, [key]: { value: normalized, source: 'user' } } }));
-    return normalized;
-  } catch (err) {
-    settingsStore.set((s) => ({ ...s, values: { ...s.values, [key]: prev } }));
-    throw err;
+export async function setSetting(key, value, scope = 'user') {
+  if (!ipc.isTauri()) {
+    settingsStore.set((s) => ({ ...s, values: { ...s.values, [key]: { value, source: scope } } }));
+    return value;
   }
+  const normalized = await ipc.settingsSet(key, value, scope);
+  await refreshValues();
+  return normalized;
 }
 
-/** Reset a user-scope value to its default. @param {string} key */
-export async function resetSetting(key) {
+/** Remove a value from a scope so the next lower layer applies. @param {string} key @param {SettingScope} [scope] */
+export async function resetSetting(key, scope = 'user') {
+  if (ipc.isTauri()) {
+    await ipc.settingsReset(key, scope);
+    await refreshValues();
+    return;
+  }
   const def = settingsStore.get().schema.find((s) => s.key === key);
-  if (ipc.isTauri()) await ipc.settingsReset(key);
-  if (ipc.isTauri()) await refreshValues();
-  else if (def) settingsStore.set((s) => ({ ...s, values: { ...s.values, [key]: { value: def.default, source: 'default' } } }));
+  if (def) settingsStore.set((s) => ({ ...s, values: { ...s.values, [key]: { value: def.default, source: 'default' } } }));
 }
+
+/** Settings that may be set per workspace. @param {SettingSchema[]} schema */
+export const workspaceScoped = (schema) => schema.filter((s) => s.scopes.includes('workspace'));
 
 /**
  * Search settings. Every whitespace-separated term must match the key, title, description,

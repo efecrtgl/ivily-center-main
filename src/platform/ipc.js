@@ -74,3 +74,71 @@ export const outputAppend = (channel, level, message) => call('output_append', {
 export const uiStateGet = (key) => call('ui_state_get', { key });
 /** @param {string} key `ui.*` @param {unknown} value */
 export const uiStateSet = (key, value) => call('ui_state_set', { key, value });
+
+// ── Workspaces ───────────────────────────────────────────────────────────────
+// The UI never passes filesystem paths: locations come from native dialogs opened by the backend,
+// from known workspace ids, or from opaque tokens returned by the backend.
+
+/**
+ * @typedef {{ id: string, kind: 'folder' | 'file', path: string, name: string, favorite: boolean, group: string,
+ *             createdAt: number, lastOpenedAt: number, openCount: number }} WorkspaceRecord
+ * @typedef {'taskExecution' | 'processLaunch' | 'languageServers' | 'extensions' | 'debugging' | 'workspaceExecutables'} Capability
+ * @typedef {{ path: string, pathKey: string, decision: 'trusted' | 'denied' | null, capabilities: Capability[],
+ *             source: { kind: 'none' | 'folder' | 'session' } | { kind: 'parent', path: string } }} FolderTrust
+ * @typedef {{ level: 'trusted' | 'partial' | 'restricted', capabilities: Capability[], folders: FolderTrust[], needsDecision: boolean }} WorkspaceTrust
+ * @typedef {{ name: string, path: string, available: boolean, problem?: string }} WorkspaceFolder
+ * @typedef {{ record: WorkspaceRecord, folders: WorkspaceFolder[], file: string | null, trust: WorkspaceTrust }} WorkspaceInfo
+ */
+
+/** @returns {Promise<WorkspaceRecord[]>} */
+export const workspaceList = () => call('workspace_list');
+/** @param {string[]} ids @returns {Promise<{ id: string, status: 'available' | 'missing' | 'inaccessible' | 'unreachable' }[]>} */
+export const workspaceAvailability = (ids) => call('workspace_availability', { ids });
+/** @returns {Promise<WorkspaceInfo | null>} */
+export const workspaceCurrent = () => call('workspace_current');
+/** Native dialog; resolves to null when cancelled. @param {'folder' | 'file'} kind @returns {Promise<WorkspaceInfo | null>} */
+export const workspaceOpenDialog = (kind) => call('workspace_open_dialog', { kind });
+/** @param {string} id @returns {Promise<WorkspaceInfo>} */
+export const workspaceOpenRecent = (id) => call('workspace_open_recent', { id });
+/** @param {string} token @returns {Promise<WorkspaceInfo>} */
+export const workspaceOpenDiscovered = (token) => call('workspace_open_discovered', { token });
+export const workspaceClose = () => call('workspace_close');
+/** @returns {Promise<{ show: 'workspace' | 'launcher' | 'welcome', workspace: WorkspaceInfo | null,
+ *   health: { previousCrashed: boolean, safeMode: boolean }, problem: string | null }>} */
+export const workspaceStartup = () => call('workspace_startup');
+/** @param {string} id @param {{ name?: string, favorite?: boolean, group?: string }} patch @returns {Promise<WorkspaceRecord>} */
+export const workspaceUpdateMeta = (id, patch) => call('workspace_update_meta', { id, patch });
+/** @param {string} id */
+export const workspaceRemove = (id) => call('workspace_remove', { id });
+/** Native dialog; null when cancelled. @param {string} id @returns {Promise<WorkspaceRecord | null>} */
+export const workspaceRelocate = (id) => call('workspace_relocate', { id });
+/** Native dialog; null when cancelled.
+ * @returns {Promise<{ root: string, projects: { token: string, name: string, path: string, markers: string[], knownWorkspaceId: string | null }[] } | null>} */
+export const workspaceDiscover = () => call('workspace_discover');
+/** Native save dialog; null when cancelled.
+ * @returns {Promise<{ status: 'saved', workspace: WorkspaceInfo } | { status: 'confirmOverwrite', token: string, path: string } | null>} */
+export const workspaceSaveAs = () => call('workspace_save_as');
+/** @param {string} token */
+export const workspaceSaveAsConfirm = (token) => call('workspace_save_as_confirm', { token });
+/** @returns {Promise<WorkspaceInfo>} */
+export const workspaceReloadFile = () => call('workspace_reload_file');
+
+// ── Trust ────────────────────────────────────────────────────────────────────
+/** @returns {Promise<WorkspaceTrust | null>} */
+export const trustCurrent = () => call('trust_current');
+/** @param {{ scope: 'folder' | 'parent', capabilities?: Capability[] | null, remember: boolean }} request @returns {Promise<WorkspaceTrust>} */
+export const trustGrant = (request) => call('trust_grant', { request });
+/** @returns {Promise<WorkspaceTrust>} */
+export const trustDeny = () => call('trust_deny');
+/** @returns {Promise<{ path: string, pathKey: string, decision: 'trusted' | 'denied', includeChildren: boolean,
+ *   capabilities: Capability[], persistent: boolean, updatedAt: number }[]>} */
+export const trustList = () => call('trust_list');
+/** @param {string} pathKey */
+export const trustRevoke = (pathKey) => call('trust_revoke', { pathKey });
+
+// ── Session ──────────────────────────────────────────────────────────────────
+/** @returns {Promise<{ state: Record<string, unknown> | null, recovered: boolean }>} */
+export const sessionLoad = () => call('session_load');
+/** @param {Record<string, unknown>} session */
+export const sessionSave = (session) => call('session_save', { session });
+export const sessionReady = () => call('session_ready');
