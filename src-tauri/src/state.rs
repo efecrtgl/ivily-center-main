@@ -1,11 +1,16 @@
 //! Process-wide application state managed by Tauri.
 
-use crate::core::{data_dir, StartupIssue};
+use crate::core::{data_dir, Severity, StartupIssue};
 use crate::db::{self, DbHealth};
 use crate::output::OutputHub;
-use crate::settings;
+use crate::settings::{self, WorkspaceLayer};
+use crate::workspace::grants::PathGrants;
+use crate::workspace::session::{self, StartupHealth};
+use crate::workspace::trust::TrustRecord;
+use crate::workspace::OpenWorkspace;
 use parking_lot::Mutex;
 use rusqlite::Connection;
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
@@ -17,15 +22,26 @@ pub struct AppState {
     pub data_dir: PathBuf,
     /// Last normal (not maximized/minimized) bounds of the main window.
     pub window_normal: Mutex<Option<crate::window::Bounds>>,
+    /// The workspace open in each window, keyed by window label. All workspace-scoped commands
+    /// resolve their workspace from the *calling* window, never from a UI-supplied id.
+    pub workspaces: Mutex<HashMap<String, OpenWorkspace>>,
+    /// Trust granted "for this session only" (never written to disk).
+    pub session_trust: Mutex<Vec<TrustRecord>>,
+    pub grants: PathGrants,
+    pub startup_health: StartupHealth,
+    /// Folder or workspace file passed on the command line (consumed by the first startup call).
+    pub cli_path: Mutex<Option<PathBuf>>,
+    pub startup_done: Mutex<bool>,
 }
 
 impl AppState {
-    pub fn init() -> Self {
-        Self::init_in(&data_dir())
+    pub fn init(cli_path: Option<PathBuf>) -> Self {
+        Self::init_in(&data_dir(), cli_path)
     }
 
-    pub fn init_in(dir: &Path) -> Self {
+    pub fn init_in(dir: &Path, cli_path: Option<PathBuf>) -> Self {
         let output = Arc::new(OutputHub::new());
+        output.register("workspace", "Workspace").expect("valid channel id");
         output.info("app", format!("{} {} starting", crate::APP_NAME, crate::APP_VERSION));
 
         let opened = db::open_app_db(dir);
@@ -40,7 +56,7 @@ impl AppState {
             Ok(_) => {}
             Err(e) => output.error("settings", format!("setting key migration failed: {e}")),
         }
-        match settings::resolve(&opened.conn, None) {
+        match settings::resolve(&opened.conn, &WorkspaceLayer::None) {
             Ok(r) => {
                 for inv in &r.invalid {
                     output.warn(
@@ -55,11 +71,21 @@ impl AppState {
             Err(e) => {
                 output.error("settings", format!("could not load settings: {e}"));
                 issues.push(StartupIssue::new(
-                    crate::core::Severity::Error,
+                    Severity::Error,
                     "settings_unavailable",
                     "Settings could not be loaded; defaults are used.",
                 ));
             }
+        }
+
+        let startup_health = session::begin_run(&opened.conn).unwrap_or_else(|e| {
+            output.error("workspace", format!("could not record startup: {e}"));
+            StartupHealth { previous_crashed: false, safe_mode: false }
+        });
+        if startup_health.safe_mode {
+            output.warn("workspace", "previous starts did not complete; safe mode: the last workspace is not restored");
+        } else if startup_health.previous_crashed {
+            output.warn("workspace", "the previous session did not shut down cleanly");
         }
 
         Self {
@@ -69,15 +95,21 @@ impl AppState {
             startup_issues: issues,
             data_dir: dir.to_path_buf(),
             window_normal: Mutex::new(None),
+            workspaces: Mutex::new(HashMap::new()),
+            session_trust: Mutex::new(Vec::new()),
+            grants: PathGrants::default(),
+            startup_health,
+            cli_path: Mutex::new(cli_path),
+            startup_done: Mutex::new(false),
         }
     }
 }
 
 fn level_of(i: &StartupIssue) -> crate::output::Level {
     match i.severity {
-        crate::core::Severity::Info => crate::output::Level::Info,
-        crate::core::Severity::Warning => crate::output::Level::Warn,
-        crate::core::Severity::Error => crate::output::Level::Error,
+        Severity::Info => crate::output::Level::Info,
+        Severity::Warning => crate::output::Level::Warn,
+        Severity::Error => crate::output::Level::Error,
     }
 }
 
@@ -86,9 +118,10 @@ mod tests {
     #[test]
     fn initializes_in_empty_directory() {
         let dir = tempfile::tempdir().unwrap();
-        let s = super::AppState::init_in(dir.path());
+        let s = super::AppState::init_in(dir.path(), None);
         assert!(s.startup_issues.is_empty());
         assert!(!s.output.read("database", 0).unwrap().is_empty());
         assert!(dir.path().join(crate::db::DB_FILE).exists());
+        assert!(!s.startup_health.safe_mode);
     }
 }

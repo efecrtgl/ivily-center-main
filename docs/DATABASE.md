@@ -22,6 +22,7 @@ Implementation: `src-tauri/src/db/`, `src-tauri/src/settings/`, `src-tauri/src/a
 | Version | Migration | Tables (owner) |
 |---|---|---|
 | 1 | `settings_and_app_state` | `settings` (settings), `app_state` (window manager / UI layout) |
+| 2 | `workspaces_trust_sessions` | `workspace`, `workspace_session` (workspace manager), `workspace_trust` (trust) |
 
 `settings`: `(scope, scope_id, key) → value (JSON), updated_at`. `scope` is `user` or
 `workspace`; `scope_id` is empty for user scope and a Center-generated workspace id otherwise.

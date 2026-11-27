@@ -23,7 +23,7 @@ pub const SETTINGS: &[SettingDef] = &[
         category: "Appearance",
         ty: T::Enum(THEMES),
         default: D::Str("modern-dark"),
-        scopes: ScopeSet::User,
+        scopes: ScopeSet::UserAndWorkspace,
     },
     SettingDef {
         key: "appearance.uiFontSize",
@@ -41,6 +41,30 @@ pub const SETTINGS: &[SettingDef] = &[
         category: "Appearance",
         ty: T::Enum(&[("system", "Follow system"), ("on", "On"), ("off", "Off")]),
         default: D::Str("system"),
+        scopes: ScopeSet::User,
+    },
+    // ── Workbench ─────────────────────────────────────────────────────────────
+    SettingDef {
+        key: "workbench.startup",
+        title: "On startup",
+        description: "What to show when Ivily Center starts. A folder passed on the command line is always opened.",
+        category: "Workbench",
+        ty: T::Enum(&[
+            ("lastWorkspace", "Reopen the last workspace"),
+            ("launcher", "Show the launcher"),
+            ("welcome", "Show the welcome page"),
+        ]),
+        default: D::Str("lastWorkspace"),
+        scopes: ScopeSet::User,
+    },
+    // ── Security ──────────────────────────────────────────────────────────────
+    SettingDef {
+        key: "security.workspaceTrust.prompt",
+        title: "Ask to trust new workspaces",
+        description: "Ask whether to trust a folder the first time it is opened. When off, undecided workspaces open in Restricted Mode without asking. Trust is never granted automatically.",
+        category: "Security",
+        ty: T::Bool,
+        default: D::Bool(true),
         scopes: ScopeSet::User,
     },
     // ── Window ────────────────────────────────────────────────────────────────

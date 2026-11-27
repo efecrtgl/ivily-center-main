@@ -49,16 +49,16 @@ export const events = {
 export const appInfo = () => call('app_info');
 
 // ── Settings ─────────────────────────────────────────────────────────────────
-/** @typedef {{ kind: 'user' } | { kind: 'workspace', workspaceId: string }} SettingScope */
-const USER = /** @type {SettingScope} */ ({ kind: 'user' });
+/** `workspace` always means the workspace open in this window (resolved by the backend). */
+/** @typedef {'user' | 'workspace'} SettingScope */
 
 export const settingsSchema = () => call('settings_schema');
-/** @param {string} [workspaceId] */
-export const settingsValues = (workspaceId) => call('settings_values', { workspaceId: workspaceId ?? null });
+/** Resolved values for this window: default < user < its workspace. */
+export const settingsValues = () => call('settings_values');
 /** @param {string} key @param {unknown} value @param {SettingScope} [scope] */
-export const settingsSet = (key, value, scope = USER) => call('settings_set', { key, value, scope });
+export const settingsSet = (key, value, scope = 'user') => call('settings_set', { key, value, scope });
 /** @param {string} key @param {SettingScope} [scope] */
-export const settingsReset = (key, scope = USER) => call('settings_reset', { key, scope });
+export const settingsReset = (key, scope = 'user') => call('settings_reset', { key, scope });
 
 // ── Output ───────────────────────────────────────────────────────────────────
 export const outputChannels = () => call('output_channels');

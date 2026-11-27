@@ -16,6 +16,10 @@ pub enum AppError {
     #[error("permission denied: {0}")]
     PermissionDenied(String),
 
+    /// The current workspace is not trusted for this capability (see workspace::trust).
+    #[error("workspace is not trusted for {0}")]
+    Untrusted(&'static str),
+
     #[error("operation cancelled")]
     Cancelled,
 
@@ -45,6 +49,7 @@ impl AppError {
             AppError::Validation { code, .. } => code,
             AppError::NotFound(_) => "not_found",
             AppError::PermissionDenied(_) => "permission_denied",
+            AppError::Untrusted(_) => "workspace_untrusted",
             AppError::Cancelled => "cancelled",
             AppError::Conflict(_) => "conflict",
             AppError::Database(_) => "database",

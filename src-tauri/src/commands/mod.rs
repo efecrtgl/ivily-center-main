@@ -5,6 +5,7 @@ pub mod app;
 pub mod output;
 pub mod settings;
 pub mod ui_state;
+pub mod workspace;
 
 /// Event names emitted to the webview.
 pub mod events {

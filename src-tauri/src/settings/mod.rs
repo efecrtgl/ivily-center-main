@@ -178,13 +178,28 @@ pub struct ResolvedSettings {
     pub invalid: Vec<InvalidStored>,
 }
 
-/// Resolve every registered setting for the given (optional) workspace.
-pub fn resolve(conn: &Connection, workspace: Option<&Scope>) -> AppResult<ResolvedSettings> {
+/// Where the workspace layer of settings comes from.
+pub enum WorkspaceLayer<'a> {
+    None,
+    /// Folder workspaces: rows in `settings` with scope `workspace` and this id.
+    Db(&'a str),
+    /// Workspace files: the file's `settings` object.
+    Values(&'a serde_json::Map<String, Value>),
+}
+
+/// Raw workspace-layer values (unvalidated JSON text per key).
+pub fn workspace_layer_raw(conn: &Connection, layer: &WorkspaceLayer<'_>) -> AppResult<BTreeMap<String, String>> {
+    Ok(match layer {
+        WorkspaceLayer::None => BTreeMap::new(),
+        WorkspaceLayer::Db(id) => load_scope(conn, &Scope::Workspace(id.to_string()))?,
+        WorkspaceLayer::Values(map) => map.iter().map(|(k, v)| (k.clone(), v.to_string())).collect(),
+    })
+}
+
+/// Resolve every registered setting: default < user < workspace layer.
+pub fn resolve(conn: &Connection, layer: &WorkspaceLayer<'_>) -> AppResult<ResolvedSettings> {
     let user = load_scope(conn, &Scope::User)?;
-    let ws = match workspace {
-        Some(s @ Scope::Workspace(_)) => load_scope(conn, s)?,
-        _ => BTreeMap::new(),
-    };
+    let ws = workspace_layer_raw(conn, layer)?;
     let mut values = BTreeMap::new();
     let mut invalid = Vec::new();
     for def in SETTINGS {
@@ -204,6 +219,18 @@ pub fn resolve(conn: &Connection, workspace: Option<&Scope>) -> AppResult<Resolv
         values.insert(def.key, resolved);
     }
     Ok(ResolvedSettings { values, invalid })
+}
+
+/// Validate a value for the workspace scope without storing it (workspace files).
+pub fn validate_workspace_value(key: &str, value: &Value) -> AppResult<Value> {
+    let def = known(key)?;
+    check_scope(def, &Scope::Workspace(String::new()))?;
+    validate(def, value)
+}
+
+/// Check that a key exists and accepts workspace scope.
+pub fn check_workspace_key(key: &str) -> AppResult<()> {
+    check_scope(known(key)?, &Scope::Workspace(String::new()))
 }
 
 /// Validate and store a value. Returns the normalized value.
@@ -316,23 +343,13 @@ pub fn schema_dto() -> Vec<SettingSchemaDto> {
         .collect()
 }
 
-/// Wire form of a scope in IPC requests.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct ScopeArg {
-    pub kind: String,
-    #[serde(default)]
-    pub workspace_id: Option<String>,
-}
-
-impl ScopeArg {
-    pub fn into_scope(self) -> AppResult<Scope> {
-        match (self.kind.as_str(), self.workspace_id) {
-            ("user", None) => Ok(Scope::User),
-            ("workspace", Some(id)) => Scope::workspace(&id),
-            _ => Err(AppError::validation("invalid_scope", "scope must be 'user' or 'workspace' with an id")),
-        }
-    }
+/// Wire form of a scope in IPC requests. `workspace` always means the workspace open in the
+/// calling window, so the UI cannot address another workspace's settings.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum ScopeArg {
+    User,
+    Workspace,
 }
 
 #[cfg(test)]
@@ -373,9 +390,9 @@ mod tests {
     #[test]
     fn set_resolve_and_reset_user_value() {
         let c = conn();
-        assert_eq!(resolve(&c, None).unwrap().values["appearance.theme"].source, Source::Default);
+        assert_eq!(resolve(&c, &WorkspaceLayer::None).unwrap().values["appearance.theme"].source, Source::Default);
         set(&c, &Scope::User, "appearance.theme", &json!("glass")).unwrap();
-        let r = resolve(&c, None).unwrap();
+        let r = resolve(&c, &WorkspaceLayer::None).unwrap();
         assert_eq!(r.values["appearance.theme"], Resolved { value: json!("glass"), source: Source::User });
         assert_eq!(get_user(&c, "appearance.theme").unwrap(), json!("glass"));
         reset(&c, &Scope::User, "appearance.theme").unwrap();
@@ -387,7 +404,7 @@ mod tests {
         let c = conn();
         assert!(set(&c, &Scope::User, "nope.key", &json!(1)).is_err());
         let ws = Scope::workspace("ws_1").unwrap();
-        assert!(set(&c, &ws, "appearance.theme", &json!("glass")).is_err());
+        assert!(set(&c, &ws, "appearance.uiFontSize", &json!(14)).is_err());
         assert!(Scope::workspace("../evil").is_err());
         assert!(Scope::workspace("").is_err());
     }
@@ -398,9 +415,29 @@ mod tests {
         // Simulate a stored workspace value for a user-only setting (e.g. hand-edited database).
         c.execute("INSERT INTO settings VALUES ('workspace', 'ws1', 'appearance.uiFontSize', '18', 0)", []).unwrap();
         set(&c, &Scope::User, "appearance.uiFontSize", &json!(15)).unwrap();
-        let r = resolve(&c, Some(&Scope::workspace("ws1").unwrap())).unwrap();
+        let r = resolve(&c, &WorkspaceLayer::Db("ws1")).unwrap();
         assert_eq!(r.values["appearance.uiFontSize"].value, json!(15));
         assert_eq!(r.invalid, vec![InvalidStored { key: "appearance.uiFontSize".into(), scope: "workspace" }]);
+
+        // Workspace-capable setting: the workspace value wins over the user value.
+        set(&c, &Scope::User, "appearance.theme", &json!("glass")).unwrap();
+        set(&c, &Scope::workspace("ws1").unwrap(), "appearance.theme", &json!("pixel-dark")).unwrap();
+        let r = resolve(&c, &WorkspaceLayer::Db("ws1")).unwrap();
+        assert_eq!(r.values["appearance.theme"], Resolved { value: json!("pixel-dark"), source: Source::Workspace });
+        // Another workspace and no workspace see the user value: no leakage between workspaces.
+        assert_eq!(resolve(&c, &WorkspaceLayer::Db("ws2")).unwrap().values["appearance.theme"].value, json!("glass"));
+        assert_eq!(resolve(&c, &WorkspaceLayer::None).unwrap().values["appearance.theme"].value, json!("glass"));
+
+        // The file layer behaves the same way; invalid file values are reported, not applied.
+        let mut file = serde_json::Map::new();
+        file.insert("appearance.theme".into(), json!("retro-terminal"));
+        file.insert("appearance.reduceMotion".into(), json!("on"));
+        let r = resolve(&c, &WorkspaceLayer::Values(&file)).unwrap();
+        assert_eq!(r.values["appearance.theme"].value, json!("retro-terminal"));
+        assert_eq!(r.values["appearance.reduceMotion"].source, Source::Default);
+        assert!(r.invalid.iter().any(|i| i.key == "appearance.reduceMotion"));
+        assert!(validate_workspace_value("appearance.theme", &json!("glass")).is_ok());
+        assert!(validate_workspace_value("appearance.uiFontSize", &json!(14)).is_err());
     }
 
     #[test]
@@ -408,7 +445,7 @@ mod tests {
         let c = conn();
         c.execute("INSERT INTO settings VALUES ('user', '', 'appearance.theme', '\"removed-theme\"', 0)", []).unwrap();
         c.execute("INSERT INTO settings VALUES ('user', '', 'future.setting', 'true', 0)", []).unwrap();
-        let r = resolve(&c, None).unwrap();
+        let r = resolve(&c, &WorkspaceLayer::None).unwrap();
         assert_eq!(r.values["appearance.theme"].value, json!("modern-dark"));
         assert_eq!(r.invalid.len(), 1);
         let n: i64 = c.query_row("SELECT count(*) FROM settings", [], |r| r.get(0)).unwrap();
@@ -433,12 +470,8 @@ mod tests {
 
     #[test]
     fn scope_arg_parsing() {
-        let user: ScopeArg = serde_json::from_value(json!({ "kind": "user" })).unwrap();
-        assert_eq!(user.into_scope().unwrap(), Scope::User);
-        let ws: ScopeArg = serde_json::from_value(json!({ "kind": "workspace", "workspaceId": "abc" })).unwrap();
-        assert_eq!(ws.into_scope().unwrap(), Scope::Workspace("abc".into()));
-        let bad: ScopeArg = serde_json::from_value(json!({ "kind": "workspace" })).unwrap();
-        assert!(bad.into_scope().is_err());
-        assert!(serde_json::from_value::<ScopeArg>(json!({ "kind": "user", "x": 1 })).is_err());
+        assert_eq!(serde_json::from_value::<ScopeArg>(json!("user")).unwrap(), ScopeArg::User);
+        assert_eq!(serde_json::from_value::<ScopeArg>(json!("workspace")).unwrap(), ScopeArg::Workspace);
+        assert!(serde_json::from_value::<ScopeArg>(json!({ "kind": "workspace", "workspaceId": "x" })).is_err());
     }
 }
