@@ -48,6 +48,10 @@ pub struct AppState {
     pub terminals: Mutex<HashMap<u64, crate::terminal::Session>>,
     pub terminal_next: std::sync::atomic::AtomicU64,
     pub terminal_profiles: Mutex<Option<Vec<crate::terminal::Profile>>>,
+    /// Running searches (cancellation flags) by UI-chosen id.
+    pub searches: Mutex<HashMap<u64, std::sync::Arc<std::sync::atomic::AtomicBool>>>,
+    /// Quick Open file index per window.
+    pub file_index: Mutex<HashMap<String, crate::commands::search::FileIndex>>,
 }
 
 impl AppState {
@@ -135,6 +139,8 @@ impl AppState {
             terminals: Mutex::new(HashMap::new()),
             terminal_next: std::sync::atomic::AtomicU64::new(1),
             terminal_profiles: Mutex::new(None),
+            searches: Mutex::new(HashMap::new()),
+            file_index: Mutex::new(HashMap::new()),
         }
     }
 }

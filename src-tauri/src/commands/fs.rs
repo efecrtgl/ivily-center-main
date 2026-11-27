@@ -51,6 +51,7 @@ pub fn sync_watcher(app: &AppHandle, label: &str) {
         let handle = watch::watch(
             roots,
             Arc::new(move |change| {
+                super::search::invalidate_index(&emitter.state::<AppState>(), &target_label);
                 let _ = emitter.emit_to(target_label.as_str(), FS_CHANGED, change);
             }),
             move |msg| output.warn("workspace", msg),

@@ -13,6 +13,7 @@ pub mod fs;
 pub mod git;
 pub mod lsp;
 pub mod output;
+pub mod search;
 pub mod settings;
 pub mod state;
 pub mod terminal;
@@ -132,6 +133,10 @@ pub fn run() {
             commands::git::git_init,
             commands::git::git_ignore,
             commands::git::git_clone,
+            commands::search::search_run,
+            commands::search::search_cancel,
+            commands::search::search_replace,
+            commands::search::quick_open,
             commands::fs::fs_list,
             commands::fs::fs_create_file,
             commands::fs::fs_create_dir,
