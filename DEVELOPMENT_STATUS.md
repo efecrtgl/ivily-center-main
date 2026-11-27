@@ -7,7 +7,7 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 
 ## Current phase
 
-**Phase 22 — Multi-window and accessibility:** done. **Next: Phase 23 — Comprehensive testing.**
+**Phase 23 — Comprehensive testing:** done. **Next: Phase 24 — Documentation.**
 
 ## Phases
 
@@ -36,7 +36,8 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 | 20 | Backup and restore | done | [docs/BACKUP.md](docs/BACKUP.md) |
 | 21 | Security, performance, stability | done | [docs/SECURITY-REVIEW.md](docs/SECURITY-REVIEW.md) |
 | 22 | Multi-window, accessibility | done | [docs/WINDOWS-AND-ACCESSIBILITY.md](docs/WINDOWS-AND-ACCESSIBILITY.md) |
-| 23–25 | See plan | planned | |
+| 23 | Comprehensive testing | done | [docs/TESTING.md](docs/TESTING.md): 149 Rust + 185 frontend tests, coverage, real-app smoke tests |
+| 24–25 | See plan | planned | |
 
 ## Phase 3 deliverables
 
