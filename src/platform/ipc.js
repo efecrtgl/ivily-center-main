@@ -39,6 +39,7 @@ export function onEvent(event, handler) {
 export const events = {
   settingsChanged: 'settings://changed',
   outputEntry: 'output://entry',
+  fsChanged: 'fs://changed',
 };
 
 /**
@@ -142,3 +143,25 @@ export const sessionLoad = () => call('session_load');
 /** @param {Record<string, unknown>} session */
 export const sessionSave = (session) => call('session_save', { session });
 export const sessionReady = () => call('session_ready');
+
+// ── Files (workspace-scoped: root index + relative path) ─────────────────────
+/**
+ * @typedef {{ root: number, path: string }} ItemRef
+ * @typedef {{ name: string, kind: 'file' | 'dir' | 'link', size: number, modified: number, hidden: boolean, ignored: boolean, readonly: boolean }} FsEntry
+ */
+/** @returns {Promise<{ entries: FsEntry[], truncated: boolean, ignored: boolean }>} */
+export const fsList = (root, path) => call('fs_list', { root, path });
+export const fsCreateFile = (root, path) => call('fs_create_file', { root, path });
+export const fsCreateDir = (root, path) => call('fs_create_dir', { root, path });
+export const fsRename = (root, path, newName) => call('fs_rename', { root, path, newName });
+/** @param {ItemRef[]} items @param {ItemRef} dest @param {'fail' | 'rename'} onConflict */
+export const fsCopy = (items, dest, onConflict) => call('fs_copy', { items, dest, onConflict });
+/** @param {ItemRef[]} items @param {ItemRef} dest */
+export const fsMove = (items, dest) => call('fs_move', { items, dest });
+export const fsDuplicate = (root, path) => call('fs_duplicate', { root, path });
+/** @param {ItemRef[]} items */
+export const fsTrash = (items) => call('fs_trash', { items });
+/** @param {ItemRef[]} items */
+export const fsDeletePermanently = (items) => call('fs_delete_permanently', { items });
+export const fsProperties = (root, path) => call('fs_properties', { root, path });
+export const fsReveal = (root, path) => call('fs_reveal', { root, path });

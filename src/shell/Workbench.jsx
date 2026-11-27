@@ -13,6 +13,7 @@ import { TrustManagerView } from '../features/trust/TrustManagerView.jsx';
 import { TrustDialog } from '../features/trust/TrustDialog.jsx';
 import { RestrictedBanner } from '../features/trust/RestrictedBanner.jsx';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
+import { ContextMenu } from './ContextMenu.jsx';
 import { workspaceStore } from '../workspace/store.js';
 
 const PAGES = { launcher: LauncherView, trust: TrustManagerView, welcome: WelcomeView };
@@ -85,6 +86,7 @@ export function Workbench() {
       <Toasts />
       <TrustDialog />
       <ConfirmDialog />
+      <ContextMenu />
     </div>
   );
 }

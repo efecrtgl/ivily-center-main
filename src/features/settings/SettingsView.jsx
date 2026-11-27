@@ -70,6 +70,20 @@ function SettingRow({ s, resolved, scope }) {
         onKeyDown={(e) => e.key === 'Enter' && draft !== null && commit(Number(draft))}
       />
     );
+  } else if (s.type === 'stringList') {
+    const text = draft ?? (Array.isArray(value) ? value.join('\n') : '');
+    control = (
+      <textarea
+        id={id}
+        className="input setting__list"
+        rows={Math.min(8, Math.max(3, text.split('\n').length + 1))}
+        spellCheck={false}
+        value={text}
+        aria-invalid={Boolean(error)}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={() => draft !== null && commit(draft.split('\n').map((l) => l.trim()).filter(Boolean))}
+      />
+    );
   } else {
     control = (
       <input

@@ -37,6 +37,10 @@ export const MODERN_PACK = {
     'folder-open': s('M3 8V6a1 1 0 0 1 1-1h5l2 2h8a1 1 0 0 1 1 1v2M3 8l2 11h14l2-9H5.5z'),
     star: s('M12 3l2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9z'),
     pencil: s('M4 20h4L19 9l-4-4L4 16zM14 6l4 4'),
+    'file-plus': s('M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M12 11v6M9 14h6'),
+    'folder-plus': s('M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM12 10v6M9 13h6'),
+    refresh: s('M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7'),
+    collapse: s('M4 4h16v16H4zM8 12h8'),
     workspace: s('M4 5h16v4H4zM4 11h7v8H4zM13 11h7v8h-7z'),
   },
 };

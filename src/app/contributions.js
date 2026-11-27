@@ -16,6 +16,7 @@ import {
   closeWorkspace, openFolder, openWorkspaceFile, reloadWorkspaceFile, saveWorkspaceAs, showPage, toggleCurrentFavorite, workspaceStore,
 } from '../workspace/store.js';
 import { ExplorerView } from '../features/explorer/ExplorerView.jsx';
+import { baseName, collapseAll, explorerStore, keyOf, parentKeyOf, parseKey, refreshAll, startCreate } from '../features/explorer/model.js';
 import { SettingsView } from '../features/settings/SettingsView.jsx';
 import { OutputView, outputUi } from '../features/output/OutputView.jsx';
 
@@ -25,6 +26,16 @@ function zoomBy(delta) {
   const current = Number(getSetting('appearance.uiFontSize') ?? ZOOM.default);
   const next = delta === 0 ? ZOOM.default : Math.min(ZOOM.max, Math.max(ZOOM.min, current + delta));
   if (next !== current) return setSetting('appearance.uiFontSize', next);
+}
+
+/** Folder for "new file/folder" commands: the focused folder, or the parent of the focused file. */
+function explorerTargetDir() {
+  const s = explorerStore.get();
+  if (!s.focus) return keyOf(0, '');
+  const { rel } = parseKey(s.focus);
+  if (!rel) return s.focus;
+  const entry = s.dirs[parentKeyOf(s.focus)]?.entries?.find((e) => e.name === baseName(rel));
+  return entry?.kind === 'dir' ? s.focus : parentKeyOf(s.focus);
 }
 
 let registered = false;
@@ -60,6 +71,10 @@ export function registerWorkbenchContributions() {
     { id: 'workspace.reloadFile', title: 'Reload Workspace File', category: 'Workspace', when: "workspaceKind == 'file'", run: () => reloadWorkspaceFile() },
     { id: 'workspace.toggleFavorite', title: 'Add / Remove Workspace from Favorites', category: 'Workspace', icon: 'star', when: 'workspaceOpen', run: () => toggleCurrentFavorite() },
     { id: 'workspace.close', title: 'Close Workspace', category: 'Workspace', when: 'workspaceOpen', run: () => closeWorkspace() },
+    { id: 'explorer.newFile', title: 'New File…', category: 'File', icon: 'file-plus', when: 'workspaceOpen', run: () => { updateLayout({ sidebarVisible: true, sidebarView: 'explorer' }); startCreate('newFile', explorerTargetDir()); } },
+    { id: 'explorer.newFolder', title: 'New Folder…', category: 'File', icon: 'folder-plus', when: 'workspaceOpen', run: () => { updateLayout({ sidebarVisible: true, sidebarView: 'explorer' }); startCreate('newFolder', explorerTargetDir()); } },
+    { id: 'explorer.refresh', title: 'Refresh Explorer', category: 'File', icon: 'refresh', when: 'workspaceOpen', run: () => refreshAll() },
+    { id: 'explorer.collapseAll', title: 'Collapse Folders in Explorer', category: 'File', icon: 'collapse', when: 'workspaceOpen', run: () => collapseAll() },
     { id: 'trust.manage', title: 'Manage Workspace Trust', category: 'Workspace Trust', icon: 'shield', run: () => showPage('trust') },
     {
       id: 'trust.prompt',

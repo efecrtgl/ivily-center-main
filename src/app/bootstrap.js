@@ -19,6 +19,7 @@ import { beforeWindowClose } from '../platform/window.js';
 import { appStore } from './appStore.js';
 import { applyStartup, showPage } from '../workspace/store.js';
 import { flushSession } from '../workspace/session.js';
+import { onFsChanged, registerExplorerSession } from '../features/explorer/model.js';
 import { errorMessage } from '../core/errors.js';
 
 /** Apply settings that have UI side effects. Only changed values are re-applied. */
@@ -77,6 +78,8 @@ export async function bootstrap() {
   });
 
   startOutput();
+  registerExplorerSession();
+  ipc.onEvent(ipc.events.fsChanged, onFsChanged);
   installKeybindingDispatcher(window);
   installWebviewGuards();
   initWindowTitle();

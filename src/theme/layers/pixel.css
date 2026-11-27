@@ -74,3 +74,6 @@
 :root[data-style='pixel'] .restricted-banner { border-bottom-width: var(--px); background-image: repeating-linear-gradient(45deg, transparent 0 6px, rgba(0, 0, 0, 0.08) 6px 8px); }
 :root[data-style='pixel'] .launcher__chip { border-radius: 0; border-width: var(--px); }
 :root[data-style='pixel'] .settings__tab--active { background: var(--color-accent); color: var(--color-accent-fg); }
+
+:root[data-style='pixel'] .explorer-row--selected { background: var(--color-surface-active); color: var(--color-fg); }
+:root[data-style='pixel'] .context-menu { border-color: var(--color-border); }
