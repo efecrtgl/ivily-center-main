@@ -102,9 +102,23 @@ export function markSessionDirty() {
   }, SAVE_DELAY_MS);
 }
 
+/** @type {Set<() => Promise<void>>} */
+const flushHooks = new Set();
+
+/**
+ * Async work that must finish before the session is saved for a workspace switch or window close
+ * (e.g. writing editor recovery drafts while the old workspace is still current).
+ * @param {() => Promise<void>} fn
+ */
+export function registerFlushHook(fn) {
+  flushHooks.add(fn);
+  return () => flushHooks.delete(fn);
+}
+
 /** Save now (before switching workspaces or closing the window). */
 export async function flushSession() {
   cancelPendingSave();
+  await Promise.allSettled([...flushHooks].map((fn) => fn()));
   if (!sink.canSave()) return;
   try {
     await sink.save(collectSession());

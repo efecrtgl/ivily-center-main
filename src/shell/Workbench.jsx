@@ -14,6 +14,10 @@ import { TrustDialog } from '../features/trust/TrustDialog.jsx';
 import { RestrictedBanner } from '../features/trust/RestrictedBanner.jsx';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
 import { ContextMenu } from './ContextMenu.jsx';
+import { QuickPick } from './QuickPick.jsx';
+import { EditorArea } from '../features/editor/EditorArea.jsx';
+import { editorStore } from '../features/editor/model.js';
+import { showPage } from '../workspace/store.js';
 import { workspaceStore } from '../workspace/store.js';
 
 const PAGES = { launcher: LauncherView, trust: TrustManagerView, welcome: WelcomeView };
@@ -33,6 +37,8 @@ export function Workbench() {
   const SidebarView = sidebar?.component;
   const page = useStore(workspaceStore, (s) => s.page);
   const Page = PAGES[page] ?? WelcomeView;
+  const hasEditors = useStore(editorStore, (s) => s.groups.some((g) => g.tabs.length > 0));
+  const showEditors = page === 'editor' && hasEditors;
 
   return (
     <div className="app-shell">
@@ -60,9 +66,18 @@ export function Workbench() {
         <div className="main-column">
           <main className="editor-area" aria-label="Editor area">
             <RestrictedBanner />
-            <div className="editor-area__page">
-              <Page />
-            </div>
+            {showEditors ? (
+              <EditorArea />
+            ) : (
+              <div className="editor-area__page">
+                {hasEditors && (
+                  <button type="button" className="btn btn--ghost editor-area__back" onClick={() => showPage('editor')}>
+                    ← Back to editors
+                  </button>
+                )}
+                <Page />
+              </div>
+            )}
           </main>
           {layout.panelVisible && (
             <>
@@ -87,6 +102,7 @@ export function Workbench() {
       <TrustDialog />
       <ConfirmDialog />
       <ContextMenu />
+      <QuickPick />
     </div>
   );
 }

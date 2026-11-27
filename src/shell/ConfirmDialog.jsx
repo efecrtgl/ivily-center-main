@@ -2,18 +2,18 @@ import { useEffect, useRef } from 'react';
 import { useStore } from '../core/store.js';
 import { answerDialog, dialogStore } from '../core/dialogs.js';
 
-/** Host for confirmation dialogs. Escape and the backdrop cancel; the safe option has focus. */
+/** Host for confirmation/choice dialogs. Escape and the backdrop dismiss; the first choice has focus. */
 export function ConfirmDialog() {
   const req = useStore(dialogStore, (s) => s.queue[0]);
-  const cancelRef = useRef(null);
+  const firstRef = useRef(null);
 
   useEffect(() => {
     if (!req) return;
-    cancelRef.current?.focus();
+    firstRef.current?.focus();
     const onKey = (e) => {
       if (e.key === 'Escape') {
         e.stopPropagation();
-        answerDialog(req.id, false);
+        answerDialog(req.id, null);
       }
     };
     window.addEventListener('keydown', onKey, true);
@@ -22,18 +22,23 @@ export function ConfirmDialog() {
 
   if (!req) return null;
   return (
-    <div className="modal-backdrop" role="presentation" onMouseDown={(e) => e.target === e.currentTarget && answerDialog(req.id, false)}>
+    <div className="modal-backdrop" role="presentation" onMouseDown={(e) => e.target === e.currentTarget && answerDialog(req.id, null)}>
       <div className="modal" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-message">
         <h2 id="confirm-title">{req.title}</h2>
         {req.message && <p id="confirm-message" className="muted">{req.message}</p>}
         {req.detail && <p className="mono modal__detail">{req.detail}</p>}
         <div className="modal__actions">
-          <button type="button" ref={cancelRef} className="btn" onClick={() => answerDialog(req.id, false)}>
-            {req.cancelLabel ?? 'Cancel'}
-          </button>
-          <button type="button" className={`btn ${req.danger ? 'btn--danger' : 'btn--primary'}`} onClick={() => answerDialog(req.id, true)}>
-            {req.confirmLabel ?? 'OK'}
-          </button>
+          {req.choices.map((c, i) => (
+            <button
+              key={c.id}
+              type="button"
+              ref={i === 0 ? firstRef : undefined}
+              className={`btn${c.danger ? ' btn--danger' : c.primary ? ' btn--primary' : ''}`}
+              onClick={() => answerDialog(req.id, c.id)}
+            >
+              {c.label}
+            </button>
+          ))}
         </div>
       </div>
     </div>

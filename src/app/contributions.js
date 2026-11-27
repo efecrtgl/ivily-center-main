@@ -18,6 +18,26 @@ import {
 import { ExplorerView } from '../features/explorer/ExplorerView.jsx';
 import { baseName, collapseAll, explorerStore, keyOf, parentKeyOf, parseKey, refreshAll, startCreate } from '../features/explorer/model.js';
 import { SettingsView } from '../features/settings/SettingsView.jsx';
+import {
+  activeEditor, activateTab, closeAllEditors, closeTab, editorStore, focusGroup, newUntitled, openFileDialog, reopenClosed, revertDocument,
+  saveAll, saveDocument, splitEditor,
+} from '../features/editor/model.js';
+import { pickEncoding, pickEol, pickLanguage } from '../features/editor/EditorStatus.jsx';
+
+function cycleTab(delta) {
+  const s = editorStore.get();
+  const g = s.groups.find((x) => x.id === s.activeGroup);
+  if (!g || g.tabs.length < 2) return;
+  const i = g.tabs.findIndex((t) => t.key === g.active);
+  activateTab(g.id, g.tabs[(i + delta + g.tabs.length) % g.tabs.length].key);
+}
+
+function withEditor(fn) {
+  return () => {
+    const ed = activeEditor();
+    return ed ? fn(ed) : undefined;
+  };
+}
 import { OutputView, outputUi } from '../features/output/OutputView.jsx';
 
 const ZOOM = { min: 10, max: 20, default: 13 };
@@ -84,6 +104,26 @@ export function registerWorkbenchContributions() {
       when: 'workspaceOpen',
       run: () => workspaceStore.set((s) => ({ ...s, trustPrompt: true })),
     },
+    { id: 'file.newUntitled', title: 'New Text File', category: 'File', icon: 'file-plus', run: () => newUntitled() },
+    { id: 'file.open', title: 'Open File…', category: 'File', icon: 'files', run: () => openFileDialog() },
+    { id: 'file.save', title: 'Save', category: 'File', when: 'editorFocus', run: withEditor((ed) => saveDocument(ed.key)) },
+    { id: 'file.saveAs', title: 'Save As…', category: 'File', when: 'editorFocus', run: withEditor((ed) => saveDocument(ed.key, { saveAs: true })) },
+    { id: 'file.saveAll', title: 'Save All', category: 'File', run: () => saveAll() },
+    { id: 'file.revert', title: 'Revert File', category: 'File', when: 'editorFocus && activeEditorDirty', run: withEditor((ed) => revertDocument(ed.key)) },
+    { id: 'editor.close', title: 'Close Editor', category: 'View', when: 'editorFocus', run: withEditor((ed) => closeTab(ed.groupId, ed.key)) },
+    { id: 'editor.closeAll', title: 'Close All Editors', category: 'View', run: () => closeAllEditors() },
+    { id: 'editor.reopenClosed', title: 'Reopen Closed Editor', category: 'View', run: () => reopenClosed() },
+    { id: 'editor.nextTab', title: 'Next Editor', category: 'View', run: () => cycleTab(1) },
+    { id: 'editor.previousTab', title: 'Previous Editor', category: 'View', run: () => cycleTab(-1) },
+    { id: 'editor.splitRight', title: 'Split Editor Right', category: 'View', icon: 'split', run: () => splitEditor('horizontal') },
+    { id: 'editor.splitDown', title: 'Split Editor Down', category: 'View', run: () => splitEditor('vertical') },
+    { id: 'editor.focusGroup1', title: 'Focus First Editor Group', category: 'View', run: () => focusGroup(editorStore.get().groups[0]?.id) },
+    { id: 'editor.focusGroup2', title: 'Focus Second Editor Group', category: 'View', run: () => focusGroup(editorStore.get().groups[1]?.id) },
+    { id: 'editor.focusGroup3', title: 'Focus Third Editor Group', category: 'View', run: () => focusGroup(editorStore.get().groups[2]?.id) },
+    { id: 'editor.toggleWordWrap', title: 'Toggle Word Wrap', category: 'View', run: () => setSetting('editor.wordWrap', getSetting('editor.wordWrap') === 'on' ? 'off' : 'on') },
+    { id: 'editor.changeEncoding', title: 'Change File Encoding', category: 'File', when: 'editorFocus', run: () => pickEncoding() },
+    { id: 'editor.changeEol', title: 'Change End of Line Sequence', category: 'File', when: 'editorFocus', run: () => pickEol() },
+    { id: 'editor.changeLanguage', title: 'Change Language Mode', category: 'File', when: 'editorFocus', run: () => pickLanguage() },
     { id: 'window.minimize', title: 'Minimize Window', category: 'Window', icon: 'minimize', run: () => minimizeWindow() },
     { id: 'window.toggleMaximize', title: 'Maximize / Restore Window', category: 'Window', icon: 'maximize', run: () => toggleMaximizeWindow() },
     { id: 'window.close', title: 'Close Window', category: 'Window', icon: 'close', run: () => closeWindow() },
@@ -109,5 +149,22 @@ export function registerWorkbenchContributions() {
     { key: 'Ctrl+0', command: 'view.zoomReset' },
     { key: 'Ctrl+Alt+O', command: 'workspace.openFolder' },
     { key: 'Ctrl+R', command: 'workspace.showLauncher' },
+    { key: 'Ctrl+N', command: 'file.newUntitled' },
+    { key: 'Ctrl+O', command: 'file.open' },
+    { key: 'Ctrl+S', command: 'file.save' },
+    { key: 'Ctrl+Shift+S', command: 'file.saveAs' },
+    { key: 'Ctrl+Alt+S', command: 'file.saveAll' },
+    { key: 'Ctrl+W', command: 'editor.close' },
+    { key: 'Ctrl+F4', command: 'editor.close' },
+    { key: 'Ctrl+Shift+T', command: 'editor.reopenClosed' },
+    { key: 'Ctrl+Tab', command: 'editor.nextTab' },
+    { key: 'Ctrl+PageDown', command: 'editor.nextTab' },
+    { key: 'Ctrl+Shift+Tab', command: 'editor.previousTab' },
+    { key: 'Ctrl+PageUp', command: 'editor.previousTab' },
+    { key: 'Ctrl+\\', command: 'editor.splitRight' },
+    { key: 'Ctrl+1', command: 'editor.focusGroup1' },
+    { key: 'Ctrl+2', command: 'editor.focusGroup2' },
+    { key: 'Ctrl+3', command: 'editor.focusGroup3' },
+    { key: 'Alt+Z', command: 'editor.toggleWordWrap' },
   ]);
 }

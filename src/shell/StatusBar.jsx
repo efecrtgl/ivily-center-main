@@ -9,6 +9,7 @@ import { ThemePicker } from './ThemePicker.jsx';
 import { statusUi, setStatusPopover } from './statusUi.js';
 import { showPage, workspaceStore } from '../workspace/store.js';
 import { LEVEL_LABEL } from '../workspace/trust.js';
+import { EditorStatus } from '../features/editor/EditorStatus.jsx';
 
 export function StatusBar() {
   const unread = useStore(notificationStore, unreadCount);
@@ -45,6 +46,7 @@ Click to show the launcher`} onClick={() => showPage('launcher')}>
         )}
       </div>
       <div className="statusbar__group">
+        <EditorStatus />
         <button
           type="button"
           className="statusbar__item"

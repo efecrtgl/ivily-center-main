@@ -165,3 +165,24 @@ export const fsTrash = (items) => call('fs_trash', { items });
 export const fsDeletePermanently = (items) => call('fs_delete_permanently', { items });
 export const fsProperties = (root, path) => call('fs_properties', { root, path });
 export const fsReveal = (root, path) => call('fs_reveal', { root, path });
+
+// ── Editor documents ─────────────────────────────────────────────────────────
+/**
+ * @typedef {{ root: number, path: string } | { external: string }} DocRef
+ * @typedef {'utf-8' | 'utf-8-bom' | 'utf-16le' | 'utf-16be' | 'windows-1252'} TextEncoding
+ * @typedef {{ ref: DocRef, name: string, location: string, content: string, encoding: TextEncoding, eol: 'lf' | 'crlf',
+ *             mixedEol: boolean, hash: string, size: number, readonly: boolean, modified: number }} OpenedDoc
+ */
+/** @returns {Promise<OpenedDoc>} */
+export const docRead = (doc) => call('doc_read', { doc });
+/** @returns {Promise<{ hash: string, size: number, modified: number }>} */
+export const docWrite = (doc, content, encoding, eol, expectedHash, create = false) =>
+  call('doc_write', { doc, content, encoding, eol, expectedHash: expectedHash ?? null, create });
+/** @returns {Promise<DocRef[] | null>} */
+export const docOpenDialog = () => call('doc_open_dialog');
+export const docSaveAsDialog = (suggestedName, content, encoding, eol) => call('doc_save_as_dialog', { suggestedName, content, encoding, eol });
+export const docSaveAsConfirm = (token, content, encoding, eol) => call('doc_save_as_confirm', { token, content, encoding, eol });
+export const draftSave = (draft) => call('draft_save', { draft });
+/** @returns {Promise<{ key: string, content: string, encoding: TextEncoding, eol: 'lf' | 'crlf', baseHash: string | null, savedAt: number }[]>} */
+export const draftList = () => call('draft_list');
+export const draftDelete = (key) => call('draft_delete', { key });

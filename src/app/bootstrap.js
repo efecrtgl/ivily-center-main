@@ -19,7 +19,9 @@ import { beforeWindowClose } from '../platform/window.js';
 import { appStore } from './appStore.js';
 import { applyStartup, showPage } from '../workspace/store.js';
 import { flushSession } from '../workspace/session.js';
-import { onFsChanged, registerExplorerSession } from '../features/explorer/model.js';
+import { onFsChanged, registerExplorerSession, setFileOpener } from '../features/explorer/model.js';
+import { applyOptionsToAll, onFsChangedEditor, openDocument, registerEditorSession } from '../features/editor/model.js';
+import { themeStore } from '../theme/engine.js';
 import { errorMessage } from '../core/errors.js';
 
 /** Apply settings that have UI side effects. Only changed values are re-applied. */
@@ -29,6 +31,17 @@ function applySettingEffects(values, prev) {
   if (changed('appearance.theme')) setActiveTheme(String(v('appearance.theme') ?? DEFAULT_THEME));
   if (changed('appearance.reduceMotion')) applyMotionPreference(v('appearance.reduceMotion') ?? 'system');
   if (changed('appearance.uiFontSize')) applyUiFontSize(v('appearance.uiFontSize') ?? 13);
+  if (['editor.fontFamily', 'editor.fontSize', 'editor.lineHeight'].some(changed)) {
+    const root = document.documentElement.style;
+    const family = String(v('editor.fontFamily') ?? '').trim();
+    if (family && !/[;{}<>]|url\(/i.test(family)) root.setProperty('--editor-font', family);
+    else root.removeProperty('--editor-font');
+    root.setProperty('--editor-font-size', `${Number(v('editor.fontSize') ?? 14)}px`);
+    root.setProperty('--editor-line-height', String(Number(v('editor.lineHeight') ?? 150) / 100));
+  }
+  if (prev && ['editor.tabSize', 'editor.insertSpaces', 'editor.wordWrap', 'editor.renderWhitespace', 'editor.lineNumbers'].some(changed)) {
+    applyOptionsToAll();
+  }
   if (['notifications.level', 'notifications.doNotDisturb', 'notifications.timeoutSeconds'].some(changed)) {
     setNotificationPrefs({
       level: v('notifications.level') ?? 'info',
@@ -79,7 +92,20 @@ export async function bootstrap() {
 
   startOutput();
   registerExplorerSession();
-  ipc.onEvent(ipc.events.fsChanged, onFsChanged);
+  registerEditorSession();
+  setFileOpener((ref, opts) => openDocument(ref, opts));
+  ipc.onEvent(ipc.events.fsChanged, (change) => {
+    onFsChanged(change);
+    onFsChangedEditor(change);
+  });
+  let appearance = themeStore.get().current?.appearance;
+  themeStore.subscribe(() => {
+    const next = themeStore.get().current?.appearance;
+    if (next !== appearance) {
+      appearance = next;
+      applyOptionsToAll();
+    }
+  });
   installKeybindingDispatcher(window);
   installWebviewGuards();
   initWindowTitle();
