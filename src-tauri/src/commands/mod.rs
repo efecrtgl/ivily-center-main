@@ -18,6 +18,7 @@ pub mod tasks;
 pub mod terminal;
 pub mod toolchains;
 pub mod ui_state;
+pub mod update;
 pub mod workspace;
 
 /// Event names emitted to the webview.

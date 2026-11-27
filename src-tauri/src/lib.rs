@@ -35,6 +35,7 @@ pub fn run() {
     let app = tauri::Builder::default()
         // Dialogs are opened from Rust only; the webview has no dialog permission.
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(state::AppState::init(cli_path))
         .setup(|app| {
             let handle = app.handle().clone();
@@ -156,6 +157,9 @@ pub fn run() {
             commands::modules::modules_status,
             commands::modules::module_request,
             commands::modules::module_open,
+            commands::update::update_check,
+            commands::update::update_install,
+            commands::update::update_info,
             commands::tasks::tasks_list,
             commands::tasks::task_run,
             commands::tasks::tasks_revoke_approvals,

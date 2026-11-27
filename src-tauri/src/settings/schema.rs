@@ -236,6 +236,15 @@ pub const SETTINGS: &[SettingDef] = &[
         scopes: ScopeSet::User,
     },
     SettingDef {
+        key: "updates.checkOnStartup",
+        title: "Check for updates on startup",
+        description: "Ask GitHub Releases once a day whether a newer Ivily Center exists. Updates are never downloaded or installed without your confirmation.",
+        category: "Updates",
+        ty: T::Bool,
+        default: D::Bool(true),
+        scopes: ScopeSet::User,
+    },
+    SettingDef {
         key: "ecosystem.enabled",
         title: "Ivily ecosystem integration",
         description: "Talk to installed Ivily apps (Optimizer, Envora, Portly, Structura) through the Ivily Ecosystem Protocol when the Modules view is opened. Nothing runs in the background.",

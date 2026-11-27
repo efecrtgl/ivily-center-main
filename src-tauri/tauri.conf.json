@@ -32,6 +32,13 @@
       "freezePrototype": true
     }
   },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDBGMkUwQzBEMzYzOUZFQzgKUldUSS9qazJEUXd1RDFzOHIzUjJGRkduck5Jc3JBdnkyaFRWSUNNNWFrZkZkMmJQaUxpcFBmL0kK",
+      "endpoints": ["https://github.com/efecrtgl/ivily-center-main/releases/latest/download/latest.json"],
+      "windows": { "installMode": "passive" }
+    }
+  },
   "bundle": {
     "active": true,
     "targets": ["nsis"],
