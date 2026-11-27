@@ -1,0 +1,53 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Ivily Center",
+  "version": "../package.json",
+  "identifier": "com.efecrtgl.ivilycenter",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://127.0.0.1:1460",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "withGlobalTauri": false,
+    "windows": [
+      {
+        "label": "main",
+        "title": "Ivily Center",
+        "width": 1440,
+        "height": 900,
+        "minWidth": 800,
+        "minHeight": 520,
+        "center": true,
+        "resizable": true,
+        "backgroundColor": "#101114"
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src ipc: http://ipc.localhost; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'",
+      "freezePrototype": true
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "publisher": "efecrtgl",
+    "homepage": "https://github.com/efecrtgl/ivily-center-main",
+    "copyright": "© 2026 efecrtgl",
+    "category": "DeveloperTool",
+    "shortDescription": "Development environment and Ivily ecosystem hub",
+    "longDescription": "Ivily Center is an open-source, Windows-first development environment and the optional integration hub of the Ivily ecosystem.",
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.ico"],
+    "windows": {
+      "webviewInstallMode": { "type": "downloadBootstrapper", "silent": true },
+      "nsis": {
+        "installMode": "currentUser",
+        "languages": ["English"],
+        "displayLanguageSelector": false,
+        "installerIcon": "icons/icon.ico",
+        "startMenuFolder": "Ivily Center"
+      }
+    }
+  }
+}

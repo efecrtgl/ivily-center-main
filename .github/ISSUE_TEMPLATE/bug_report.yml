@@ -1,0 +1,75 @@
+name: Bug report
+description: Something does not work as expected.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks! Please do **not** report security issues here — use a
+        [private security advisory](https://github.com/efecrtgl/ivily-center-main/security/advisories/new).
+        Remove private paths, project names and secrets from anything you paste.
+  - type: input
+    id: version
+    attributes:
+      label: Ivily Center version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      placeholder: "Windows 11 24H2"
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Window / layout
+        - Workspace / launcher
+        - File explorer
+        - Editor
+        - Language support / LSP
+        - Terminal
+        - Git
+        - Search / Quick Open / Command Palette
+        - Tasks
+        - Problems / Output
+        - Settings / themes / icons
+        - Notes / bookmarks / previews
+        - Extensions
+        - Ivily modules / IEP
+        - Updates / backup
+        - Installer
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant output
+      description: From the Output panel, if available. Check it for secrets before pasting.
+      render: text

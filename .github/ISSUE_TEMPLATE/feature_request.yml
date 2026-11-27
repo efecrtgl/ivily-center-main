@@ -1,0 +1,25 @@
+name: Feature request
+description: Suggest a feature, language, integration or improvement.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does it solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: textarea
+    id: safety
+    attributes:
+      label: Safety and performance
+      description: Does it execute anything, touch the network, modify files, or run in the background?
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered

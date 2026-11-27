@@ -7,14 +7,14 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 
 ## Current phase
 
-**Phase 0 — Audit, architecture and planning:** done.
+**Phase 2 — Core & custom window:** next.
 
 ## Phases
 
 | # | Phase | Status | Notes |
 |---|---|---|---|
 | 0 | Audit, architecture, planning | done | [docs/DEVELOPMENT_PLAN.md](docs/DEVELOPMENT_PLAN.md), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
-| 1 | Repository infrastructure | planned | |
+| 1 | Repository infrastructure | done | Scaffold, community files, CI. Release workflow deferred to Phase 25 (needs updater signing). |
 | 2 | Core & custom window | planned | Includes DB, settings, theme tokens, command registry (roadmap change, see plan §3) |
 | 3–25 | See plan | planned | |
 
@@ -30,7 +30,8 @@ See [ARCHITECTURE.md §7](docs/ARCHITECTURE.md#7-key-technology-decisions-adr-su
 
 ## Build / test status
 
-No code yet.
+Local (2026-11-27): `npm test` 1 passed, `npm run build` ok, `cargo fmt --check` ok,
+`cargo clippy --all-targets -- -D warnings` ok, `cargo test` 2 passed. CI result: see GitHub Actions.
 
 ## Release status
 
