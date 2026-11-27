@@ -72,6 +72,11 @@ export function registerTheme(def, { replace = false } = {}) {
 }
 
 export const getTheme = (id) => themes.get(id);
+/** Remove a user/extension theme (built-in themes cannot be removed). */
+export function unregisterTheme(id) {
+  if (!String(id).startsWith('user-')) return;
+  if (themes.delete(id)) themeStore.set((s) => ({ ...s, version: s.version + 1 }));
+}
 export const listThemes = () => [...themes.values()];
 
 /**

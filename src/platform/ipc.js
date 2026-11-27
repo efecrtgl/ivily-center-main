@@ -231,6 +231,14 @@ export const dapSend = (id, message) => call('dap_send', { id, message });
 export const dapStop = (id) => call('dap_stop', { id });
 export const dapRevokeApprovals = () => call('dap_revoke_approvals');
 
+// ── Extensions (declarative; installed copies live in the app data folder) ────
+export const extensionsList = () => call('extensions_list');
+/** Folder picker + validation; returns `{ token, manifest, files, replaces }` or null. */
+export const extensionsInstallDialog = () => call('extensions_install_dialog');
+export const extensionsInstallConfirm = (token) => call('extensions_install_confirm', { token });
+export const extensionsSetEnabled = (id, enabled) => call('extensions_set_enabled', { id, enabled });
+export const extensionsUninstall = (id) => call('extensions_uninstall', { id });
+
 // ── Tasks (running requires the taskExecution trust capability + approval) ──
 export const tasksList = () => call('tasks_list');
 /** Starts one task in a terminal session; `approve` records the user's approval of its command. */

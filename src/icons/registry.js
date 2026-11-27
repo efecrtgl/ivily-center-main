@@ -30,6 +30,10 @@ export function registerIconPack(pack) {
 }
 
 export const hasIconPack = (id) => packs.has(id);
+/** Remove a user/extension icon pack (built-in packs cannot be removed). */
+export function unregisterIconPack(id) {
+  if (String(id).startsWith('user-')) packs.delete(id);
+}
 export const listIconPacks = () => [...packs.values()];
 
 /**

@@ -64,6 +64,9 @@ All notable changes to this project are documented here. The format follows
 - Phase 15: Debug Adapter Protocol client — adapter detection (debugpy, lldb-dap, netcoredbg) and
   user adapters, launch.json with approval, breakpoints, stepping, call stack, variables, debug
   console with evaluation.
+- Phase 16: declarative extensions (themes, icon packs, snippets, shortcuts, file associations)
+  installed from a folder after a contribution preview; enable/disable/remove; workspace
+  recommendations shown, never auto-installed.
 
 ### Fixed
 - The main window no longer grows by its border width on every launch (inner size is persisted).

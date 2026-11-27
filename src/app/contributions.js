@@ -28,6 +28,8 @@ import { restartServers } from '../features/lsp/manager.js';
 import { TerminalView } from '../features/terminal/TerminalView.jsx';
 import { ScmView } from '../features/git/ScmView.jsx';
 import { SearchView } from '../features/search/SearchView.jsx';
+import { ExtensionsView } from '../features/extensions/ExtensionsView.jsx';
+import { installExtension } from '../features/extensions/model.js';
 import { DebugConsoleView, DebugView } from '../features/debug/DebugView.jsx';
 import {
   configureLaunch, continueExecution, pauseExecution, removeAllBreakpoints, restartDebugging, revokeDebugApprovals, startDebugging, stepInto, stepOut, stepOver, stopDebugging,
@@ -101,6 +103,7 @@ export function registerWorkbenchContributions() {
   registerView({ id: 'search', title: 'Search', icon: 'search', location: 'sidebar', component: SearchView, order: 15, command: 'search.show' });
   registerView({ id: 'notes', title: 'Notes', icon: 'pencil', location: 'sidebar', component: NotesView, order: 40, command: 'notes.show' });
   registerView({ id: 'debug', title: 'Run and Debug', icon: 'debug', location: 'sidebar', component: DebugView, order: 30, command: 'debug.showView' });
+  registerView({ id: 'extensions', title: 'Extensions', icon: 'extensions', location: 'sidebar', component: ExtensionsView, order: 50, command: 'extensions.show' });
   registerView({ id: 'scm', title: 'Source Control', icon: 'git', location: 'sidebar', component: ScmView, order: 20, command: 'git.showView' });
   registerView({ id: 'settings', title: 'Settings', icon: 'settings', location: 'sidebar', component: SettingsView, order: 100, group: 'bottom', command: 'preferences.openSettings' });
   registerView({ id: 'terminal', title: 'Terminal', icon: 'terminal', location: 'panel', component: TerminalView, order: 10, command: 'terminal.toggle' });
@@ -237,6 +240,8 @@ export function registerWorkbenchContributions() {
     { id: 'debug.removeAllBreakpoints', title: 'Remove All Breakpoints', category: 'Debug', run: () => removeAllBreakpoints() },
     { id: 'debug.configure', title: 'Add Configuration (.ivily/launch.json)', category: 'Debug', when: 'workspaceOpen', run: () => configureLaunch() },
     { id: 'debug.revokeApprovals', title: 'Revoke Launch Approvals', category: 'Debug', when: 'workspaceOpen', run: () => revokeDebugApprovals() },
+    { id: 'extensions.show', title: 'Show Extensions', category: 'Extensions', icon: 'extensions', run: () => toggleSidebarView('extensions') },
+    { id: 'extensions.install', title: 'Install Extension from Folder…', category: 'Extensions', run: () => installExtension() },
     { id: 'git.showView', title: 'Show Source Control', category: 'Git', icon: 'git', run: () => updateLayout({ sidebarVisible: true, sidebarView: 'scm' }) },
     { id: 'git.refresh', title: 'Refresh', category: 'Git', icon: 'refresh', when: 'workspaceOpen', run: () => loadRepos() },
     { id: 'git.checkout', title: 'Checkout to…', category: 'Git', when: 'gitRepository', run: () => { const r = activeRepo(); return r && gitCheckout(r.root); } },
@@ -293,6 +298,7 @@ export function registerWorkbenchContributions() {
     { key: 'Ctrl+`', command: 'terminal.toggle' },
     { key: 'Ctrl+Shift+G', command: 'git.showView' },
     { key: 'Ctrl+P', command: 'workbench.quickOpen' },
+    { key: 'Ctrl+Shift+X', command: 'extensions.show' },
     { key: 'F5', command: 'debug.start' },
     { key: 'F5', command: 'debug.continue', when: "debugState == 'stopped'" },
     { key: 'F6', command: 'debug.pause' },

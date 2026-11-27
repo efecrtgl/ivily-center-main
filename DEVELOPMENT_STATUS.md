@@ -7,7 +7,7 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 
 ## Current phase
 
-**Phase 15 — Debugging (DAP):** done. **Next: Phase 16 — Extensions.**
+**Phase 16 — Extensions:** done. **Next: Phase 17 — IEP client and integrations.**
 
 ## Phases
 
@@ -29,7 +29,8 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 | 13 | Settings import/export, user themes, icon packs | done | [docs/THEMES.md](docs/THEMES.md) |
 | 14 | Notes, bookmarks, Markdown/HTML preview | done | [docs/NOTES.md](docs/NOTES.md) |
 | 15 | Debugging (DAP) | done | `ce9f520` backend, then UI. [docs/DEBUGGING.md](docs/DEBUGGING.md). No real adapter installed — verified with scripted adapters. |
-| 16–25 | See plan | planned | |
+| 16 | Declarative extensions | done | [docs/EXTENSIONS.md](docs/EXTENSIONS.md) |
+| 17–25 | See plan | planned | |
 
 ## Phase 3 deliverables
 

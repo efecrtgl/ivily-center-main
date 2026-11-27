@@ -10,6 +10,7 @@ import { installSearch } from '../features/search/integration.js';
 import { installTasks } from '../features/tasks/model.js';
 import { installBookmarks } from '../features/bookmarks/model.js';
 import { installDebug } from '../features/debug/model.js';
+import { installExtensions, loadExtensions } from '../features/extensions/model.js';
 import { loadUserCustomizations } from '../features/customize/model.js';
 import { registerWorkbenchContributions } from './contributions.js';
 import { loadSettings, settingsStore } from '../core/settings.js';
@@ -104,6 +105,7 @@ export async function bootstrap() {
   registerEditorSession();
   installBookmarks();
   installDebug();
+  installExtensions();
   installLsp();
   installTerminal();
   installGit();
@@ -127,6 +129,7 @@ export async function bootstrap() {
   initWindowTitle();
 
   await loadUserCustomizations().catch(() => {});
+  await loadExtensions().catch(() => {});
   const results = await Promise.allSettled([
     ipc.isTauri() ? ipc.appInfo() : Promise.resolve(null),
     loadSettings([]),
