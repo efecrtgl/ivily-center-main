@@ -219,6 +219,10 @@ export const saveTextConfirm = (token, content) => call('save_text_confirm', { t
 /** Native open dialog; returns `{ name, content }` of the chosen UTF-8 file (≤ 2 MB) or null. */
 export const openTextDialog = (title, extensions) => call('open_text_dialog', { title, extensions });
 
+// ── Notes (per workspace, stored in the app data folder) ─────────────────────
+export const notesRead = () => call('notes_read');
+export const notesWrite = (content) => call('notes_write', { content });
+
 // ── Tasks (running requires the taskExecution trust capability + approval) ──
 export const tasksList = () => call('tasks_list');
 /** Starts one task in a terminal session; `approve` records the user's approval of its command. */

@@ -221,9 +221,17 @@ function cloneState(st, groupId) {
 
 const docKeyFacet = Facet.define({ combine: (v) => v[0] });
 
+/** @type {((docKey: string) => import('@codemirror/state').Extension)[]} */
+const extensionProviders = [];
+/** Add an editor extension for every document (bookmarks, …). Applies to newly created states. */
+export function registerEditorExtension(provider) {
+  extensionProviders.push(provider);
+}
+
 function extensionsFor(doc, groupId) {
   return buildExtensions(editorOptions(doc), doc.language, [
     docKeyFacet.of(doc.key),
+    ...extensionProviders.map((p) => p(doc.key)),
     EditorView.updateListener.of((u) => onUpdate(groupId, doc.key, u)),
     EditorView.domEventHandlers({ blur: () => onBlur(doc.key) }),
   ], doc.lspExtension ?? []);

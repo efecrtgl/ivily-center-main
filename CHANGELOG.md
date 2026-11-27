@@ -59,6 +59,8 @@ All notable changes to this project are documented here. The format follows
   status-bar counts, running-task indicator) and *Save Output As…* with confirmed overwrite.
 - Phase 13: settings and shortcut import/export (validated, confirmed), user themes and user icon
   packs (validated JSON, `user-` ids, stored locally), *Export Current Theme…*.
+- Phase 14: workspace notes (stored outside the project), bookmarks that follow edits, sanitized
+  live Markdown preview and sandboxed static HTML preview.
 
 ### Fixed
 - The main window no longer grows by its border width on every launch (inner size is persisted).

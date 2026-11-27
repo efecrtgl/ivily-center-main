@@ -28,6 +28,9 @@ import { restartServers } from '../features/lsp/manager.js';
 import { TerminalView } from '../features/terminal/TerminalView.jsx';
 import { ScmView } from '../features/git/ScmView.jsx';
 import { SearchView } from '../features/search/SearchView.jsx';
+import { NotesView } from '../features/notes/NotesView.jsx';
+import { openPreview } from '../features/preview/PreviewView.jsx';
+import { clearBookmarks, goToBookmark, listBookmarks, toggleBookmark } from '../features/bookmarks/model.js';
 import { ProblemsView, goToProblem } from '../features/problems/ProblemsView.jsx';
 import { exportOutputChannel } from '../features/output/OutputView.jsx';
 import { exportCurrentTheme, exportSettings, importIconPack, importSettings, importTheme, removeUserItem } from '../features/customize/model.js';
@@ -91,6 +94,7 @@ export function registerWorkbenchContributions() {
   // ── Views ──────────────────────────────────────────────────────────────────
   registerView({ id: 'explorer', title: 'Explorer', icon: 'files', location: 'sidebar', component: ExplorerView, order: 10, command: 'workbench.showExplorer' });
   registerView({ id: 'search', title: 'Search', icon: 'search', location: 'sidebar', component: SearchView, order: 15, command: 'search.show' });
+  registerView({ id: 'notes', title: 'Notes', icon: 'pencil', location: 'sidebar', component: NotesView, order: 40, command: 'notes.show' });
   registerView({ id: 'scm', title: 'Source Control', icon: 'git', location: 'sidebar', component: ScmView, order: 20, command: 'git.showView' });
   registerView({ id: 'settings', title: 'Settings', icon: 'settings', location: 'sidebar', component: SettingsView, order: 100, group: 'bottom', command: 'preferences.openSettings' });
   registerView({ id: 'terminal', title: 'Terminal', icon: 'terminal', location: 'panel', component: TerminalView, order: 10, command: 'terminal.toggle' });
@@ -205,6 +209,13 @@ export function registerWorkbenchContributions() {
     { id: 'preferences.exportTheme', title: 'Export Current Theme…', category: 'Preferences', run: () => exportCurrentTheme() },
     { id: 'preferences.importIconPack', title: 'Import Icon Pack…', category: 'Preferences', run: () => importIconPack() },
     { id: 'preferences.removeCustomization', title: 'Remove User Theme or Icon Pack…', category: 'Preferences', run: () => removeUserItem() },
+    { id: 'notes.show', title: 'Show Workspace Notes', category: 'View', icon: 'pencil', when: 'workspaceOpen', run: () => toggleSidebarView('notes') },
+    { id: 'preview.open', title: 'Open Preview (Markdown / HTML)', category: 'View', when: 'editorFocus', run: () => openPreview() },
+    { id: 'bookmarks.toggle', title: 'Toggle Bookmark', category: 'Bookmarks', when: 'editorFocus', run: () => toggleBookmark() },
+    { id: 'bookmarks.next', title: 'Go to Next Bookmark', category: 'Bookmarks', run: () => goToBookmark(1) },
+    { id: 'bookmarks.previous', title: 'Go to Previous Bookmark', category: 'Bookmarks', run: () => goToBookmark(-1) },
+    { id: 'bookmarks.list', title: 'List Bookmarks', category: 'Bookmarks', run: () => listBookmarks() },
+    { id: 'bookmarks.clear', title: 'Remove All Bookmarks', category: 'Bookmarks', run: () => clearBookmarks() },
     { id: 'git.showView', title: 'Show Source Control', category: 'Git', icon: 'git', run: () => updateLayout({ sidebarVisible: true, sidebarView: 'scm' }) },
     { id: 'git.refresh', title: 'Refresh', category: 'Git', icon: 'refresh', when: 'workspaceOpen', run: () => loadRepos() },
     { id: 'git.checkout', title: 'Checkout to…', category: 'Git', when: 'gitRepository', run: () => { const r = activeRepo(); return r && gitCheckout(r.root); } },
@@ -261,6 +272,10 @@ export function registerWorkbenchContributions() {
     { key: 'Ctrl+`', command: 'terminal.toggle' },
     { key: 'Ctrl+Shift+G', command: 'git.showView' },
     { key: 'Ctrl+P', command: 'workbench.quickOpen' },
+    { key: 'Ctrl+Shift+V', command: 'preview.open' },
+    { key: 'Ctrl+Alt+K', command: 'bookmarks.toggle' },
+    { key: 'Ctrl+Alt+L', command: 'bookmarks.next' },
+    { key: 'Ctrl+Alt+J', command: 'bookmarks.previous' },
     { key: 'Ctrl+Shift+M', command: 'workbench.showProblems' },
     { key: 'F8', command: 'problems.next' },
     { key: 'Shift+F8', command: 'problems.previous' },

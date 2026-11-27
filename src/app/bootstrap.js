@@ -8,6 +8,7 @@
 import { initThemes, setActiveTheme, applyMotionPreference, applyUiFontSize, DEFAULT_THEME } from '../theme/index.js';
 import { installSearch } from '../features/search/integration.js';
 import { installTasks } from '../features/tasks/model.js';
+import { installBookmarks } from '../features/bookmarks/model.js';
 import { loadUserCustomizations } from '../features/customize/model.js';
 import { registerWorkbenchContributions } from './contributions.js';
 import { loadSettings, settingsStore } from '../core/settings.js';
@@ -100,6 +101,7 @@ export async function bootstrap() {
   startOutput();
   registerExplorerSession();
   registerEditorSession();
+  installBookmarks();
   installLsp();
   installTerminal();
   installGit();

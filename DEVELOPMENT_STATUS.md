@@ -7,7 +7,7 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 
 ## Current phase
 
-**Phase 13 — Customization:** done. **Next: Phase 14 — Notes, bookmarks and previews.**
+**Phase 14 — Notes, bookmarks, previews:** done. **Next: Phase 15 — Debugging (DAP).**
 
 ## Phases
 
@@ -27,7 +27,8 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 | 11 | Tasks | done | [docs/TASKS.md](docs/TASKS.md) |
 | 12 | Problems panel, output export | done | [docs/PROBLEMS.md](docs/PROBLEMS.md) |
 | 13 | Settings import/export, user themes, icon packs | done | [docs/THEMES.md](docs/THEMES.md) |
-| 14–25 | See plan | planned | |
+| 14 | Notes, bookmarks, Markdown/HTML preview | done | [docs/NOTES.md](docs/NOTES.md) |
+| 15–25 | See plan | planned | |
 
 ## Phase 3 deliverables
 
