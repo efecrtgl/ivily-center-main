@@ -1,6 +1,6 @@
 # Ivily Center — Architecture
 
-Status: **design baseline (Phase 0)**. Sections describe the intended design; each subsystem's
+Status: **design baseline (Phase 0), foundation implemented in Phase 2**. Sections describe the intended design; each subsystem's
 implementation status is tracked in [../DEVELOPMENT_STATUS.md](../DEVELOPMENT_STATUS.md). When the
 implementation diverges, this document is updated in the same commit.
 
@@ -155,7 +155,27 @@ with a clear error instead of being downgraded.
   which is why themes are more than colour maps. CodeMirror and xterm.js themes are derived from
   the same tokens.
 
-## 7. Key technology decisions (ADR summary)
+## 7. Implemented so far (Phase 2)
+
+| Subsystem | Implementation | Docs |
+|---|---|---|
+| Database, app state | `src-tauri/src/db/`, `app_state.rs` | [DATABASE.md](DATABASE.md) |
+| Settings | `src-tauri/src/settings/`, `src/core/settings.js` | [DATABASE.md](DATABASE.md#settings-resolution) |
+| Output | `src-tauri/src/output/`, `src/core/output.js` | [COMMANDS.md](COMMANDS.md#output-channels) |
+| Window manager | `src-tauri/src/window/`, `src/shell/TitleBar.jsx`, `src/platform/window.js` | below |
+| Theme engine, icons | `src/theme/`, `src/icons/` | [THEMES.md](THEMES.md) |
+| Commands, keybindings, views, notifications | `src/core/` | [COMMANDS.md](COMMANDS.md) |
+
+**Window manager.** The window is frameless (`decorations: false`) with the native shadow and native
+edge resizing. It starts hidden; Rust validates saved bounds against the monitors' *work areas*
+(`window::fit_bounds`: the title bar must be reachable, size is clamped, position pulled inside) and only
+then shows it. Bounds are tracked in physical pixels of the virtual screen, so mixed-DPI setups work.
+The title bar is a `data-tauri-drag-region="deep"`; buttons are excluded from dragging by Tauri, and a
+double-click toggles maximize. The title is context-aware (`core/title.js`) and mirrored to the native
+window title for the taskbar. Known limitation: Windows 11 Snap Layouts flyout does not appear when
+hovering the custom maximize button (Win+Z and edge snapping work).
+
+## 8. Key technology decisions (ADR summary)
 
 | # | Decision | Alternatives considered |
 |---|---|---|

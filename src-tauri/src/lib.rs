@@ -11,6 +11,7 @@ pub mod error;
 pub mod output;
 pub mod settings;
 pub mod state;
+pub mod window;
 
 use tauri::{Emitter, Manager};
 
@@ -26,7 +27,15 @@ pub fn run() {
             st.output.set_sink(Box::new(move |entry| {
                 let _ = handle.emit(commands::events::OUTPUT_ENTRY, entry);
             }));
+            if let Some(w) = app.get_webview_window("main") {
+                window::runtime::restore_and_show(&w, &st);
+            }
             Ok(())
+        })
+        .on_window_event(|w, event| {
+            if let Some(ww) = w.app_handle().get_webview_window(w.label()) {
+                window::runtime::on_event(&ww, event, &w.state::<state::AppState>());
+            }
         })
         .invoke_handler(tauri::generate_handler![
             commands::app::app_info,

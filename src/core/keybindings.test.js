@@ -18,6 +18,7 @@ describe('chords', () => {
     ['esc', 'Escape'],
     ['ctrl+up', 'Ctrl+ArrowUp'],
     ['Meta+K', 'Meta+K'],
+    ['ctrl+numpadadd', 'Ctrl+NumpadAdd'],
   ])('%s → %s', (input, expected) => expect(normalizeChord(input)).toBe(expected));
 
   it.each(['', 'ctrl', 'ctrl+a+b', 'ctrl+nope', 42])('rejects %s', (input) => expect(normalizeChord(input)).toBeNull());

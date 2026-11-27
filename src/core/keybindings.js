@@ -31,8 +31,8 @@ const ALIASES = {
 const CODE_TO_KEY = {
   Comma: ',', Period: '.', Slash: '/', Backslash: '\\', Semicolon: ';', Quote: "'", Backquote: '`',
   BracketLeft: '[', BracketRight: ']', Minus: '-', Equal: '=', Space: 'Space',
-  NumpadAdd: 'Numpad+', NumpadSubtract: 'Numpad-', NumpadMultiply: 'Numpad*', NumpadDivide: 'Numpad/',
-  NumpadEnter: 'Enter', NumpadDecimal: 'Numpad.',
+  NumpadAdd: 'NumpadAdd', NumpadSubtract: 'NumpadSubtract', NumpadMultiply: 'NumpadMultiply',
+  NumpadDivide: 'NumpadDivide', NumpadEnter: 'Enter', NumpadDecimal: 'NumpadDecimal',
 };
 const NAMED = new Set([
   'Escape', 'Enter', 'Tab', 'Space', 'Backspace', 'Delete', 'Insert', 'Home', 'End', 'PageUp', 'PageDown',
@@ -46,7 +46,8 @@ function normalizeKey(part) {
   if (/^[a-z0-9]$/i.test(part)) return part.toUpperCase();
   if (/^f([1-9]|1\d|2[0-4])$/i.test(part)) return part.toUpperCase();
   if (/^numpad[0-9]$/i.test(part)) return `Numpad${part.slice(-1)}`;
-  if (Object.values(CODE_TO_KEY).includes(part)) return part;
+  const mapped = Object.values(CODE_TO_KEY).find((k) => k.toLowerCase() === lower);
+  if (mapped) return mapped;
   for (const n of NAMED) if (n.toLowerCase() === lower) return n;
   return null;
 }
@@ -59,7 +60,7 @@ function normalizeKey(part) {
  */
 export function normalizeChord(chord) {
   if (typeof chord !== 'string') return null;
-  // Split on '+' but allow '+' itself as the final key ("Ctrl++" is not supported; use "Ctrl+=").
+  // '+' separates parts, so the plus key itself is written as "=" (main row) or "NumpadAdd".
   const parts = chord.split('+').map((p) => p.trim()).filter(Boolean);
   if (!parts.length) return null;
   const mods = new Set();

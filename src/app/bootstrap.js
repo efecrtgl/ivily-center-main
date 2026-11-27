@@ -1,0 +1,107 @@
+// Application startup. Order matters:
+//   1. themes (first paint with the cached theme)
+//   2. contributions (commands, views, keybindings)
+//   3. settings → effects (theme, motion, font size, notification preferences)
+//   4. layout, window title, output events, shortcut dispatcher, startup issues
+import { initThemes, setActiveTheme, applyMotionPreference, applyUiFontSize, DEFAULT_THEME } from '../theme/index.js';
+import { registerWorkbenchContributions } from './contributions.js';
+import { loadSettings, settingsStore } from '../core/settings.js';
+import { setNotificationPrefs, notify } from '../core/notifications.js';
+import { setCommandErrorHandler } from '../core/commands.js';
+import { installKeybindingDispatcher } from '../core/keybindings.js';
+import { initLayout } from '../core/layout.js';
+import { initWindowTitle } from '../core/title.js';
+import { startOutput, uiLog } from '../core/output.js';
+import * as ipc from '../platform/ipc.js';
+import { appStore } from './appStore.js';
+
+/** Apply settings that have UI side effects. Only changed values are re-applied. */
+function applySettingEffects(values, prev) {
+  const v = (k) => values[k]?.value;
+  const changed = (k) => !prev || prev[k]?.value !== values[k]?.value;
+  if (changed('appearance.theme')) setActiveTheme(String(v('appearance.theme') ?? DEFAULT_THEME));
+  if (changed('appearance.reduceMotion')) applyMotionPreference(v('appearance.reduceMotion') ?? 'system');
+  if (changed('appearance.uiFontSize')) applyUiFontSize(v('appearance.uiFontSize') ?? 13);
+  if (['notifications.level', 'notifications.doNotDisturb', 'notifications.timeoutSeconds'].some(changed)) {
+    setNotificationPrefs({
+      level: v('notifications.level') ?? 'info',
+      doNotDisturb: v('notifications.doNotDisturb') ?? false,
+      timeoutSeconds: v('notifications.timeoutSeconds') ?? 6,
+    });
+  }
+}
+
+/** Prevent browser behaviours that make no sense in a desktop IDE (reload, print, page find). */
+function installWebviewGuards() {
+  const blocked = new Set(['F5', 'Ctrl+R', 'Ctrl+Shift+R', 'Ctrl+P', 'Ctrl+F', 'Ctrl+G', 'Ctrl+U', 'Ctrl+S']);
+  window.addEventListener('keydown', (e) => {
+    const mods = `${e.ctrlKey ? 'Ctrl+' : ''}${e.shiftKey ? 'Shift+' : ''}`;
+    const key = e.key.length === 1 ? e.key.toUpperCase() : e.key;
+    if (blocked.has(`${mods}${key}`)) e.preventDefault();
+  });
+  if (import.meta.env.PROD) {
+    // Keep the native menu (copy/paste) in text fields only; hide "Reload"/"Inspect" elsewhere.
+    window.addEventListener('contextmenu', (e) => {
+      const t = /** @type {HTMLElement} */ (e.target);
+      if (!t.closest('input, textarea, [contenteditable="true"], .selectable')) e.preventDefault();
+    });
+  }
+}
+
+let started = false;
+
+export async function bootstrap() {
+  if (started) return;
+  started = true;
+
+  initThemes();
+  registerWorkbenchContributions();
+
+  setCommandErrorHandler((err, id) => {
+    const message = err?.message ?? String(err);
+    uiLog('error', `command ${id} failed: ${message}`);
+    notify({ severity: 'error', title: 'Command failed', message: `${id}: ${message}`, source: 'commands' });
+  });
+
+  let prev = null;
+  settingsStore.subscribe(() => {
+    const { values } = settingsStore.get();
+    applySettingEffects(values, prev);
+    prev = values;
+  });
+
+  startOutput();
+  installKeybindingDispatcher(window);
+  installWebviewGuards();
+  initWindowTitle();
+
+  const results = await Promise.allSettled([
+    ipc.isTauri() ? ipc.appInfo() : Promise.resolve(null),
+    loadSettings([]),
+    initLayout(),
+  ]);
+  const [info, settings] = results;
+
+  if (info.status === 'fulfilled') {
+    appStore.set({ ready: true, info: info.value });
+    for (const issue of info.value?.startupIssues ?? []) {
+      notify({ severity: issue.severity, title: issue.code === 'db_recovered' ? 'Database recovered' : 'Storage problem', message: issue.message, source: 'database', sticky: true });
+    }
+  } else {
+    appStore.set({ ready: true, info: null });
+  }
+  if (settings.status === 'rejected') {
+    notify({ severity: 'error', title: 'Settings could not be loaded', message: settings.reason?.message ?? String(settings.reason), source: 'settings' });
+  } else if (settings.value?.invalid?.length) {
+    notify({
+      severity: 'warning',
+      title: 'Some saved settings were ignored',
+      message: `${settings.value.invalid.length} stored value(s) are invalid and were replaced by defaults. Details are in the Settings output channel.`,
+      source: 'settings',
+      actions: [{ label: 'Show Output', command: 'workbench.showOutput' }],
+    });
+  }
+  // Apply effects once even if nothing changed after load (e.g. outside Tauri).
+  applySettingEffects(settingsStore.get().values, null);
+  uiLog('info', 'workbench ready');
+}

@@ -3,5 +3,13 @@
   "identifier": "default",
   "description": "Minimal permissions for the main window. No fs/shell/http plugins: every native operation goes through validated Rust commands.",
   "windows": ["main"],
-  "permissions": ["core:default"]
+  "permissions": [
+    "core:default",
+    "core:window:allow-minimize",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-internal-toggle-maximize",
+    "core:window:allow-close",
+    "core:window:allow-start-dragging",
+    "core:window:allow-set-title"
+  ]
 }

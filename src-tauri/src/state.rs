@@ -15,6 +15,8 @@ pub struct AppState {
     pub output: Arc<OutputHub>,
     pub startup_issues: Vec<StartupIssue>,
     pub data_dir: PathBuf,
+    /// Last normal (not maximized/minimized) bounds of the main window.
+    pub window_normal: Mutex<Option<crate::window::Bounds>>,
 }
 
 impl AppState {
@@ -66,6 +68,7 @@ impl AppState {
             output,
             startup_issues: issues,
             data_dir: dir.to_path_buf(),
+            window_normal: Mutex::new(None),
         }
     }
 }
