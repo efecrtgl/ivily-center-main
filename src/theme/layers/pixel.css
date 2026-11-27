@@ -1,0 +1,70 @@
+/*
+ * Pixel layer: bitmap typography, square geometry, chunky two-pixel borders, bevelled
+ * "8-bit" controls, hard drop shadows, dithered backdrops and stepped motion.
+ */
+
+:root[data-style='pixel'] { --px: 2px; --notch: 4px; }
+:root[data-style='pixel'] body { -webkit-font-smoothing: none; }
+:root[data-style='pixel'] .icon { image-rendering: pixelated; }
+
+/* Notched (pixel-rounded) corners on solid controls */
+:root[data-style='pixel'] .btn,
+:root[data-style='pixel'] .input,
+:root[data-style='pixel'] .select,
+:root[data-style='pixel'] .kbd {
+  clip-path: polygon(0 var(--notch), var(--px) var(--notch), var(--px) var(--px), var(--notch) var(--px), var(--notch) 0,
+    calc(100% - var(--notch)) 0, calc(100% - var(--notch)) var(--px), calc(100% - var(--px)) var(--px), calc(100% - var(--px)) var(--notch), 100% var(--notch),
+    100% calc(100% - var(--notch)), calc(100% - var(--px)) calc(100% - var(--notch)), calc(100% - var(--px)) calc(100% - var(--px)), calc(100% - var(--notch)) calc(100% - var(--px)), calc(100% - var(--notch)) 100%,
+    var(--notch) 100%, var(--notch) calc(100% - var(--px)), var(--px) calc(100% - var(--px)), var(--px) calc(100% - var(--notch)), 0 calc(100% - var(--notch)));
+}
+
+/* Bevelled buttons that physically "press" */
+:root[data-style='pixel'] .btn {
+  border-color: var(--color-border);
+  box-shadow: inset calc(var(--px) * -1) calc(var(--px) * -1) 0 rgba(0, 0, 0, 0.35), inset var(--px) var(--px) 0 rgba(255, 255, 255, 0.22);
+  text-transform: uppercase; font-size: 0.88em; letter-spacing: 0.06em;
+}
+:root[data-style='pixel'] .btn:active:not(:disabled) {
+  box-shadow: inset var(--px) var(--px) 0 rgba(0, 0, 0, 0.35);
+  transform: translate(1px, 1px);
+}
+:root[data-style='pixel'] .btn--ghost { box-shadow: none; border-color: transparent; }
+:root[data-style='pixel'] .btn--ghost:hover:not(:disabled) { border-color: var(--color-border); }
+
+:root[data-style='pixel'] .input,
+:root[data-style='pixel'] .select { border-color: var(--color-border); box-shadow: inset var(--px) var(--px) 0 rgba(0, 0, 0, 0.25); }
+
+/* Square, chunky checkbox */
+:root[data-style='pixel'] .checkbox {
+  appearance: none; width: 1rem; height: 1rem; margin: 0;
+  border: var(--px) solid var(--color-border-strong); background: var(--color-bg);
+  box-shadow: inset var(--px) var(--px) 0 rgba(0, 0, 0, 0.3);
+}
+:root[data-style='pixel'] .checkbox:checked { background: var(--color-accent); box-shadow: inset 0 0 0 var(--px) var(--color-bg); }
+
+:root[data-style='pixel'] :focus-visible { outline: var(--px) dashed var(--color-focus); outline-offset: var(--px); }
+
+/* Hard 8-bit shadows instead of blur */
+:root[data-style='pixel'] .toast,
+:root[data-style='pixel'] .card,
+:root[data-style='pixel'] .notif-center,
+:root[data-style='pixel'] .popover { border-color: var(--color-border); box-shadow: var(--shadow-popup); }
+
+:root[data-style='pixel'] .badge { border-radius: 0; box-shadow: 0 0 0 var(--px) var(--color-border); }
+
+:root[data-style='pixel'] .section-title::before { content: '▸ '; color: var(--color-accent); }
+
+/* Workbench chrome */
+:root[data-style='pixel'] .titlebar { border-bottom: var(--px) solid var(--color-border); }
+:root[data-style='pixel'] .titlebar__brand { text-transform: uppercase; letter-spacing: 0.12em; }
+:root[data-style='pixel'] .activitybar { border-right: var(--px) solid var(--color-border); }
+:root[data-style='pixel'] .activitybar__item--active { background: var(--color-activitybar-active); color: var(--color-accent-fg); }
+:root[data-style='pixel'] .sidebar,
+:root[data-style='pixel'] .panel { border-color: var(--color-border); border-width: var(--px); }
+:root[data-style='pixel'] .panel__tab--active { background: var(--color-accent); color: var(--color-accent-fg); }
+:root[data-style='pixel'] .statusbar { border-top: var(--px) solid var(--color-border); text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.35); }
+:root[data-style='pixel'] .splitter:hover,
+:root[data-style='pixel'] .splitter--dragging { background: repeating-linear-gradient(45deg, var(--color-accent) 0 2px, transparent 2px 4px); }
+
+/* Square scrollbars */
+:root[data-style='pixel'] ::-webkit-scrollbar-thumb { border-radius: 0; border: var(--px) solid var(--color-border); background: var(--color-surface-active); background-clip: border-box; }

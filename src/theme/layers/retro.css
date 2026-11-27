@@ -1,0 +1,58 @@
+/*
+ * Retro Terminal layer: phosphor glow, CRT scanlines and vignette, bracketed text-mode
+ * controls, inverse-video focus and selection, double-line frames, blinking block cursor.
+ */
+
+:root[data-style='retro'] body { text-shadow: 0 0 0.35em color-mix(in srgb, var(--color-fg) 45%, transparent); }
+
+/* CRT overlay: scanlines + vignette (non-interactive, above everything) */
+:root[data-style='retro'] #root::after {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 1000;
+  background:
+    repeating-linear-gradient(to bottom, transparent 0, transparent 2px, rgba(0, 0, 0, 0.22) 3px),
+    radial-gradient(ellipse at center, transparent 60%, rgba(0, 0, 0, 0.45) 100%);
+}
+
+:root[data-style='retro'] ::selection { background: var(--color-fg); color: var(--color-bg); text-shadow: none; }
+
+/* Text-mode buttons: [ LABEL ] with inverse-video hover */
+:root[data-style='retro'] .btn {
+  border-color: var(--color-border); background: transparent; text-transform: uppercase;
+}
+:root[data-style='retro'] .btn::before { content: '['; }
+:root[data-style='retro'] .btn::after { content: ']'; }
+:root[data-style='retro'] .btn--icon::before,
+:root[data-style='retro'] .btn--icon::after { content: none; }
+:root[data-style='retro'] .btn:hover:not(:disabled),
+:root[data-style='retro'] .btn--primary { background: var(--color-fg); color: var(--color-bg); text-shadow: none; }
+
+:root[data-style='retro'] .input,
+:root[data-style='retro'] .select { background: transparent; border-color: var(--color-border); caret-color: var(--color-fg); }
+
+:root[data-style='retro'] :focus-visible { outline: none; background: var(--color-fg) !important; color: var(--color-bg) !important; text-shadow: none; }
+:root[data-style='retro'] .input:focus-visible { background: var(--color-surface-active) !important; color: var(--color-fg) !important; }
+
+:root[data-style='retro'] .checkbox { appearance: none; width: 1.1em; height: 1.1em; margin: 0; border: 1px solid var(--color-fg); }
+:root[data-style='retro'] .checkbox:checked { background: var(--color-fg); box-shadow: inset 0 0 0 2px var(--color-bg); }
+
+/* Double-line frames */
+:root[data-style='retro'] .toast,
+:root[data-style='retro'] .card,
+:root[data-style='retro'] .notif-center,
+:root[data-style='retro'] .popover { border: 3px double var(--color-border-strong); box-shadow: var(--shadow-popup); }
+
+:root[data-style='retro'] .section-title { color: var(--color-fg); }
+:root[data-style='retro'] .section-title::before { content: '> '; }
+:root[data-style='retro'] .badge { border-radius: 0; background: var(--color-fg); color: var(--color-bg); text-shadow: none; }
+
+/* Workbench chrome */
+:root[data-style='retro'] .titlebar { border-bottom: 1px solid var(--color-border); text-transform: uppercase; }
+:root[data-style='retro'] .titlebar__title::after { content: '█'; margin-left: 0.25em; animation: retro-blink 1.06s steps(1) infinite; }
+:root[data-style='retro'] .activitybar__item--active { background: var(--color-fg); color: var(--color-bg); }
+:root[data-style='retro'] .panel__tab { text-transform: uppercase; }
+:root[data-style='retro'] .panel__tab--active { background: var(--color-fg); color: var(--color-bg); text-shadow: none; }
+:root[data-style='retro'] .statusbar { text-transform: uppercase; border-top: 1px solid var(--color-border); }
+
+:root[data-style='retro'] ::-webkit-scrollbar-thumb { border-radius: 0; background: var(--color-border); border: 0; }
+
+@keyframes retro-blink { 50% { opacity: 0; } }
