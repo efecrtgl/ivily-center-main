@@ -7,6 +7,8 @@ import { appStore } from '../app/appStore.js';
 import { NotificationCenter } from './Notifications.jsx';
 import { ThemePicker } from './ThemePicker.jsx';
 import { statusUi, setStatusPopover } from './statusUi.js';
+import { showPage, workspaceStore } from '../workspace/store.js';
+import { LEVEL_LABEL } from '../workspace/trust.js';
 
 export function StatusBar() {
   const unread = useStore(notificationStore, unreadCount);
@@ -15,10 +17,27 @@ export function StatusBar() {
   const storage = useStore(appStore, (s) => s.info?.database.mode);
   const popover = useStore(statusUi, (s) => s.popover);
   const close = useCallback(() => setStatusPopover(null), []);
+  const ws = useStore(workspaceStore, (s) => s.current);
 
   return (
     <footer className="statusbar" aria-label="Status bar">
       <div className="statusbar__group">
+        {ws && (
+          <button type="button" className="statusbar__item" title={`${ws.record.path}
+Click to show the launcher`} onClick={() => showPage('launcher')}>
+            <Icon name={ws.record.kind === 'file' ? 'workspace' : 'folder'} size={13} /> {ws.record.name}
+          </button>
+        )}
+        {ws && (
+          <button
+            type="button"
+            className={`statusbar__item statusbar__item--trust-${ws.trust.level}`}
+            title="Workspace Trust — click to manage"
+            onClick={() => showPage('trust')}
+          >
+            <Icon name={ws.trust.level === 'trusted' ? 'shield-check' : 'shield'} size={13} /> {LEVEL_LABEL[ws.trust.level]}
+          </button>
+        )}
         {storage === 'memory' && (
           <span className="statusbar__item statusbar__item--warning" title="Settings and state are not being saved this session. See notifications for details.">
             <Icon name="warning" size={13} /> Not saving

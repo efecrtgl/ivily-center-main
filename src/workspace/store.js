@@ -14,6 +14,7 @@ import { setContext } from '../core/context.js';
 import { titleStore } from '../core/title.js';
 import { notify } from '../core/notifications.js';
 import { errorCode, errorMessage } from '../core/errors.js';
+import { confirmDialog } from '../core/dialogs.js';
 import { refreshValues } from '../core/settings.js';
 import { uiLog } from '../core/output.js';
 import * as ipc from '../platform/ipc.js';
@@ -195,5 +196,43 @@ export async function applyStartup(result) {
   }
   if (result.problem) {
     notify({ severity: 'warning', title: 'Could not reopen the last workspace', message: result.problem, source: 'workspace' });
+  }
+}
+
+/**
+ * Save the open workspace as a `*.ivily-workspace` file (native save dialog). An existing file
+ * is only replaced after explicit confirmation. The window then switches to the file workspace,
+ * carrying the session over.
+ */
+export const saveWorkspaceAs = () =>
+  transition(async () => {
+    if (!workspaceStore.get().current) return undefined;
+    let result = await ipc.workspaceSaveAs();
+    if (!result) return undefined;
+    if (result.status === 'confirmOverwrite') {
+      const ok = await confirmDialog({
+        title: 'Replace the existing file?',
+        message: 'A file with this name already exists. Replacing it overwrites its contents.',
+        detail: result.path,
+        confirmLabel: 'Replace',
+        danger: true,
+      });
+      if (!ok) return undefined;
+      result = await ipc.workspaceSaveAsConfirm(result.token);
+    }
+    notify({ title: 'Workspace file saved', message: result.workspace.file ?? '', source: 'workspace' });
+    return result.workspace;
+  }, 'Could not save the workspace file');
+
+/** Toggle the favorite flag of the open workspace. */
+export async function toggleCurrentFavorite() {
+  const ws = workspaceStore.get().current;
+  if (!ws) return;
+  try {
+    const record = await ipc.workspaceUpdateMeta(ws.record.id, { favorite: !ws.record.favorite });
+    updateCurrent({ record });
+    bumpRecents();
+  } catch (e) {
+    notify({ severity: 'error', title: 'Could not update the workspace', message: errorMessage(e), source: 'workspace' });
   }
 }

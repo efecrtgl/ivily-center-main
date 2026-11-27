@@ -1,22 +1,43 @@
 import { useDeferredValue, useState } from 'react';
 import { useStore } from '../../core/store.js';
-import { groupByCategory, resetSetting, searchSettings, setSetting, settingsStore } from '../../core/settings.js';
+import { groupByCategory, resetSetting, searchSettings, setSetting, settingsStore, workspaceScoped } from '../../core/settings.js';
+import { errorCode, errorMessage } from '../../core/errors.js';
+import { notify } from '../../core/notifications.js';
+import { workspaceStore } from '../../workspace/store.js';
 
-/** One setting row: control chosen from the schema type; validation errors come from Rust. */
-function SettingRow({ s, resolved }) {
+/**
+ * One setting row for a scope. The value shown is that scope's own value when set, otherwise the
+ * inherited effective value. Validation errors come from Rust.
+ * @param {{ s: import('../../core/settings.js').SettingSchema, resolved: any, scope: 'user' | 'workspace' }} props
+ */
+function SettingRow({ s, resolved, scope }) {
   const [error, setError] = useState(null);
   const [draft, setDraft] = useState(null);
-  const value = resolved?.value ?? s.default;
-  const modified = (resolved?.source ?? 'default') !== 'default';
-  const id = `setting-${s.key}`;
+  const own = scope === 'user' ? resolved?.userValue : resolved?.workspaceValue;
+  const isSet = own !== undefined;
+  const value = isSet ? own : scope === 'workspace' ? (resolved?.value ?? s.default) : s.default;
+  const overridden = scope === 'user' && resolved?.source === 'workspace';
+  const id = `setting-${scope}-${s.key}`;
 
+  const report = (e) => {
+    setError(errorMessage(e));
+    if (errorCode(e) === 'conflict') {
+      notify({
+        severity: 'warning',
+        title: 'The workspace file changed on disk',
+        message: 'Your change was not saved so the other change is not lost. Reload the workspace file and try again.',
+        source: 'settings',
+        actions: [{ label: 'Reload Workspace File', command: 'workspace.reloadFile' }],
+      });
+    }
+  };
   const commit = async (v) => {
     setError(null);
     try {
-      await setSetting(s.key, v);
+      await setSetting(s.key, v, scope);
       setDraft(null);
     } catch (e) {
-      setError(e?.message ?? String(e));
+      report(e);
     }
   };
 
@@ -65,14 +86,14 @@ function SettingRow({ s, resolved }) {
   }
 
   return (
-    <div className={`setting${modified ? ' setting--modified' : ''}`}>
+    <div className={`setting${isSet ? ' setting--modified' : ''}`}>
       <div className="setting__head">
         <label htmlFor={id} className="setting__title">
           {s.title}
         </label>
-        {modified && (
-          <button type="button" className="btn btn--ghost setting__reset" onClick={() => resetSetting(s.key).catch((e) => setError(e?.message ?? String(e)))}>
-            Reset
+        {isSet && (
+          <button type="button" className="btn btn--ghost setting__reset" onClick={() => resetSetting(s.key, scope).catch(report)}>
+            {scope === 'workspace' ? 'Use user value' : 'Reset'}
           </button>
         )}
       </div>
@@ -81,6 +102,8 @@ function SettingRow({ s, resolved }) {
         {control}
         {s.type === 'integer' && <span className="subtle">{`${s.min}–${s.max}`}</span>}
       </div>
+      {overridden && <div className="setting__note sev-info">Overridden in this workspace</div>}
+      {scope === 'workspace' && !isSet && <div className="setting__note subtle">Not set for this workspace — inherited</div>}
       {error && (
         <div className="setting__error sev-error" role="alert">
           {error}
@@ -93,13 +116,26 @@ function SettingRow({ s, resolved }) {
 
 export function SettingsView() {
   const { schema, values, loaded } = useStore(settingsStore);
+  const workspace = useStore(workspaceStore, (s) => s.current);
   const [query, setQuery] = useState('');
+  const [tab, setTab] = useState(/** @type {'user' | 'workspace'} */ ('user'));
+  const scope = workspace ? tab : 'user';
   const deferred = useDeferredValue(query);
-  const groups = groupByCategory(searchSettings(schema, deferred, values));
+  const visible = scope === 'workspace' ? workspaceScoped(schema) : schema;
+  const groups = groupByCategory(searchSettings(visible, deferred, values));
 
   return (
     <div className="settings">
       <div className="settings__search">
+        {workspace && (
+          <div className="settings__tabs" role="tablist" aria-label="Settings scope">
+            {['user', 'workspace'].map((t) => (
+              <button key={t} type="button" role="tab" aria-selected={scope === t} className={`settings__tab${scope === t ? ' settings__tab--active' : ''}`} onClick={() => setTab(t)}>
+                {t === 'user' ? 'User' : 'Workspace'}
+              </button>
+            ))}
+          </div>
+        )}
         <input
           className="input"
           type="search"
@@ -109,17 +145,25 @@ export function SettingsView() {
           onChange={(e) => setQuery(e.target.value)}
         />
       </div>
+      {scope === 'workspace' && (
+        <p className="subtle settings__note">
+          {workspace.file
+            ? `Saved in the workspace file ${workspace.file}.`
+            : 'Stored by Ivily Center for this workspace; nothing is written into the project folder.'}{' '}
+          Workspace values override user values.
+        </p>
+      )}
       {!loaded && <div className="empty-state">Loading settings…</div>}
       {loaded && groups.length === 0 && <div className="empty-state">No settings match “{query}”.</div>}
       {groups.map((g) => (
         <section key={g.category} className="settings__group" aria-label={g.category}>
           <h2 className="section-title">{g.category}</h2>
           {g.items.map((s) => (
-            <SettingRow key={s.key} s={s} resolved={values[s.key]} />
+            <SettingRow key={`${scope}-${s.key}`} s={s} resolved={values[s.key]} scope={scope} />
           ))}
         </section>
       ))}
-      <p className="subtle settings__note">Settings shown here apply to your user profile. Workspace-level settings become available with workspaces.</p>
+      {!workspace && <p className="subtle settings__note">Open a workspace to change settings for it.</p>}
     </div>
   );
 }

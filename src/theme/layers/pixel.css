@@ -68,3 +68,9 @@
 
 /* Square scrollbars */
 :root[data-style='pixel'] ::-webkit-scrollbar-thumb { border-radius: 0; border: var(--px) solid var(--color-border); background: var(--color-surface-active); background-clip: border-box; }
+
+/* Modals, banner and lists */
+:root[data-style='pixel'] .modal { border-color: var(--color-border); box-shadow: var(--shadow-popup); }
+:root[data-style='pixel'] .restricted-banner { border-bottom-width: var(--px); background-image: repeating-linear-gradient(45deg, transparent 0 6px, rgba(0, 0, 0, 0.08) 6px 8px); }
+:root[data-style='pixel'] .launcher__chip { border-radius: 0; border-width: var(--px); }
+:root[data-style='pixel'] .settings__tab--active { background: var(--color-accent); color: var(--color-accent-fg); }

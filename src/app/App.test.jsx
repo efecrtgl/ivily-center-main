@@ -15,7 +15,9 @@ describe('App (outside Tauri)', () => {
     expect(screen.getByRole('button', { name: 'Close' })).toBeTruthy();
     expect(screen.getByText('No folder open', { selector: '.titlebar__title' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Explorer' })).toBeTruthy();
-    expect(screen.getByRole('heading', { name: 'Ivily Center' })).toBeTruthy();
+    // Without a workspace the editor area shows the launcher (never a mandatory step).
+    expect(screen.getByRole('heading', { name: 'Workspaces' })).toBeTruthy();
+    expect(screen.getAllByRole('button', { name: /Open Folder/ }).length).toBeGreaterThan(0);
     expect(screen.getByRole('contentinfo', { name: 'Status bar' })).toBeTruthy();
   });
 

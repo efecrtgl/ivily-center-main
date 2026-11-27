@@ -158,3 +158,112 @@ button.statusbar__item:hover { background: color-mix(in srgb, var(--color-status
 .welcome__key { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; width: 100%; padding: 0.35rem 0.5rem; border: 0; background: transparent; cursor: pointer; text-align: left; border-radius: var(--radius-sm); }
 .welcome__key:hover { background: var(--color-surface-hover); }
 .welcome__storage { margin-top: 2.5rem; font-size: 0.85em; word-break: break-all; }
+
+/* ── Editor-area pages ────────────────────────────────────────────────────── */
+.editor-area { display: flex; flex-direction: column; }
+.editor-area__page { flex: 1; min-height: 0; overflow: auto; }
+
+/* ── Launcher ─────────────────────────────────────────────────────────────── */
+.launcher { min-height: 100%; display: flex; justify-content: center; padding: 2.5rem 1.5rem; }
+.launcher__inner { width: min(52rem, 100%); }
+.launcher__header { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.2rem; }
+.launcher__header h1 { font-size: 1.7em; margin-bottom: 0.3rem; }
+.launcher__primary { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.launcher__primary .kbd { margin-left: 0.3rem; }
+.launcher__search { width: 100%; margin-bottom: 1rem; }
+.launcher section { margin-bottom: 1.4rem; }
+.launcher section > .section-title { margin-bottom: 0.35rem; }
+.launcher__list { list-style: none; margin: 0; padding: 0; }
+.launcher__item { display: flex; align-items: center; gap: 0.3rem; border-radius: var(--radius-sm); }
+.launcher__item:hover, .launcher__item:focus-within { background: var(--color-surface-hover); }
+.launcher__item--editing { padding: 0.4rem 0.5rem; }
+.launcher__open {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 0.7rem; padding: 0.45rem 0.6rem;
+  border: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; border-radius: var(--radius-sm);
+}
+.launcher__open:disabled { cursor: default; }
+.launcher__text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.launcher__name { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; font-weight: var(--font-weight-strong); }
+.launcher__path { font-size: 0.85em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.launcher__when { font-size: 0.82em; white-space: nowrap; }
+.launcher__actions { display: flex; align-items: center; gap: 0.1rem; padding-right: 0.3rem; opacity: 0.55; }
+.launcher__item:hover .launcher__actions, .launcher__item:focus-within .launcher__actions { opacity: 1; }
+.launcher__item--unavailable .launcher__name { color: var(--color-fg-muted); }
+.launcher__chip {
+  display: inline-block; padding: 0 0.4rem; border-radius: 999px; font-size: 0.72em; font-weight: 400; line-height: 1.6;
+  border: var(--border-width) solid var(--color-border-strong); color: var(--color-fg-muted);
+}
+.launcher__chip--accent { border-color: var(--color-accent); color: var(--color-accent); }
+.launcher__chip--warn { border-color: var(--color-warning); color: var(--color-warning); }
+.launcher__edit { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; width: 100%; }
+.launcher__edit .input { flex: 1; min-width: 9rem; }
+.launcher__error { width: 100%; font-size: 0.88em; }
+.launcher__found-head { display: flex; justify-content: space-between; align-items: center; }
+.launcher__none { padding: 0.4rem 0.6rem; }
+.launcher__footer { display: flex; align-items: center; gap: 0.6rem; margin-top: 2rem; padding-top: 1rem; border-top: var(--border-width) solid var(--color-border); }
+.icon--filled path { fill: var(--color-warning); stroke: var(--color-warning); }
+
+/* ── Explorer (workspace folders) ─────────────────────────────────────────── */
+.explorer { padding: 0 0.5rem; }
+.explorer__actions { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.6rem; width: 100%; max-width: 15rem; }
+.explorer__roots { list-style: none; margin: 0; padding: 0; }
+.explorer__root { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.2rem 0.45rem; padding: 0.35rem 0.4rem; border-radius: var(--radius-sm); }
+.explorer__root:hover { background: var(--color-surface-hover); }
+.explorer__name { font-weight: var(--font-weight-strong); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.explorer__path { grid-column: 2 / 4; font-size: 0.8em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.explorer__root--missing .explorer__name { color: var(--color-fg-muted); }
+.explorer__note { font-size: 0.85em; padding: 0 0.4rem; }
+
+/* ── Settings scope tabs ──────────────────────────────────────────────────── */
+.settings__tabs { display: flex; gap: 0.2rem; margin-bottom: 0.5rem; }
+.settings__tab { flex: 1; padding: 0.3rem 0.5rem; border: var(--border-width) solid var(--color-border); background: transparent; color: var(--color-fg-muted); cursor: pointer; border-radius: var(--radius-sm); }
+.settings__tab--active { background: var(--color-accent-muted); color: var(--color-fg); border-color: var(--color-accent); }
+.setting__note { font-size: 0.85em; margin-top: 0.3rem; }
+
+/* ── Restricted Mode banner and status ────────────────────────────────────── */
+.restricted-banner {
+  flex: none; display: flex; align-items: center; gap: 0.6rem; padding: 0.3rem 0.4rem 0.3rem 0.8rem;
+  background: color-mix(in srgb, var(--color-warning) 16%, var(--color-bg)); color: var(--color-fg);
+  border-bottom: var(--border-width) solid color-mix(in srgb, var(--color-warning) 45%, transparent); font-size: 0.9em;
+}
+.restricted-banner > span { flex: 1; }
+.restricted-banner .btn { min-height: 1.5rem; }
+.restricted-banner--partial { background: color-mix(in srgb, var(--color-info) 14%, var(--color-bg)); border-bottom-color: color-mix(in srgb, var(--color-info) 45%, transparent); }
+.statusbar__item--trust-restricted { color: var(--color-warning); }
+
+/* ── Modals ───────────────────────────────────────────────────────────────── */
+.modal-backdrop { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; background: var(--color-overlay); padding: 1rem; }
+.modal {
+  width: min(32rem, 100%); max-height: calc(100vh - 2rem); overflow: auto; padding: 1.2rem 1.3rem;
+  border: var(--border-width) solid var(--color-border-strong); border-radius: var(--radius-lg);
+  background: var(--color-bg-elevated); box-shadow: var(--shadow-popup); font-size: 1rem;
+}
+.modal h2 { font-size: 1.15em; margin-bottom: 0.5rem; }
+.modal__detail { font-size: 0.88em; padding: 0.4rem 0.6rem; background: var(--color-surface); border-radius: var(--radius-sm); word-break: break-all; user-select: text; }
+.modal__actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem; }
+.btn--danger { background: var(--color-danger); border-color: var(--color-danger); color: #fff; }
+
+.trust-dialog { width: min(40rem, 100%); }
+.trust-dialog__head { display: flex; align-items: center; gap: 0.7rem; color: var(--color-warning); }
+.trust-dialog__head h2 { color: var(--color-fg); margin: 0; }
+.trust-dialog__body p { margin: 0.7rem 0; }
+.trust-dialog__caps { margin: 0.2rem 0 0.6rem; padding-left: 1.2rem; color: var(--color-fg-muted); }
+.trust-dialog__folders { list-style: none; margin: 0; padding: 0.4rem 0.6rem; background: var(--color-surface); border-radius: var(--radius-sm); font-size: 0.88em; word-break: break-all; user-select: text; }
+.trust-dialog__actions { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 1rem; }
+.trust-dialog__spacer { flex: 1; }
+.trust-dialog__custom { border: 0; margin: 0.8rem 0 0; padding: 0; }
+.trust-dialog__cap { display: flex; gap: 0.6rem; align-items: flex-start; padding: 0.3rem 0; cursor: pointer; }
+.trust-dialog__cap .checkbox { margin-top: 0.2rem; }
+.trust-dialog__capdesc { display: block; font-size: 0.85em; }
+
+/* ── Trust manager ────────────────────────────────────────────────────────── */
+.trust-manager { display: flex; justify-content: center; padding: 2.5rem 1.5rem; }
+.trust-manager__inner { width: min(56rem, 100%); }
+.trust-manager__header { display: flex; justify-content: space-between; align-items: center; }
+.trust-manager__header h1 { display: flex; align-items: center; gap: 0.5rem; font-size: 1.6em; }
+.trust-manager section { margin-top: 1.6rem; }
+.trust-manager__actions { margin-top: 0.7rem; }
+.trust-table { width: 100%; border-collapse: collapse; margin-top: 0.4rem; font-size: 0.92em; }
+.trust-table th { text-align: left; font-weight: var(--font-weight-strong); color: var(--color-fg-muted); padding: 0.35rem 0.5rem; border-bottom: var(--border-width) solid var(--color-border-strong); }
+.trust-table td { padding: 0.45rem 0.5rem; border-bottom: var(--border-width) solid var(--color-border); vertical-align: top; word-break: break-word; }
+.trust-table td.mono { font-size: 0.9em; user-select: text; }

@@ -56,3 +56,11 @@
 :root[data-style='retro'] ::-webkit-scrollbar-thumb { border-radius: 0; background: var(--color-border); border: 0; }
 
 @keyframes retro-blink { 50% { opacity: 0; } }
+
+/* Modals, banner and lists */
+:root[data-style='retro'] .modal { border: 3px double var(--color-border-strong); }
+:root[data-style='retro'] .modal-backdrop { background: rgba(0, 0, 0, 0.75); }
+:root[data-style='retro'] .restricted-banner { background: transparent; color: var(--color-warning); border-bottom: 1px dashed var(--color-warning); text-transform: uppercase; }
+:root[data-style='retro'] .launcher__chip { border-radius: 0; }
+:root[data-style='retro'] .launcher__chip::before { content: '<'; }
+:root[data-style='retro'] .launcher__chip::after { content: '>'; }

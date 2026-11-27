@@ -4,6 +4,7 @@ import { commandsVersion, executeCommand, listCommands } from '../../core/comman
 import { keybindingFor, keybindingStore } from '../../core/keybindings.js';
 import { listThemes, themeStore } from '../../theme/engine.js';
 import { ThemeSwatch, selectTheme } from '../../shell/ThemePicker.jsx';
+import { workspaceStore } from '../../workspace/store.js';
 
 /** Editor-area start page. Lists real commands and shortcuts from the registry. */
 export function WelcomeView() {
@@ -11,6 +12,7 @@ export function WelcomeView() {
   useStore(commandsVersion);
   useStore(keybindingStore);
   const current = useStore(themeStore, (s) => s.current?.id);
+  const workspace = useStore(workspaceStore, (s) => s.current);
   const shortcuts = listCommands({ paletteOnly: true })
     .map((c) => ({ ...c, key: keybindingFor(c.id) }))
     .filter((c) => c.key);
@@ -21,8 +23,9 @@ export function WelcomeView() {
         <header className="welcome__header">
           <h1>Ivily Center</h1>
           <p className="muted">
-            Development build {info?.version ?? __APP_VERSION__}. The workbench foundation is in place; workspaces, the file
-            explorer and the editor are being built next.
+            Development build {info?.version ?? __APP_VERSION__}.{' '}
+            {workspace ? `Workspace “${workspace.record.name}” is open.` : 'No workspace is open.'} The file explorer and the
+            editor are being built next.
           </p>
         </header>
 

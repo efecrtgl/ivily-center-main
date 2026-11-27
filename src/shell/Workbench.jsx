@@ -8,6 +8,14 @@ import { StatusBar } from './StatusBar.jsx';
 import { Splitter } from './Splitter.jsx';
 import { Toasts } from './Notifications.jsx';
 import { WelcomeView } from '../features/welcome/WelcomeView.jsx';
+import { LauncherView } from '../features/launcher/LauncherView.jsx';
+import { TrustManagerView } from '../features/trust/TrustManagerView.jsx';
+import { TrustDialog } from '../features/trust/TrustDialog.jsx';
+import { RestrictedBanner } from '../features/trust/RestrictedBanner.jsx';
+import { ConfirmDialog } from './ConfirmDialog.jsx';
+import { workspaceStore } from '../workspace/store.js';
+
+const PAGES = { launcher: LauncherView, trust: TrustManagerView, welcome: WelcomeView };
 
 /**
  * Workbench layout:
@@ -22,6 +30,8 @@ export function Workbench() {
   const sidebarViews = viewsAt(views, 'sidebar');
   const sidebar = sidebarViews.find((v) => v.id === layout.sidebarView) || sidebarViews[0];
   const SidebarView = sidebar?.component;
+  const page = useStore(workspaceStore, (s) => s.page);
+  const Page = PAGES[page] ?? WelcomeView;
 
   return (
     <div className="app-shell">
@@ -48,7 +58,10 @@ export function Workbench() {
         )}
         <div className="main-column">
           <main className="editor-area" aria-label="Editor area">
-            <WelcomeView />
+            <RestrictedBanner />
+            <div className="editor-area__page">
+              <Page />
+            </div>
           </main>
           {layout.panelVisible && (
             <>
@@ -70,6 +83,8 @@ export function Workbench() {
       </div>
       <StatusBar />
       <Toasts />
+      <TrustDialog />
+      <ConfirmDialog />
     </div>
   );
 }

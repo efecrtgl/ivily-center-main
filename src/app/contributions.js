@@ -12,6 +12,9 @@ import { listThemes } from '../theme/engine.js';
 import { closeWindow, minimizeWindow, toggleMaximizeWindow } from '../platform/window.js';
 import { setStatusPopover, statusUi } from '../shell/statusUi.js';
 import { selectTheme } from '../shell/ThemePicker.jsx';
+import {
+  closeWorkspace, openFolder, openWorkspaceFile, reloadWorkspaceFile, saveWorkspaceAs, showPage, toggleCurrentFavorite, workspaceStore,
+} from '../workspace/store.js';
 import { ExplorerView } from '../features/explorer/ExplorerView.jsx';
 import { SettingsView } from '../features/settings/SettingsView.jsx';
 import { OutputView, outputUi } from '../features/output/OutputView.jsx';
@@ -50,6 +53,22 @@ export function registerWorkbenchContributions() {
     { id: 'notifications.toggleCenter', title: 'Show Notifications', category: 'Notifications', icon: 'bell', run: () => setStatusPopover(statusUi.get().popover === 'notifications' ? null : 'notifications') },
     { id: 'notifications.clearAll', title: 'Clear All Notifications', category: 'Notifications', run: () => clearAll() },
     { id: 'notifications.toggleDoNotDisturb', title: 'Toggle Do Not Disturb', category: 'Notifications', icon: 'bell-off', run: () => setSetting('notifications.doNotDisturb', !notificationStore.get().prefs.doNotDisturb) },
+    { id: 'workspace.openFolder', title: 'Open Folder…', category: 'Workspace', icon: 'folder-open', run: () => openFolder() },
+    { id: 'workspace.openWorkspaceFile', title: 'Open Workspace File…', category: 'Workspace', icon: 'workspace', run: () => openWorkspaceFile() },
+    { id: 'workspace.showLauncher', title: 'Show Launcher / Recent Workspaces', category: 'Workspace', icon: 'folder', run: () => showPage('launcher') },
+    { id: 'workspace.saveAs', title: 'Save Workspace As…', category: 'Workspace', when: 'workspaceOpen', run: () => saveWorkspaceAs() },
+    { id: 'workspace.reloadFile', title: 'Reload Workspace File', category: 'Workspace', when: "workspaceKind == 'file'", run: () => reloadWorkspaceFile() },
+    { id: 'workspace.toggleFavorite', title: 'Add / Remove Workspace from Favorites', category: 'Workspace', icon: 'star', when: 'workspaceOpen', run: () => toggleCurrentFavorite() },
+    { id: 'workspace.close', title: 'Close Workspace', category: 'Workspace', when: 'workspaceOpen', run: () => closeWorkspace() },
+    { id: 'trust.manage', title: 'Manage Workspace Trust', category: 'Workspace Trust', icon: 'shield', run: () => showPage('trust') },
+    {
+      id: 'trust.prompt',
+      title: 'Change Trust for This Workspace…',
+      category: 'Workspace Trust',
+      icon: 'shield',
+      when: 'workspaceOpen',
+      run: () => workspaceStore.set((s) => ({ ...s, trustPrompt: true })),
+    },
     { id: 'window.minimize', title: 'Minimize Window', category: 'Window', icon: 'minimize', run: () => minimizeWindow() },
     { id: 'window.toggleMaximize', title: 'Maximize / Restore Window', category: 'Window', icon: 'maximize', run: () => toggleMaximizeWindow() },
     { id: 'window.close', title: 'Close Window', category: 'Window', icon: 'close', run: () => closeWindow() },
@@ -73,5 +92,7 @@ export function registerWorkbenchContributions() {
     { key: 'Ctrl+-', command: 'view.zoomOut' },
     { key: 'Ctrl+NumpadSubtract', command: 'view.zoomOut' },
     { key: 'Ctrl+0', command: 'view.zoomReset' },
+    { key: 'Ctrl+Alt+O', command: 'workspace.openFolder' },
+    { key: 'Ctrl+R', command: 'workspace.showLauncher' },
   ]);
 }
