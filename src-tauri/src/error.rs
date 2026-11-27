@@ -55,6 +55,12 @@ impl AppError {
     }
 }
 
+impl From<rusqlite::Error> for AppError {
+    fn from(e: rusqlite::Error) -> Self {
+        AppError::Database(e.to_string())
+    }
+}
+
 impl From<std::io::Error> for AppError {
     fn from(e: std::io::Error) -> Self {
         if e.kind() == std::io::ErrorKind::PermissionDenied {
