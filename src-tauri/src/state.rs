@@ -45,6 +45,9 @@ pub struct AppState {
     /// Running language servers by instance id.
     pub lsp: Mutex<HashMap<u64, crate::lsp::ServerProcess>>,
     pub lsp_next: std::sync::atomic::AtomicU64,
+    pub terminals: Mutex<HashMap<u64, crate::terminal::Session>>,
+    pub terminal_next: std::sync::atomic::AtomicU64,
+    pub terminal_profiles: Mutex<Option<Vec<crate::terminal::Profile>>>,
 }
 
 impl AppState {
@@ -128,6 +131,9 @@ impl AppState {
             toolchain_cache: Mutex::new(None),
             lsp: Mutex::new(HashMap::new()),
             lsp_next: std::sync::atomic::AtomicU64::new(1),
+            terminals: Mutex::new(HashMap::new()),
+            terminal_next: std::sync::atomic::AtomicU64::new(1),
+            terminal_profiles: Mutex::new(None),
         }
     }
 }

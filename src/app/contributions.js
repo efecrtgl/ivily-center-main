@@ -25,6 +25,8 @@ import {
 import { pickEncoding, pickEol, pickLanguage } from '../features/editor/EditorStatus.jsx';
 import { findReferences, formatDocument, jumpToDefinition, jumpToImplementation, jumpToTypeDefinition, renameSymbol } from '@codemirror/lsp-client';
 import { restartServers } from '../features/lsp/manager.js';
+import { TerminalView } from '../features/terminal/TerminalView.jsx';
+import { activeTerminalId, clearTerminal, createTerminal, killTerminal, newTerminalWithProfile, splitTerminal, terminalStore } from '../features/terminal/model.js';
 
 function cycleTab(delta) {
   const s = editorStore.get();
@@ -69,6 +71,7 @@ export function registerWorkbenchContributions() {
   // ── Views ──────────────────────────────────────────────────────────────────
   registerView({ id: 'explorer', title: 'Explorer', icon: 'files', location: 'sidebar', component: ExplorerView, order: 10, command: 'workbench.showExplorer' });
   registerView({ id: 'settings', title: 'Settings', icon: 'settings', location: 'sidebar', component: SettingsView, order: 100, group: 'bottom', command: 'preferences.openSettings' });
+  registerView({ id: 'terminal', title: 'Terminal', icon: 'terminal', location: 'panel', component: TerminalView, order: 10, command: 'terminal.toggle' });
   registerView({ id: 'output', title: 'Output', icon: 'output', location: 'panel', component: OutputView, order: 20, command: 'workbench.showOutput' });
 
   // ── Commands ───────────────────────────────────────────────────────────────
@@ -134,6 +137,25 @@ export function registerWorkbenchContributions() {
     { id: 'editor.renameSymbol', title: 'Rename Symbol', category: 'Language', when: 'editorFocus', run: withEditor((ed) => ed.view && renameSymbol(ed.view)) },
     { id: 'editor.formatDocument', title: 'Format Document', category: 'Language', when: 'editorFocus', run: withEditor((ed) => ed.view && formatDocument(ed.view)) },
     { id: 'lsp.restart', title: 'Restart Language Servers', category: 'Language', icon: 'refresh', when: 'workspaceOpen', run: () => restartServers() },
+    {
+      id: 'terminal.toggle',
+      title: 'Toggle Terminal',
+      category: 'Terminal',
+      icon: 'terminal',
+      run: () => {
+        const l = layoutStore.get();
+        if (l.panelVisible && l.panelView === 'terminal') updateLayout({ panelVisible: false });
+        else {
+          showPanelView('terminal');
+          if (!terminalStore.get().groups.length) createTerminal();
+        }
+      },
+    },
+    { id: 'terminal.new', title: 'New Terminal', category: 'Terminal', icon: 'terminal', run: () => createTerminal() },
+    { id: 'terminal.newWithProfile', title: 'New Terminal with Profile…', category: 'Terminal', run: () => newTerminalWithProfile() },
+    { id: 'terminal.split', title: 'Split Terminal', category: 'Terminal', run: () => splitTerminal() },
+    { id: 'terminal.kill', title: 'Kill Active Terminal', category: 'Terminal', run: () => { const id = activeTerminalId(); if (id != null) killTerminal(id); } },
+    { id: 'terminal.clear', title: 'Clear Terminal', category: 'Terminal', run: () => clearTerminal() },
     { id: 'window.minimize', title: 'Minimize Window', category: 'Window', icon: 'minimize', run: () => minimizeWindow() },
     { id: 'window.toggleMaximize', title: 'Maximize / Restore Window', category: 'Window', icon: 'maximize', run: () => toggleMaximizeWindow() },
     { id: 'window.close', title: 'Close Window', category: 'Window', icon: 'close', run: () => closeWindow() },
@@ -176,5 +198,7 @@ export function registerWorkbenchContributions() {
     { key: 'Ctrl+2', command: 'editor.focusGroup2' },
     { key: 'Ctrl+3', command: 'editor.focusGroup3' },
     { key: 'Alt+Z', command: 'editor.toggleWordWrap' },
+    { key: 'Ctrl+`', command: 'terminal.toggle' },
+    { key: 'Ctrl+Shift+`', command: 'terminal.new' },
   ]);
 }

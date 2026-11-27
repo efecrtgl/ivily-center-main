@@ -14,6 +14,7 @@ pub mod lsp;
 pub mod output;
 pub mod settings;
 pub mod state;
+pub mod terminal;
 pub mod toolchains;
 pub mod window;
 pub mod workspace;
@@ -39,6 +40,7 @@ pub fn run() {
             let _ = st.workspace_hook.set(Box::new(move |label| {
                 commands::fs::sync_watcher(&hook_app, label);
                 commands::lsp::stop_window(&hook_app.state::<state::AppState>(), label);
+                commands::terminal::kill_window(&hook_app.state::<state::AppState>(), label);
             }));
             if let Some(w) = app.get_webview_window("main") {
                 window::runtime::restore_and_show(&w, &st);
@@ -97,8 +99,14 @@ pub fn run() {
             commands::lsp::lsp_start,
             commands::lsp::lsp_send,
             commands::lsp::lsp_stop,
+            commands::terminal::terminal_profiles,
+            commands::terminal::terminal_create,
+            commands::terminal::terminal_write,
+            commands::terminal::terminal_resize,
+            commands::terminal::terminal_kill,
             commands::toolchains::toolchains_detect,
             commands::toolchains::toolchains_open_homepage,
+            commands::toolchains::open_external_url,
             commands::fs::fs_list,
             commands::fs::fs_create_file,
             commands::fs::fs_create_dir,

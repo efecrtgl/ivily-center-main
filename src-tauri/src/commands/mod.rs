@@ -7,6 +7,7 @@ pub mod fs;
 pub mod lsp;
 pub mod output;
 pub mod settings;
+pub mod terminal;
 pub mod toolchains;
 pub mod ui_state;
 pub mod workspace;

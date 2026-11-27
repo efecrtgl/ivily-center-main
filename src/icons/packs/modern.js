@@ -42,6 +42,7 @@ export const MODERN_PACK = {
     refresh: s('M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7'),
     collapse: s('M4 4h16v16H4zM8 12h8'),
     wrench: s('M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z'),
+    terminal: s('M4 5h16v14H4zM7 9l3 3-3 3M12 15h5'),
     split: s('M4 4h16v16H4zM12 4v16'),
     workspace: s('M4 5h16v4H4zM4 11h7v8H4zM13 11h7v8h-7z'),
   },

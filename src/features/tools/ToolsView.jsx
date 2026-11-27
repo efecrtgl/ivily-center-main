@@ -8,6 +8,8 @@ import * as ipc from '../../platform/ipc.js';
 import { listLanguages, TIER_LABEL } from '../../languages/registry.js';
 import { registerBuiltinLanguages } from '../../languages/builtin.js';
 import { showPage, workspaceStore } from '../../workspace/store.js';
+import { confirmDialog } from '../../core/dialogs.js';
+import { runInNewTerminal, terminalStore, loadProfiles } from '../terminal/model.js';
 
 /** Detection results shared with other features (e.g. LSP server discovery). */
 export const toolsStore = createStore(/** @type {null | { tools: any[], relevant: string[], detectedAt: number }} */ (null));
@@ -34,6 +36,24 @@ const STATUS = {
   unverified: { label: 'Found, version unknown', cls: 'sev-warning' },
 };
 
+/** Install a tool with winget in a visible terminal, after explicit confirmation. */
+async function installInTerminal(t) {
+  const command = `winget install --id ${t.winget} --exact --source winget`;
+  const ok = await confirmDialog({
+    title: `Install ${t.name}?`,
+    message:
+      `This runs the command below in a new PowerShell terminal. winget downloads ${t.name} from the official winget community repository ` +
+      '(package id shown below). Depending on the package, it installs for your user or system-wide and may ask for administrator approval (UAC). ' +
+      'You can cancel in the terminal at any time (Ctrl+C). Run “Detect again” afterwards to verify.',
+    detail: command,
+    confirmLabel: 'Run in terminal',
+  });
+  if (!ok) return;
+  const profiles = terminalStore.get().profiles.length ? terminalStore.get().profiles : await loadProfiles();
+  const ps = profiles.find((p) => p.id === 'pwsh') ?? profiles.find((p) => p.id === 'powershell');
+  await runInNewTerminal(command, ps?.id);
+}
+
 function ToolRow({ t, relevant }) {
   const copyWinget = () => {
     navigator.clipboard?.writeText(`winget install --id ${t.winget} --exact --source winget`);
@@ -55,6 +75,7 @@ function ToolRow({ t, relevant }) {
           <>
             <button type="button" className="btn btn--ghost" onClick={() => ipc.toolchainsOpenHomepage(t.id).catch(() => {})}>Download page</button>
             {t.winget && <button type="button" className="btn btn--ghost" onClick={copyWinget} title={`winget install --id ${t.winget}`}>Copy winget command</button>}
+            {t.winget && <button type="button" className="btn btn--ghost" onClick={() => installInTerminal(t)}>Install in terminal…</button>}
           </>
         )}
       </td>

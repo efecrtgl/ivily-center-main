@@ -61,6 +61,20 @@ impl ProcessJob {
         let _ = child;
         Ok(())
     }
+
+    /// Put a process into the job by its raw handle (e.g. a ConPTY child).
+    ///
+    /// # Safety
+    /// `handle` must be a valid process handle with `PROCESS_SET_QUOTA | PROCESS_TERMINATE`
+    /// access for the duration of the call.
+    #[cfg(windows)]
+    pub unsafe fn assign_raw(&self, handle: std::os::windows::io::RawHandle) -> AppResult<()> {
+        let ok = windows_sys::Win32::System::JobObjects::AssignProcessToJobObject(self.handle, handle as _);
+        if ok == 0 {
+            return Err(AppError::Internal("AssignProcessToJobObject failed".into()));
+        }
+        Ok(())
+    }
 }
 
 impl Drop for ProcessJob {

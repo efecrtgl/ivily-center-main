@@ -380,3 +380,26 @@ button.statusbar__item:hover { background: color-mix(in srgb, var(--color-status
 .lsp-status--blocked, .lsp-status--missing { color: var(--color-warning); }
 .cm-lsp-documentation { font-family: var(--font-ui); font-size: 0.92em; max-width: 36rem; }
 .cm-lsp-documentation pre, .cm-lsp-documentation code { font-family: var(--font-mono); }
+
+/* ── Terminal ─────────────────────────────────────────────────────────────── */
+.terminal-view { flex: 1; min-height: 0; display: flex; }
+.terminal-main { flex: 1; min-width: 0; display: flex; position: relative; }
+.terminal-group { flex: 1; min-width: 0; display: flex; }
+.terminal-group[hidden] { display: none; }
+.terminal-pane { flex: 1; min-width: 0; position: relative; display: flex; flex-direction: column; border-left: var(--border-width) solid var(--color-border); background: var(--terminal-bg); }
+.terminal-pane:first-child { border-left: 0; }
+.terminal-mount { flex: 1; min-height: 0; padding: 0.2rem 0 0 0.5rem; }
+.terminal-host, .terminal-host .xterm { height: 100%; }
+.terminal-host .xterm-viewport { background-color: var(--terminal-bg) !important; }
+.terminal-search { position: absolute; top: 0.3rem; right: 1.2rem; z-index: 5; display: flex; gap: 0.2rem; padding: 0.2rem; background: var(--color-bg-elevated); border: var(--border-width) solid var(--color-border-strong); border-radius: var(--radius-sm); box-shadow: var(--shadow-popup); }
+.terminal-search .input { width: 12rem; min-height: 1.5rem; }
+.terminal-exited { position: absolute; right: 1rem; bottom: 0.3rem; font-size: 0.85em; z-index: 4; }
+.terminal-side { flex: none; width: 11rem; display: flex; flex-direction: column; border-left: var(--border-width) solid var(--color-border); }
+.terminal-toolbar { display: flex; gap: 0.1rem; padding: 0.15rem 0.3rem; }
+.terminal-toolbar .btn--icon { width: 1.6rem; min-height: 1.6rem; }
+.terminal-tabs { list-style: none; margin: 0; padding: 0; overflow: auto; }
+.terminal-tab { display: flex; align-items: center; gap: 0.3rem; padding: 0.25rem 0.5rem; cursor: pointer; font-size: 0.9em; }
+.terminal-tab:hover { background: var(--color-surface-hover); }
+.terminal-tab--active { background: var(--color-accent-muted); }
+.terminal-tab__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.terminal-tab .input { min-height: 1.4rem; width: 100%; }

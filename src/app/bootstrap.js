@@ -23,6 +23,7 @@ import { onFsChanged, registerExplorerSession, setFileOpener } from '../features
 import { applyOptionsToAll, onFsChangedEditor, openDocument, registerEditorSession } from '../features/editor/model.js';
 import { themeStore } from '../theme/engine.js';
 import { installLsp } from '../features/lsp/integration.js';
+import { applyTerminalOptions, installTerminal } from '../features/terminal/model.js';
 import { errorMessage } from '../core/errors.js';
 
 /** Apply settings that have UI side effects. Only changed values are re-applied. */
@@ -43,6 +44,7 @@ function applySettingEffects(values, prev) {
   if (prev && ['editor.tabSize', 'editor.insertSpaces', 'editor.wordWrap', 'editor.renderWhitespace', 'editor.lineNumbers'].some(changed)) {
     applyOptionsToAll();
   }
+  if (prev && ['terminal.fontFamily', 'terminal.fontSize', 'terminal.cursorStyle'].some(changed)) applyTerminalOptions();
   if (['notifications.level', 'notifications.doNotDisturb', 'notifications.timeoutSeconds'].some(changed)) {
     setNotificationPrefs({
       level: v('notifications.level') ?? 'info',
@@ -95,6 +97,7 @@ export async function bootstrap() {
   registerExplorerSession();
   registerEditorSession();
   installLsp();
+  installTerminal();
   setFileOpener((ref, opts) => openDocument(ref, opts));
   ipc.onEvent(ipc.events.fsChanged, (change) => {
     onFsChanged(change);

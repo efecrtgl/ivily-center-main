@@ -46,3 +46,9 @@ pub fn toolchains_open_homepage(id: String) -> AppResult<()> {
     let spec = TOOLS.iter().find(|t| t.id == id).ok_or_else(|| AppError::NotFound(format!("tool {id}")))?;
     crate::core::open_url(spec.homepage)
 }
+
+/// Open an http(s) link the user clicked (terminal output, hover documentation).
+#[tauri::command]
+pub fn open_external_url(url: String) -> AppResult<()> {
+    crate::core::open_url(&url)
+}

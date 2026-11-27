@@ -200,3 +200,14 @@ export const lspServers = () => call('lsp_servers');
 export const lspStart = (server) => call('lsp_start', { server });
 export const lspSend = (id, message) => call('lsp_send', { id, message });
 export const lspStop = (id) => call('lsp_stop', { id });
+
+// ── Terminal ─────────────────────────────────────────────────────────────────
+/** @returns {Promise<{ id: string, name: string, path: string, args: string[], source: string }[]>} */
+export const terminalProfiles = (refresh = false) => call('terminal_profiles', { refresh });
+/** Starts a shell; output arrives on `onData` (a Tauri Channel delivering ArrayBuffers). */
+export const terminalCreate = (profile, root, cols, rows, onData) => call('terminal_create', { profile, root, cols, rows, onData });
+export const terminalWrite = (id, data) => call('terminal_write', { id, data });
+export const terminalResize = (id, cols, rows) => call('terminal_resize', { id, cols, rows });
+export const terminalKill = (id) => call('terminal_kill', { id });
+/** Opens an http(s) link in the default browser (validated by the backend). */
+export const openExternalUrl = (url) => call('open_external_url', { url });
