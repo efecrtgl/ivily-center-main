@@ -15,6 +15,17 @@ import { useProblems } from '../features/problems/ProblemsView.jsx';
 import { countProblems } from '../features/problems/model.js';
 import { showPanelView } from '../core/layout.js';
 import { tasksStore } from '../features/tasks/model.js';
+import { updateStore } from '../features/update/model.js';
+
+function UpdateStatus() {
+  const r = useStore(updateStore, (s) => s.result);
+  if (!r?.available) return null;
+  return (
+    <button type="button" className="statusbar__item statusbar__item--accent" title="An update is available" onClick={() => showPage('updates')}>
+      <Icon name="refresh" size={13} /> Update {r.version}
+    </button>
+  );
+}
 
 function ProblemsStatus() {
   const c = countProblems(useProblems());
@@ -24,6 +35,7 @@ function ProblemsStatus() {
       <button type="button" className="statusbar__item" title="Problems (Ctrl+Shift+M)" aria-label={`${c.error} errors, ${c.warning} warnings`} onClick={() => showPanelView('problems')}>
         <Icon name="error" size={13} /> {c.error} <Icon name="warning" size={13} /> {c.warning}
       </button>
+      <UpdateStatus />
       {running > 0 && (
         <button type="button" className="statusbar__item" title="Running tasks — click to stop one" onClick={() => import('../core/commands.js').then((m) => m.executeCommand('tasks.terminate'))}>
           <Icon name="terminal" size={13} /> {running} task{running === 1 ? '' : 's'}

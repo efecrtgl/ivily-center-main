@@ -25,8 +25,9 @@ import { DiffView } from '../features/git/DiffView.jsx';
 import { KeybindingsView } from '../features/keybindings/KeybindingsView.jsx';
 import { PreviewView } from '../features/preview/PreviewView.jsx';
 import { ModulesView } from '../features/modules/ModulesView.jsx';
+import { UpdatesView } from '../features/update/UpdatesView.jsx';
 
-const PAGES = { launcher: LauncherView, trust: TrustManagerView, welcome: WelcomeView, tools: ToolsView, diff: DiffView, keybindings: KeybindingsView, preview: PreviewView, modules: ModulesView };
+const PAGES = { launcher: LauncherView, trust: TrustManagerView, welcome: WelcomeView, tools: ToolsView, diff: DiffView, keybindings: KeybindingsView, preview: PreviewView, modules: ModulesView, updates: UpdatesView };
 
 /**
  * Workbench layout:

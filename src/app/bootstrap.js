@@ -11,6 +11,7 @@ import { installTasks } from '../features/tasks/model.js';
 import { installBookmarks } from '../features/bookmarks/model.js';
 import { installDebug } from '../features/debug/model.js';
 import { installExtensions, loadExtensions } from '../features/extensions/model.js';
+import { installUpdates, maybeCheckOnStartup } from '../features/update/model.js';
 import { loadUserCustomizations } from '../features/customize/model.js';
 import { registerWorkbenchContributions } from './contributions.js';
 import { loadSettings, settingsStore } from '../core/settings.js';
@@ -106,6 +107,7 @@ export async function bootstrap() {
   installBookmarks();
   installDebug();
   installExtensions();
+  installUpdates();
   installLsp();
   installTerminal();
   installGit();
@@ -169,6 +171,8 @@ export async function bootstrap() {
     beforeWindowClose(() => flushSession());
     // The workbench restored: reset the failed-start counter used for safe mode.
     ipc.sessionReady().catch(() => {});
+    // At most once a day, a little after startup, and only when enabled.
+    setTimeout(() => maybeCheckOnStartup().catch(() => {}), 15000);
   } else {
     showPage('launcher');
   }

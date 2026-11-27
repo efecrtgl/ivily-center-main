@@ -595,3 +595,9 @@ button.statusbar__item:hover { background: color-mix(in srgb, var(--color-status
 .module-row__key { color: var(--color-fg-muted); }
 .link-like { border: 0; background: none; color: var(--color-accent); padding: 0; cursor: pointer; font: inherit; text-decoration: underline; }
 .welcome__start { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.8rem; }
+
+/* About & updates */
+.updates-title { margin-top: 1.4rem; }
+.update-notes { max-height: 22rem; padding: 0.4rem 0; }
+.update-progress { display: block; width: 100%; margin-top: 0.3rem; }
+.statusbar__item--accent { color: var(--color-accent); }

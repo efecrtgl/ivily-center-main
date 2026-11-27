@@ -244,6 +244,11 @@ export const modulesStatus = (refresh = false) => call('modules_status', { refre
 export const moduleRequest = (product, method, params) => call('module_request', { product, method, params });
 export const moduleOpen = (product) => call('module_open', { product });
 
+// ── Updates (GitHub Releases, signature verified in the backend) ──────────────
+export const updateCheck = () => call('update_check');
+export const updateInstall = (expectedVersion) => call('update_install', { expectedVersion });
+export const updateInfo = () => call('update_info');
+
 // ── Tasks (running requires the taskExecution trust capability + approval) ──
 export const tasksList = () => call('tasks_list');
 /** Starts one task in a terminal session; `approve` records the user's approval of its command. */

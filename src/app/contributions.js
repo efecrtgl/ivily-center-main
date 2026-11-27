@@ -28,6 +28,7 @@ import { restartServers } from '../features/lsp/manager.js';
 import { TerminalView } from '../features/terminal/TerminalView.jsx';
 import { ScmView } from '../features/git/ScmView.jsx';
 import { SearchView } from '../features/search/SearchView.jsx';
+import { checkForUpdates } from '../features/update/model.js';
 import { ExtensionsView } from '../features/extensions/ExtensionsView.jsx';
 import { installExtension } from '../features/extensions/model.js';
 import { DebugConsoleView, DebugView } from '../features/debug/DebugView.jsx';
@@ -243,6 +244,8 @@ export function registerWorkbenchContributions() {
     { id: 'extensions.show', title: 'Show Extensions', category: 'Extensions', icon: 'extensions', run: () => toggleSidebarView('extensions') },
     { id: 'extensions.install', title: 'Install Extension from Folder…', category: 'Extensions', run: () => installExtension() },
     { id: 'ecosystem.showDashboard', title: 'Show Ivily Ecosystem', category: 'Ecosystem', icon: 'ecosystem', run: () => showPage('modules') },
+    { id: 'app.checkForUpdates', title: 'Check for Updates…', category: 'Help', run: () => { showPage('updates'); return checkForUpdates(); } },
+    { id: 'app.showUpdates', title: 'About Ivily Center', category: 'Help', icon: 'info', run: () => showPage('updates') },
     { id: 'git.showView', title: 'Show Source Control', category: 'Git', icon: 'git', run: () => updateLayout({ sidebarVisible: true, sidebarView: 'scm' }) },
     { id: 'git.refresh', title: 'Refresh', category: 'Git', icon: 'refresh', when: 'workspaceOpen', run: () => loadRepos() },
     { id: 'git.checkout', title: 'Checkout to…', category: 'Git', when: 'gitRepository', run: () => { const r = activeRepo(); return r && gitCheckout(r.root); } },

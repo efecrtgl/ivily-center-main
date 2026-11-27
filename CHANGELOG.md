@@ -71,6 +71,8 @@ All notable changes to this project are documented here. The format follows
   allowlisted read-only requests) and Center's own `--iep describe` / `--iep request`.
 - Phase 18: Ivily Ecosystem dashboard — module status, capabilities, health, read-only summaries,
   open module, per-module disable; Welcome page entry points.
+- Phase 19: signed app updates from GitHub Releases (check, notes, confirmed install, daily
+  startup check, history) and the About page.
 
 ### Fixed
 - The main window no longer grows by its border width on every launch (inner size is persisted).
