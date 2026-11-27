@@ -45,6 +45,11 @@ pub struct AppState {
     /// Running language servers by instance id.
     pub lsp: Mutex<HashMap<u64, crate::lsp::ServerProcess>>,
     pub lsp_next: std::sync::atomic::AtomicU64,
+    /// Running debug adapters by id.
+    pub dap: Mutex<HashMap<u64, crate::dap::DapProcess>>,
+    pub dap_next: std::sync::atomic::AtomicU64,
+    /// Detected debug adapters (cached).
+    pub dap_adapters: Mutex<Option<Vec<crate::dap::Adapter>>>,
     pub terminals: Mutex<HashMap<u64, crate::terminal::Session>>,
     pub terminal_next: std::sync::atomic::AtomicU64,
     pub terminal_profiles: Mutex<Option<Vec<crate::terminal::Profile>>>,
@@ -72,6 +77,7 @@ impl AppState {
         output.register("workspace", "Workspace").expect("valid channel id");
         output.register("lsp", "Language Servers").expect("valid channel id");
         output.register("git", "Git").expect("valid channel id");
+        output.register("debug", "Debug").expect("valid channel id");
         output.info("app", format!("{} {} starting", crate::APP_NAME, crate::APP_VERSION));
 
         let opened = db::open_app_db(dir);
@@ -136,6 +142,9 @@ impl AppState {
             toolchain_cache: Mutex::new(None),
             lsp: Mutex::new(HashMap::new()),
             lsp_next: std::sync::atomic::AtomicU64::new(1),
+            dap: Mutex::new(HashMap::new()),
+            dap_next: std::sync::atomic::AtomicU64::new(1),
+            dap_adapters: Mutex::new(None),
             terminals: Mutex::new(HashMap::new()),
             terminal_next: std::sync::atomic::AtomicU64::new(1),
             terminal_profiles: Mutex::new(None),

@@ -6,6 +6,7 @@
 pub mod app_state;
 pub mod commands;
 pub mod core;
+pub mod dap;
 pub mod db;
 pub mod editor_io;
 pub mod error;
@@ -43,6 +44,7 @@ pub fn run() {
             let _ = st.workspace_hook.set(Box::new(move |label| {
                 commands::fs::sync_watcher(&hook_app, label);
                 commands::lsp::stop_window(&hook_app.state::<state::AppState>(), label);
+                commands::dap::stop_window(&hook_app.state::<state::AppState>(), label);
                 commands::terminal::kill_window(&hook_app.state::<state::AppState>(), label);
             }));
             if let Some(w) = app.get_webview_window("main") {
@@ -139,6 +141,11 @@ pub fn run() {
             commands::export::open_text_dialog,
             commands::notes::notes_read,
             commands::notes::notes_write,
+            commands::dap::dap_info,
+            commands::dap::dap_start,
+            commands::dap::dap_send,
+            commands::dap::dap_stop,
+            commands::dap::dap_revoke_approvals,
             commands::tasks::tasks_list,
             commands::tasks::task_run,
             commands::tasks::tasks_revoke_approvals,

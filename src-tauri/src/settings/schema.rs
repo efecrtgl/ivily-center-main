@@ -236,6 +236,15 @@ pub const SETTINGS: &[SettingDef] = &[
         scopes: ScopeSet::User,
     },
     SettingDef {
+        key: "debug.adapters",
+        title: "Additional debug adapters",
+        description: "Debug adapters that speak DAP over stdio, one per line as type|C:\\absolute\\path\\adapter.exe|arguments. The type matches the \"type\" of launch configurations.",
+        category: "Debug",
+        ty: T::StringList { max_items: 20, max_len: 400 },
+        default: D::List(&[]),
+        scopes: ScopeSet::User,
+    },
+    SettingDef {
         key: "tasks.shell",
         title: "Task shell",
         description: "Shell for shell tasks. Automatic uses PowerShell 7 when installed, otherwise Windows PowerShell. cmd cannot run commands containing double quotes.",

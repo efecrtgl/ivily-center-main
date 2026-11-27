@@ -2,6 +2,7 @@
 //! subsystem module. No business logic lives here.
 
 pub mod app;
+pub mod dap;
 pub mod editor;
 pub mod export;
 pub mod fs;
