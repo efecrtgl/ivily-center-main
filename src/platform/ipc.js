@@ -223,6 +223,14 @@ export const openTextDialog = (title, extensions) => call('open_text_dialog', { 
 export const notesRead = () => call('notes_read');
 export const notesWrite = (content) => call('notes_write', { content });
 
+// ── Debugging (requires the debugging trust capability + approval) ───────────
+export const dapInfo = (refresh = false) => call('dap_info', { refresh });
+/** Returns `{ kind: 'needsApproval', config, adapter }` or `{ kind: 'started', id, adapter, adapterId, request, config }`. */
+export const dapStart = (configId, approve, file) => call('dap_start', { configId, approve, file: file ?? null });
+export const dapSend = (id, message) => call('dap_send', { id, message });
+export const dapStop = (id) => call('dap_stop', { id });
+export const dapRevokeApprovals = () => call('dap_revoke_approvals');
+
 // ── Tasks (running requires the taskExecution trust capability + approval) ──
 export const tasksList = () => call('tasks_list');
 /** Starts one task in a terminal session; `approve` records the user's approval of its command. */

@@ -7,7 +7,7 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 
 ## Current phase
 
-**Phase 14 — Notes, bookmarks, previews:** done. **Next: Phase 15 — Debugging (DAP).**
+**Phase 15 — Debugging (DAP):** done. **Next: Phase 16 — Extensions.**
 
 ## Phases
 
@@ -28,7 +28,8 @@ committed, pushed and verified on GitHub), **in progress**, or **planned**.
 | 12 | Problems panel, output export | done | [docs/PROBLEMS.md](docs/PROBLEMS.md) |
 | 13 | Settings import/export, user themes, icon packs | done | [docs/THEMES.md](docs/THEMES.md) |
 | 14 | Notes, bookmarks, Markdown/HTML preview | done | [docs/NOTES.md](docs/NOTES.md) |
-| 15–25 | See plan | planned | |
+| 15 | Debugging (DAP) | done | `ce9f520` backend, then UI. [docs/DEBUGGING.md](docs/DEBUGGING.md). No real adapter installed — verified with scripted adapters. |
+| 16–25 | See plan | planned | |
 
 ## Phase 3 deliverables
 

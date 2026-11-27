@@ -28,6 +28,11 @@ import { restartServers } from '../features/lsp/manager.js';
 import { TerminalView } from '../features/terminal/TerminalView.jsx';
 import { ScmView } from '../features/git/ScmView.jsx';
 import { SearchView } from '../features/search/SearchView.jsx';
+import { DebugConsoleView, DebugView } from '../features/debug/DebugView.jsx';
+import {
+  configureLaunch, continueExecution, pauseExecution, removeAllBreakpoints, restartDebugging, revokeDebugApprovals, startDebugging, stepInto, stepOut, stepOver, stopDebugging,
+  toggleBreakpoint,
+} from '../features/debug/model.js';
 import { NotesView } from '../features/notes/NotesView.jsx';
 import { openPreview } from '../features/preview/PreviewView.jsx';
 import { clearBookmarks, goToBookmark, listBookmarks, toggleBookmark } from '../features/bookmarks/model.js';
@@ -95,10 +100,12 @@ export function registerWorkbenchContributions() {
   registerView({ id: 'explorer', title: 'Explorer', icon: 'files', location: 'sidebar', component: ExplorerView, order: 10, command: 'workbench.showExplorer' });
   registerView({ id: 'search', title: 'Search', icon: 'search', location: 'sidebar', component: SearchView, order: 15, command: 'search.show' });
   registerView({ id: 'notes', title: 'Notes', icon: 'pencil', location: 'sidebar', component: NotesView, order: 40, command: 'notes.show' });
+  registerView({ id: 'debug', title: 'Run and Debug', icon: 'debug', location: 'sidebar', component: DebugView, order: 30, command: 'debug.showView' });
   registerView({ id: 'scm', title: 'Source Control', icon: 'git', location: 'sidebar', component: ScmView, order: 20, command: 'git.showView' });
   registerView({ id: 'settings', title: 'Settings', icon: 'settings', location: 'sidebar', component: SettingsView, order: 100, group: 'bottom', command: 'preferences.openSettings' });
   registerView({ id: 'terminal', title: 'Terminal', icon: 'terminal', location: 'panel', component: TerminalView, order: 10, command: 'terminal.toggle' });
   registerView({ id: 'problems', title: 'Problems', icon: 'warning', location: 'panel', component: ProblemsView, order: 5, command: 'workbench.showProblems' });
+  registerView({ id: 'debugConsole', title: 'Debug Console', icon: 'debug', location: 'panel', component: DebugConsoleView, order: 15, command: 'debug.showConsole' });
   registerView({ id: 'output', title: 'Output', icon: 'output', location: 'panel', component: OutputView, order: 20, command: 'workbench.showOutput' });
 
   // ── Commands ───────────────────────────────────────────────────────────────
@@ -216,6 +223,20 @@ export function registerWorkbenchContributions() {
     { id: 'bookmarks.previous', title: 'Go to Previous Bookmark', category: 'Bookmarks', run: () => goToBookmark(-1) },
     { id: 'bookmarks.list', title: 'List Bookmarks', category: 'Bookmarks', run: () => listBookmarks() },
     { id: 'bookmarks.clear', title: 'Remove All Bookmarks', category: 'Bookmarks', run: () => clearBookmarks() },
+    { id: 'debug.showView', title: 'Show Run and Debug', category: 'Debug', icon: 'debug', run: () => updateLayout({ sidebarVisible: true, sidebarView: 'debug' }) },
+    { id: 'debug.showConsole', title: 'Show Debug Console', category: 'Debug', run: () => showPanelView('debugConsole') },
+    { id: 'debug.start', title: 'Start Debugging', category: 'Debug', when: 'workspaceOpen && !inDebugMode', run: () => startDebugging() },
+    { id: 'debug.continue', title: 'Continue', category: 'Debug', when: "debugState == 'stopped'", run: () => continueExecution() },
+    { id: 'debug.pause', title: 'Pause', category: 'Debug', when: "debugState == 'running'", run: () => pauseExecution() },
+    { id: 'debug.stepOver', title: 'Step Over', category: 'Debug', when: "debugState == 'stopped'", run: () => stepOver() },
+    { id: 'debug.stepInto', title: 'Step Into', category: 'Debug', when: "debugState == 'stopped'", run: () => stepInto() },
+    { id: 'debug.stepOut', title: 'Step Out', category: 'Debug', when: "debugState == 'stopped'", run: () => stepOut() },
+    { id: 'debug.stop', title: 'Stop Debugging', category: 'Debug', when: 'inDebugMode', run: () => stopDebugging() },
+    { id: 'debug.restart', title: 'Restart Debugging', category: 'Debug', when: 'inDebugMode', run: () => restartDebugging() },
+    { id: 'debug.toggleBreakpoint', title: 'Toggle Breakpoint', category: 'Debug', when: 'editorFocus', run: () => toggleBreakpoint() },
+    { id: 'debug.removeAllBreakpoints', title: 'Remove All Breakpoints', category: 'Debug', run: () => removeAllBreakpoints() },
+    { id: 'debug.configure', title: 'Add Configuration (.ivily/launch.json)', category: 'Debug', when: 'workspaceOpen', run: () => configureLaunch() },
+    { id: 'debug.revokeApprovals', title: 'Revoke Launch Approvals', category: 'Debug', when: 'workspaceOpen', run: () => revokeDebugApprovals() },
     { id: 'git.showView', title: 'Show Source Control', category: 'Git', icon: 'git', run: () => updateLayout({ sidebarVisible: true, sidebarView: 'scm' }) },
     { id: 'git.refresh', title: 'Refresh', category: 'Git', icon: 'refresh', when: 'workspaceOpen', run: () => loadRepos() },
     { id: 'git.checkout', title: 'Checkout to…', category: 'Git', when: 'gitRepository', run: () => { const r = activeRepo(); return r && gitCheckout(r.root); } },
@@ -272,6 +293,16 @@ export function registerWorkbenchContributions() {
     { key: 'Ctrl+`', command: 'terminal.toggle' },
     { key: 'Ctrl+Shift+G', command: 'git.showView' },
     { key: 'Ctrl+P', command: 'workbench.quickOpen' },
+    { key: 'F5', command: 'debug.start' },
+    { key: 'F5', command: 'debug.continue', when: "debugState == 'stopped'" },
+    { key: 'F6', command: 'debug.pause' },
+    { key: 'F10', command: 'debug.stepOver' },
+    { key: 'F11', command: 'debug.stepInto' },
+    { key: 'Shift+F11', command: 'debug.stepOut' },
+    { key: 'Shift+F5', command: 'debug.stop' },
+    { key: 'Ctrl+Shift+F5', command: 'debug.restart' },
+    { key: 'F9', command: 'debug.toggleBreakpoint' },
+    { key: 'Ctrl+Shift+D', command: 'debug.showView' },
     { key: 'Ctrl+Shift+V', command: 'preview.open' },
     { key: 'Ctrl+Alt+K', command: 'bookmarks.toggle' },
     { key: 'Ctrl+Alt+L', command: 'bookmarks.next' },

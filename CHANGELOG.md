@@ -61,6 +61,9 @@ All notable changes to this project are documented here. The format follows
   packs (validated JSON, `user-` ids, stored locally), *Export Current Theme…*.
 - Phase 14: workspace notes (stored outside the project), bookmarks that follow edits, sanitized
   live Markdown preview and sandboxed static HTML preview.
+- Phase 15: Debug Adapter Protocol client — adapter detection (debugpy, lldb-dap, netcoredbg) and
+  user adapters, launch.json with approval, breakpoints, stepping, call stack, variables, debug
+  console with evaluation.
 
 ### Fixed
 - The main window no longer grows by its border width on every launch (inner size is persisted).

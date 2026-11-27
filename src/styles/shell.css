@@ -536,3 +536,34 @@ button.statusbar__item:hover { background: color-mix(in srgb, var(--color-status
 .notes { display: flex; flex-direction: column; height: 100%; min-height: 0; }
 .notes__text { flex: 1; margin: 0.4rem; resize: none; font-family: var(--font-mono); min-height: 8rem; }
 .notes__preview { padding: 0.6rem 0.8rem; }
+
+/* Debugging */
+.cm-breakpoints .cm-gutterElement { cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.cm-breakpoint { display: inline-block; width: 0.65em; height: 0.65em; border-radius: 50%; background: var(--color-danger); }
+.cm-breakpoint--unverified { background: transparent; border: 1.5px solid var(--color-fg-muted); }
+.cm-debug-stopped { background: color-mix(in srgb, var(--color-warning) 22%, transparent); }
+.debug-view { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+.debug-start { display: flex; flex-direction: column; gap: 0.4rem; padding: 0 0.6rem 0.5rem; }
+.debug-note { font-size: 0.85em; padding: 0.1rem 0.6rem; }
+.debug-toolbar { display: flex; align-items: center; gap: 0.1rem; padding: 0 0.4rem 0.4rem; flex-wrap: wrap; }
+.debug-toolbar__name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.debug-toolbar .btn--icon { min-height: 1.6rem; width: 1.7rem; }
+.debug-state--stopped { background: color-mix(in srgb, var(--color-warning) 35%, transparent); }
+.debug-body { flex: 1; min-height: 0; overflow: auto; }
+.debug-section__head { display: flex; align-items: center; gap: 0.3rem; width: 100%; border: 0; background: transparent; color: inherit; padding: 0.3rem 0.5rem; cursor: pointer; text-align: left; }
+.debug-list { list-style: none; margin: 0; padding: 0; }
+.debug-list ul { list-style: none; margin: 0; padding: 0; }
+.debug-var { display: flex; align-items: center; gap: 0.35rem; padding: 0.05rem 0.5rem; cursor: default; white-space: nowrap; font-family: var(--font-mono); font-size: 0.85em; }
+.debug-var:hover, .debug-frame:hover { background: var(--color-surface-hover); }
+.debug-var__pad { width: 11px; flex: none; }
+.debug-var__name { color: var(--color-accent); }
+.debug-var__value { overflow: hidden; text-overflow: ellipsis; }
+.debug-frame { display: flex; gap: 0.5rem; justify-content: space-between; width: 100%; border: 0; background: transparent; color: inherit; padding: 0.1rem 0.8rem; cursor: pointer; text-align: left; font: inherit; }
+.debug-frame--active { background: var(--color-accent-muted); }
+.debug-bp { display: flex; align-items: center; gap: 0.3rem; padding-left: 0.8rem; }
+.debug-console { font-family: var(--font-mono); }
+.debug-line { white-space: pre-wrap; word-break: break-word; }
+.debug-line--stderr { color: var(--color-danger); }
+.debug-line--input { color: var(--color-fg-muted); }
+.debug-line--info { color: var(--color-info); }
+.debug-input { margin: 0.3rem 0.6rem 0.5rem; font-family: var(--font-mono); }
