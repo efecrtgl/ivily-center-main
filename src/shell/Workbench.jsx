@@ -20,7 +20,9 @@ import { editorStore } from '../features/editor/model.js';
 import { showPage } from '../workspace/store.js';
 import { workspaceStore } from '../workspace/store.js';
 
-const PAGES = { launcher: LauncherView, trust: TrustManagerView, welcome: WelcomeView };
+import { ToolsView } from '../features/tools/ToolsView.jsx';
+
+const PAGES = { launcher: LauncherView, trust: TrustManagerView, welcome: WelcomeView, tools: ToolsView };
 
 /**
  * Workbench layout:

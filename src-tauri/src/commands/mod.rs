@@ -6,6 +6,7 @@ pub mod editor;
 pub mod fs;
 pub mod output;
 pub mod settings;
+pub mod toolchains;
 pub mod ui_state;
 pub mod workspace;
 

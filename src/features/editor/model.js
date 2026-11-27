@@ -48,6 +48,7 @@ const syncAnnotation = Annotation.define();
  * @property {boolean} saving
  * @property {import('@codemirror/state').Extension} language
  * @property {string} languageName
+ * @property {string | null} [languageId]
  */
 
 /**
@@ -369,7 +370,9 @@ async function loadLanguage(doc) {
   if (!lang || !docs.has(doc.key)) return;
   doc.language = lang.support;
   doc.languageName = lang.name;
+  doc.languageId = lang.id ?? null;
   publishMeta(doc);
+  languageListeners.forEach((fn) => fn(doc));
   if (doc.large) return;
   const effects = compartments.language.reconfigure(lang.support);
   for (const [k, st] of tabStates) if (k.endsWith(`|${doc.key}`)) tabStates.set(k, st.update({ effects }).state);
@@ -382,7 +385,9 @@ export async function setDocLanguage(key, lang) {
   if (!doc) return;
   doc.language = lang.support;
   doc.languageName = lang.name;
+  doc.languageId = lang.id ?? null;
   publishMeta(doc);
+  languageListeners.forEach((fn) => fn(doc));
   const effects = compartments.language.reconfigure(doc.large ? [] : lang.support);
   for (const [k, st] of tabStates) if (k.endsWith(`|${key}`)) tabStates.set(k, st.update({ effects }).state);
   for (const g of editorStore.get().groups) if (g.active === key) views.get(g.id)?.dispatch({ effects });
@@ -913,6 +918,14 @@ export function registerEditorSession() {
     reset: resetAll,
   });
   registerFlushHook(flushDrafts);
+}
+
+/** @type {Set<(doc: Doc) => void>} */
+const languageListeners = new Set();
+/** Notified when a document's language becomes known or changes (LSP attaches here). */
+export function onDocumentLanguage(fn) {
+  languageListeners.add(fn);
+  return () => languageListeners.delete(fn);
 }
 
 /** True if any open document has unsaved changes. */

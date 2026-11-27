@@ -95,6 +95,7 @@ export function registerWorkbenchContributions() {
     { id: 'explorer.newFolder', title: 'New Folder…', category: 'File', icon: 'folder-plus', when: 'workspaceOpen', run: () => { updateLayout({ sidebarVisible: true, sidebarView: 'explorer' }); startCreate('newFolder', explorerTargetDir()); } },
     { id: 'explorer.refresh', title: 'Refresh Explorer', category: 'File', icon: 'refresh', when: 'workspaceOpen', run: () => refreshAll() },
     { id: 'explorer.collapseAll', title: 'Collapse Folders in Explorer', category: 'File', icon: 'collapse', when: 'workspaceOpen', run: () => collapseAll() },
+    { id: 'tools.show', title: 'Show Languages & Tools', category: 'View', icon: 'wrench', run: () => showPage('tools') },
     { id: 'trust.manage', title: 'Manage Workspace Trust', category: 'Workspace Trust', icon: 'shield', run: () => showPage('trust') },
     {
       id: 'trust.prompt',

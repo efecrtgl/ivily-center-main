@@ -39,7 +39,7 @@ export async function pickLanguage() {
   const langs = availableLanguages();
   const item = await quickPick({
     placeholder: 'Select language mode',
-    items: [{ id: '__plain', label: 'Plain Text' }, ...langs.map((l) => ({ id: l.name, label: l.name }))],
+    items: [{ id: '__plain', label: 'Plain Text' }, ...langs.map((l) => ({ id: l.name, label: l.name, description: l.tier }))],
     activeId: ed.doc.languageName,
   });
   if (!item) return;

@@ -13,6 +13,7 @@ pub mod fs;
 pub mod output;
 pub mod settings;
 pub mod state;
+pub mod toolchains;
 pub mod window;
 pub mod workspace;
 
@@ -88,6 +89,8 @@ pub fn run() {
             commands::editor::draft_save,
             commands::editor::draft_list,
             commands::editor::draft_delete,
+            commands::toolchains::toolchains_detect,
+            commands::toolchains::toolchains_open_homepage,
             commands::fs::fs_list,
             commands::fs::fs_create_file,
             commands::fs::fs_create_dir,

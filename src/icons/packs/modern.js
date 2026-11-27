@@ -41,6 +41,7 @@ export const MODERN_PACK = {
     'folder-plus': s('M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM12 10v6M9 13h6'),
     refresh: s('M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7'),
     collapse: s('M4 4h16v16H4zM8 12h8'),
+    wrench: s('M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z'),
     split: s('M4 4h16v16H4zM12 4v16'),
     workspace: s('M4 5h16v4H4zM4 11h7v8H4zM13 11h7v8h-7z'),
   },

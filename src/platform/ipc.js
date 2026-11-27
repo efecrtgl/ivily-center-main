@@ -186,3 +186,10 @@ export const draftSave = (draft) => call('draft_save', { draft });
 /** @returns {Promise<{ key: string, content: string, encoding: TextEncoding, eol: 'lf' | 'crlf', baseHash: string | null, savedAt: number }[]>} */
 export const draftList = () => call('draft_list');
 export const draftDelete = (key) => call('draft_delete', { key });
+
+// ── Toolchains ───────────────────────────────────────────────────────────────
+/** @returns {Promise<{ tools: { id: string, name: string, category: string, status: 'available' | 'notFound' | 'storeAlias' | 'unverified',
+ *   version: string | null, path: string | null, homepage: string, winget: string | null }[], relevant: string[], detectedAt: number }>} */
+export const toolchainsDetect = (refresh = false) => call('toolchains_detect', { refresh });
+/** Opens the official download page of a known tool (by id). */
+export const toolchainsOpenHomepage = (id) => call('toolchains_open_homepage', { id });

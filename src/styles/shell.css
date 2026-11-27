@@ -363,3 +363,14 @@ button.statusbar__item:hover { background: color-mix(in srgb, var(--color-status
 .quick-pick__label mark { background: none; color: var(--color-accent); font-weight: var(--font-weight-strong); }
 .quick-pick__desc { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.88em; }
 .quick-pick__empty { padding: 0.5rem; }
+
+/* ── Languages & Tools ────────────────────────────────────────────────────── */
+.tools-page { display: flex; justify-content: center; padding: 2.5rem 1.5rem; }
+.tools-page__inner { width: min(64rem, 100%); }
+.tools-tabs { max-width: 22rem; margin: 1rem 0; }
+.tools-bar { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.6rem; }
+.tools-table td { vertical-align: middle; }
+.tools-path { max-width: 22rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.85em; }
+.tools-actions { white-space: nowrap; text-align: right; }
+.tools-row--needed { background: color-mix(in srgb, var(--color-warning) 10%, transparent); }
+.tools-filter { width: 18rem; margin-bottom: 0.6rem; }

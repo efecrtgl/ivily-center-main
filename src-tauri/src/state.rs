@@ -40,6 +40,8 @@ pub struct AppState {
     /// Called with a window label whenever that window's workspace changes (opened, switched,
     /// closed, reloaded). Set once by the Tauri layer to restart per-workspace services.
     pub workspace_hook: std::sync::OnceLock<WorkspaceHook>,
+    /// Last toolchain detection (tools, timestamp).
+    pub toolchain_cache: Mutex<Option<(Vec<crate::toolchains::Tool>, i64)>>,
 }
 
 impl AppState {
@@ -119,6 +121,7 @@ impl AppState {
             startup_done: Mutex::new(false),
             watchers: Mutex::new(HashMap::new()),
             workspace_hook: std::sync::OnceLock::new(),
+            toolchain_cache: Mutex::new(None),
         }
     }
 }
